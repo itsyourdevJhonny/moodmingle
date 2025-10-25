@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MoodMingle</string>
+    <string name="no_name_or_avatar_found">Please provide name or avatar.</string>
+</resources>

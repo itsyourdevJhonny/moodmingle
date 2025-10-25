@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.MoodMingle" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.MoodMingle.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo</item>
+        <item name="windowSplashScreenBackground">@drawable/splash_background</item>
+        <item name="postSplashScreenTheme">@style/Theme.MoodMingle</item>
+    </style>
+
+</resources>

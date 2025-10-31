@@ -138,7 +138,7 @@ fun CreateMoods() {
     Box(
         modifier = Modifier
             .padding(top = 10.dp)
-            .border(1.dp, Color.Gray, CircleShape),
+            .border(1.dp, if (selected) PurplePrimary else Color.Gray, CircleShape),
         contentAlignment = Alignment.Center
     ) {
         if (selected) {

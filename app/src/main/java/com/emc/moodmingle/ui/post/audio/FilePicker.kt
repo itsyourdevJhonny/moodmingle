@@ -1,6 +1,8 @@
 package com.emc.moodmingle.ui.post.audio
 
+import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -35,16 +38,18 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.emc.moodmingle.R
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 
 @Composable
 fun FilePicker() {
-    var selectedTye by remember { mutableStateOf("Image") }
+    var selectedType by remember { mutableStateOf("Image") }
     val types = listOf("Image", "Video", "Audio")
     var expanded by remember { mutableStateOf(false) }
     var fileUri by remember { mutableStateOf<Uri?>(null) }
@@ -67,50 +72,23 @@ fun FilePicker() {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(text = "Select Type", color = Color.White)
+            TypeSelector(
+                selectedType = selectedType,
+                expanded = expanded,
+                onExpandedChange = { expanded = it }
+            )
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { expanded = !expanded }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Type",
-                        modifier = Modifier
-                            .graphicsLayer(alpha = 0.99f)
-                            .drawWithCache {
-                                onDrawWithContent {
-                                    drawContent()
-                                    drawRect(
-                                        brush = BrushPrimaryGradient,
-                                        blendMode = BlendMode.SrcAtop
-                                    )
-                                }
-                            }
-                    )
-
-                    Text(text = selectedTye, fontStyle = FontStyle.Italic)
-                }
-            }
-
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                types.forEach { type ->
-                    DropdownMenuItem(
-                        onClick = {
-                            selectedTye = type
-                            expanded = false
-                        },
-                        text = { Text(type, textAlign = TextAlign.Center) }
-                    )
-                }
-            }
+            TypeDropdownMenu(
+                expanded = expanded,
+                types = types,
+                onDismiss = { expanded = false },
+                onTypeSelected = { selectedType = it }
+            )
         }
 
         Button(
             onClick = {
-                val mimeType = when (selectedTye) {
+                val mimeType = when (selectedType) {
                     "Image" -> "image/*"
                     "Video" -> "video/*"
                     "Audio" -> "audio/*"
@@ -137,13 +115,93 @@ fun FilePicker() {
                     Text(formatFileSize(fileSize))
                 }
             )
-            FilePreview(uri = it, mimeType = getMimeType(context, it))
+            FilePreview(uri = it, mimeType = getMimeType(context, it), context)
         }
     }
 }
 
 @Composable
-fun FilePreview(uri: Uri, mimeType: String) {
+fun TypeSelector(
+    selectedType: String,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(text = "Select Type", color = Color.White)
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onExpandedChange(!expanded) }
+        ) {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = "Type",
+                modifier = Modifier
+                    .graphicsLayer(alpha = 0.99f)
+                    .drawWithCache {
+                        onDrawWithContent {
+                            drawContent()
+                            drawRect(
+                                brush = BrushPrimaryGradient,
+                                blendMode = BlendMode.SrcAtop
+                            )
+                        }
+                    }
+            )
+
+            Text(text = selectedType, fontStyle = FontStyle.Italic)
+        }
+    }
+}
+
+@Composable
+fun TypeDropdownMenu(
+    expanded: Boolean,
+    types: List<String>,
+    onDismiss: () -> Unit,
+    onTypeSelected: (String) -> Unit
+) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        types.forEach { type ->
+            DropdownMenuItem(
+                onClick = {
+                    onTypeSelected(type)
+                    onDismiss()
+                },
+                text = { Text(type, textAlign = TextAlign.Center) },
+                leadingIcon = {
+                    val iconRes = when (type) {
+                        "Image" -> R.drawable.image
+                        "Video" -> R.drawable.video
+                        "Audio" -> R.drawable.audio
+                        else -> R.drawable.image
+                    }
+
+                    Icon(
+                        painter = painterResource(iconRes),
+                        contentDescription = "Dropdown Icon",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .graphicsLayer(alpha = 0.99f)
+                            .drawWithCache {
+                                onDrawWithContent {
+                                    drawContent()
+                                    drawRect(
+                                        brush = BrushPrimaryGradient,
+                                        blendMode = BlendMode.SrcAtop
+                                    )
+                                }
+                            }
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun FilePreview(uri: Uri, mimeType: String, context: Context) {
     when {
         mimeType.startsWith("image/") -> {
             AsyncImage(
@@ -164,7 +222,7 @@ fun FilePreview(uri: Uri, mimeType: String) {
         }
 
         else -> {
-            Text("Unsupported file type")
+            Toast.makeText(context, "Unsupported file type", Toast.LENGTH_SHORT).show()
         }
     }
 }

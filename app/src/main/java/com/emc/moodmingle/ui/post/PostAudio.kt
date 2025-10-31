@@ -62,7 +62,7 @@ fun PostAudio(@RawRes audioRes: Int, modifier: Modifier = Modifier) {
         "android.resource://${context.packageName}/$audioRes".toUri()
     }
 
-    val exoPlayer = remember {
+    /*val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(MediaItem.fromUri(audioUri))
             prepare()
@@ -98,7 +98,7 @@ fun PostAudio(@RawRes audioRes: Int, modifier: Modifier = Modifier) {
             exoPlayer.removeListener(listener)
             exoPlayer.release()
         }
-    }
+    }*/
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -109,7 +109,7 @@ fun PostAudio(@RawRes audioRes: Int, modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
+/*@Composable
 fun AudioSlider(
     exoPlayer: ExoPlayer,
     isUserSeeking: Boolean,
@@ -177,7 +177,7 @@ fun ControllerButton(isPlaying: Boolean, exoPlayer: ExoPlayer) {
             }
         }
     }
-}
+}*/
 
 @Composable
 fun AnimatedSoundWave(isPlaying: Boolean) {
@@ -241,9 +241,9 @@ fun SoundBar(barCount: Int, animatedHeights: List<Animatable<Float, AnimationVec
     }
 }
 
-fun formatTime(ms: Long): String {
+/*fun formatTime(ms: Long): String {
     val totalSec = (ms / 1000).toInt()
     val min = totalSec / 60
     val sec = totalSec % 60
     return "%d:%02d".format(min, sec)
-}
+}*/

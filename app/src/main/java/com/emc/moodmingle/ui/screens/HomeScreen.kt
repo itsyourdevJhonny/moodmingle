@@ -1,6 +1,8 @@
 package com.emc.moodmingle.ui.screens
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,13 +30,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,20 +77,6 @@ fun TopNavigationBar(selectedAvatar: String, onSearchClick: () -> Unit) {
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.3f))
         )
-        /*Box(
-            modifier = Modifier
-                .padding(top = 15.dp, bottom = 15.dp, start = 20.dp)
-                .size(45.dp)
-                .clip(CircleShape)
-                .background(BrushPrimaryGradient),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = selectedAvatar,
-                fontSize = 26.sp,
-                textAlign = TextAlign.Center
-            )
-        }*/
 
         Text(
             text = "MoodMingle",

@@ -82,8 +82,6 @@ fun SettingsScreen(onBackClick: () -> Unit, onClick: (String) -> Unit) {
         }
 
         MainContent()
-
-
     }
 }
 
@@ -99,8 +97,8 @@ fun MainContent() {
             Pair("Privacy" to R.drawable.privacy, "Security" to R.drawable.security)
         ),
         Pair(
-            "Blocked & Favorite Accounts",
-            Pair("Blocked" to R.drawable.blocked, "Favorites" to R.drawable.favorites)
+            "Saved & Favorite Posts",
+            Pair("Saved" to R.drawable.save_post, "Favorites" to R.drawable.favorites)
         ),
         Pair(
             "Encryption & Logout",

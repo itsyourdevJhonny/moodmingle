@@ -2,7 +2,6 @@ package com.emc.moodmingle.ui.screens
 
 import android.annotation.SuppressLint
 import android.os.Build
-import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +31,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -46,38 +51,42 @@ import androidx.compose.ui.unit.sp
 import com.emc.moodmingle.R
 import com.emc.moodmingle.ui.post.AvatarImage
 import com.emc.moodmingle.ui.post.MultimediaCard
+import com.emc.moodmingle.ui.post.data.Post
 import com.emc.moodmingle.ui.post.PostActions
+import com.emc.moodmingle.ui.post.PostAudio
 import com.emc.moodmingle.ui.post.PostImage
 import com.emc.moodmingle.ui.post.PostText
 import com.emc.moodmingle.ui.post.PostVideo
-import com.emc.moodmingle.ui.post.dummyPosts
+import com.emc.moodmingle.ui.post.data.dummyPosts
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PurpleDark
 import com.emc.moodmingle.ui.theme.PurplePrimary
-
-data class Post(
-    val name: String,
-    @DrawableRes val avatar: Int,
-    val mood: String,
-    val moodEmoji: String,
-    val content: String,
-    val timeAgo: String,
-    val likes: Int,
-    val comments: Int,
-    val shares: Int,
-    val type: String,
-    @DrawableRes val imageRes: Int,
-    val videoRes: Int? = null
-)
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @SuppressLint("UseKtx")
 @Composable
 fun MoodFeedScreen(onCreateClick: () -> Unit) {
     val posts = dummyPosts()
+    var displayedPosts by remember { mutableStateOf(posts.take(4)) }
 
     val listState = rememberLazyListState()
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .filter { it != null }
+            .distinctUntilChanged()
+            .collect { lastVisible ->
+                val index = lastVisible ?: 0
+                if (index >= displayedPosts.lastIndex - 1 && displayedPosts.size < posts.size) {
+                    delay(300)
+                    displayedPosts = posts.take(displayedPosts.size + 3)
+                }
+            }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -107,7 +116,8 @@ fun MoodFeedScreen(onCreateClick: () -> Unit) {
         }
 
         itemsIndexed(
-            items = posts,
+            items = displayedPosts,
+            key = { index, post -> post.hashCode() }
         ) { index, post ->
             when (post.type) {
                 "text" -> {
@@ -130,6 +140,13 @@ fun MoodFeedScreen(onCreateClick: () -> Unit) {
                         post = post
                     )
                 }
+
+                "audio" -> {
+                    MultimediaCard(
+                        composable = { PostAudio(post.audioRes) },
+                        post = post
+                    )
+                }
             }
         }
 
@@ -145,7 +162,7 @@ fun CreatePostSection(onCreateClick: () -> Unit) {
             .padding(top = 10.dp)
             .background(
                 Brush.linearGradient(colors = listOf(PurplePrimary, PurpleDark)),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(30.dp)
             ),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent

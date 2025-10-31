@@ -2,7 +2,7 @@ package com.emc.moodmingle.ui.profile
 
 import androidx.annotation.DrawableRes
 import com.emc.moodmingle.R
-import com.emc.moodmingle.ui.screens.Post
+import com.emc.moodmingle.ui.post.data.Post
 
 fun getPosts(@DrawableRes avatarId: Int, avatar: String, username: String): List<Post> {
     val dummyPosts = List(10) { index ->
@@ -31,7 +31,8 @@ fun getPosts(@DrawableRes avatarId: Int, avatar: String, username: String): List
             shares = (1..10).random(),
             type = type,
             imageRes = R.drawable.happy_person,
-            videoRes = R.raw.sample1
+            videoRes = R.raw.sample1,
+            audioRes = R.raw.rob_deniel_ikaw_sana_and_nandito_ako
         )
     }
 

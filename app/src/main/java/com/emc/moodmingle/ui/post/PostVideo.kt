@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.widget.Toast
 import androidx.annotation.RawRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -31,8 +30,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -42,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.graphics.scale
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -49,8 +47,11 @@ import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.emc.moodmingle.R
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
+import java.io.ByteArrayOutputStream
 
 @Composable
 fun PostVideo(@RawRes videoRes: Int) {
@@ -67,16 +68,7 @@ fun PostVideo(@RawRes videoRes: Int) {
                 detectTapGestures(onTap = { showFullVideo = true })
             }
     ) {
-        Image(
-            bitmap = (thumbnail?.asImageBitmap() ?: Bitmap.DENSITY_NONE) as ImageBitmap,
-            contentDescription = "Video thumbnail",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-                .clip(RoundedCornerShape(16.dp)),
-            contentScale = ContentScale.Crop
-        )
-//        VideoThumbnailAsyncImage(videoRes)
+        VideoThumbnailAsyncImage(thumbnail)
 
         Icon(
             painter = painterResource(R.drawable.video),
@@ -106,30 +98,24 @@ fun PostVideo(@RawRes videoRes: Int) {
     }
 }
 
-// Kun karuyag mo sir ig compress an resolution san first frame san image
-/*@Composable
-fun VideoThumbnailAsyncImage(@RawRes videoRes: Int) {
-    val thumbnail = videoThumbnailFromRaw(videoRes)
-
+@Composable
+fun VideoThumbnailAsyncImage(thumbnail: Bitmap?) {
     val resizedBitmap = thumbnail?.scale(200, 200)
 
     val stream = ByteArrayOutputStream()
-    resizedBitmap?.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+    resizedBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, stream)
     val byteArray = stream.toByteArray()
 
     AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(byteArray)
-            .size(200, 200)
-            .build(),
+        model = ImageRequest.Builder(LocalContext.current).data(byteArray).build(),
         contentDescription = "Video thumbnail",
         modifier = Modifier
-            .width(200.dp)
-            .height(200.dp)
+            .fillMaxWidth()
+            .height(220.dp)
             .clip(RoundedCornerShape(16.dp)),
         contentScale = ContentScale.Crop
     )
-}*/
+}
 
 @SuppressLint("LocalContextResourcesRead")
 @Composable
@@ -195,7 +181,12 @@ fun FullVideoPlayer(
                     .align(Alignment.TopEnd)
                     .padding(30.dp)
             ) {
-                Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                Icon(
+                    modifier = Modifier.size(35.dp),
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.White
+                )
             }
         }
     }

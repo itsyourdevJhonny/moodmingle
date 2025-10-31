@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.media3.session)
+    implementation(libs.androidx.vectordrawable.animated)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -63,12 +64,14 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    implementation(libs.androidx.media)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
     implementation("org.jellyfin.media3:media3-ffmpeg-decoder:1.8.0+1")
 
     // coil
     implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
 
     // navigation
     implementation(libs.androidx.navigation.compose)

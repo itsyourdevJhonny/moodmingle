@@ -1,9 +1,12 @@
 package com.emc.moodmingle
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -76,6 +79,7 @@ import com.emc.moodmingle.ui.theme.PurplePrimary
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -90,87 +94,92 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun SplashScreenContent() {
     var startAnimation by remember { mutableStateOf(false) }
     var showSplash by remember { mutableStateOf(true) }
 
-    val infiniteTransition = rememberInfiniteTransition()
+    val infiniteTransition = rememberInfiniteTransition(label = "")
     val offset by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1000f,
         animationSpec = infiniteRepeatable(
-            animation = tween(3000, easing = LinearEasing),
+            animation = tween(4000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
-        )
+        ),
+        label = ""
     )
 
     val alphaAnim = animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
-        animationSpec = tween(durationMillis = 1200)
+        animationSpec = tween(durationMillis = 1200), label = ""
     )
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         startAnimation = true
-        delay(2200)
+        delay(2500)
         showSplash = false
     }
 
-    if (showSplash) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(PurplePrimary, PurpleDark),
-                        start = Offset(0f, offset),
-                        end = Offset(offset, 0f)
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+    Crossfade(targetState = showSplash, animationSpec = tween(1000)) { isSplashVisible ->
+        if (isSplashVisible) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(PurplePrimary, PurpleDark),
+                            start = Offset(0f, offset),
+                            end = Offset(offset, 0f)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "App Logo",
-                    modifier = Modifier
-                        .size(200.dp)
-                        .alpha(alphaAnim.value),
-                    contentScale = ContentScale.Fit
-                )
-
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = "MoodMingle",
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        modifier = Modifier.alpha(alphaAnim.value)
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = "App Logo",
+                        modifier = Modifier
+                            .size(230.dp)
+                            .alpha(alphaAnim.value),
+                        contentScale = ContentScale.Fit
                     )
 
-                    Text(
-                        text = "Connect. Share. Inspire.",
-                        color = Color.White.copy(alpha = 0.8f),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.alpha(alphaAnim.value)
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        Text(
+                            text = "MoodMingle",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            modifier = Modifier.alpha(alphaAnim.value)
+                        )
+
+                        Text(
+                            text = "Connect. Share. Inspire.",
+                            color = Color.White.copy(alpha = 0.8f),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.alpha(alphaAnim.value)
+                        )
+                    }
                 }
             }
-        }
-    } else {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            AppNavigation()
+        } else {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                AppNavigation()
+            }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -196,16 +205,31 @@ fun AppNavigation() {
                 onCreateProfile = { username, password, selectedAvatar, bio ->
                     navController.navigate("home/$username&$password&$selectedAvatar&$bio") {
                         popUpTo(Routes.Login.route) { inclusive = true }
+                        launchSingleTop = true
                     }
                 },
-                onRegisterClick = { navController.navigate(Routes.Register.route) }
+                onRegisterClick = {
+                    navController.navigate(Routes.Register.route) {
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 
         composable(Routes.Register.route) {
             RegisterScreen(
-                onLoginClick = { navController.navigate(Routes.Login.route) },
-                onRegisterClick = { navController.navigate(Routes.Login.route) }
+                onLoginClick = {
+                    navController.navigate(Routes.Login.route) {
+                        popUpTo(Routes.Register.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onRegisterClick = {
+                    navController.navigate(Routes.Login.route) {
+                        popUpTo(Routes.Register.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 
@@ -240,6 +264,7 @@ fun AppNavigation() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun BottomNavigationContainer(
     mainNavController: NavHostController,
@@ -276,12 +301,8 @@ fun BottomNavigationContainer(
                     password = password,
                     selectedAvatar = avatar,
                     bio = bio,
-                    onCreateClick = {
-                        mainNavController.navigate(Routes.CreatePost.route)
-                    },
-                    onSearchClick = {
-                        mainNavController.navigate(Routes.Search.route)
-                    }
+                    onCreateClick = { mainNavController.navigate(Routes.CreatePost.route) },
+                    onSearchClick = { mainNavController.navigate(Routes.Search.route) }
                 )
             }
 
@@ -297,6 +318,7 @@ fun BottomNavigationContainer(
                     onLogoutClick = {
                         mainNavController.navigate(Routes.Login.route) {
                             popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
                         }
                     }
                 )
@@ -307,7 +329,10 @@ fun BottomNavigationContainer(
                     onBackClick = { bottomNavController.navigate(Routes.BottomHome.route) },
                     onClick = { label ->
                         val route = if (label == "Logout") "login" else label.lowercase()
-                        mainNavController.navigate(route)
+                        mainNavController.navigate(route) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     }
                 )
             }

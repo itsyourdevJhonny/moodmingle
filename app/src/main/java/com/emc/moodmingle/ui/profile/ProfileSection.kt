@@ -1,7 +1,6 @@
 package com.emc.moodmingle.ui.profile
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,9 +21,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.emc.moodmingle.ui.theme.PrimaryGradient
 
 @Composable
@@ -65,8 +64,8 @@ fun ProfileSection(@DrawableRes avatarId: Int, name: String, bio: String = "", j
 
 @Composable
 fun CreateAvatar(@DrawableRes avatarId: Int) {
-    Image(
-        painter = painterResource(avatarId),
+    AsyncImage(
+        model = avatarId,
         contentDescription = "Profile Picture",
         contentScale = ContentScale.Crop,
         modifier = Modifier
@@ -74,24 +73,6 @@ fun CreateAvatar(@DrawableRes avatarId: Int) {
             .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.3f))
     )
-    /*Box(
-        modifier = Modifier
-            .padding(vertical = 16.dp, horizontal = 10.dp)
-            .size(80.dp)
-            .clip(CircleShape)
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(Purple40, CalmBlue)
-                )
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = avatar,
-            fontSize = 34.sp,
-            textAlign = TextAlign.Center
-        )
-    }*/
 }
 
 @Composable

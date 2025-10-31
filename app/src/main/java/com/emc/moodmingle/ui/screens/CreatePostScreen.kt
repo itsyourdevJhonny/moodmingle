@@ -216,6 +216,8 @@ fun DisplayMoods(
             .background(Color.Black)
     ) {
         items(moods) { (emoji, text) ->
+            val isSelected = emoji == selectedMood
+
             Box(
                 modifier = Modifier
                     .size(70.dp)
@@ -225,13 +227,13 @@ fun DisplayMoods(
                         shape = RoundedCornerShape(8.dp)
                     )
                     .border(
-                        width = 1.dp,
-                        color = PurplePrimary.copy(alpha = 0.6f),
+                        width = if (isSelected) 2.dp else 1.dp,
+                        color = if (isSelected) PurpleDark else PurplePrimary.copy(alpha = 0.6f),
                         shape = RoundedCornerShape(8.dp)
                     )
                     .clickable {
-                        onSelectedMood(emoji)
-                        onSelected(true)
+                        if (isSelected) onSelectedMood("") else onSelectedMood(emoji)
+                        onSelected(!isSelected)
                         onShowDialog(false)
                     },
                 contentAlignment = Alignment.Center

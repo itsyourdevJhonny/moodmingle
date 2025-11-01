@@ -1,10 +1,10 @@
-# 🌈 MoodMingle
+# MoodMingle
 
 ### The Community Mood Tracker and Emotional Connection Platform
 
 ---
 
-## 🧠 Description (Problem Statement & Solution)
+## Description (Problem Statement & Solution)
 
 ### Problem Statement
 
@@ -24,7 +24,7 @@ MoodMingle transforms self-reflection from an isolated task into a dynamic, comm
 
 ---
 
-## 👥 MoodMingle: Team Members & Roles
+## MoodMingle: Team Members & Roles
 
 | Name                 | Role                                     | Responsibilities                                                                                                                          |
 | -------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -34,18 +34,18 @@ MoodMingle transforms self-reflection from an isolated task into a dynamic, comm
 
 ---
 
-## 🎨 Description of Multimedia Integration for MoodMingle
+## Description of Multimedia Integration for MoodMingle
 
 The multimedia integration in MoodMingle is designed to make mood logging more expressive, filtering more intuitive, and the overall user experience visually engaging. It focuses heavily on visual language (icons and color) to communicate emotion instantly.
 
-### 1️⃣ Custom Mood Icons (Emoji System)
+### 1️. Custom Mood Icons (Emoji System)
 
 Instead of relying solely on text, every mood is paired with a distinct, custom-designed icon (emoji).
 
 - **Expressiveness:** Icons like "Happy", "Anxious", or "Grateful" instantly convey emotion.
 - **Filtering:** Icons serve as visual identifiers for filtering posts.
 
-### 2️⃣ Color Palette for Emotional Context
+### 2️. Color Palette for Emotional Context
 
 The app uses a dynamic color system with vibrant purples and dark tones, complemented by specific colors for each mood.
 
@@ -53,19 +53,19 @@ The app uses a dynamic color system with vibrant purples and dark tones, complem
 - Soft blue for “Calm”
 - Red-orange for “Angry”
 
-### 3️⃣ Profile & Feed Imagery
+### 3️. Profile & Feed Imagery
 
 - **User Avatars:** Profile pictures personalize mood posts.
 - **Simplicity:** Avoids heavy media to maintain emotional focus.
 
-### 4️⃣ Interactive Visual Feedback
+### 4️. Interactive Visual Feedback
 
 - **Animations:** Provide instant confirmation on mood logging or filtering.
 - **Trending Visuals:** Fire emoji (🔥) highlights popular moods.
 
 ---
 
-## 🔐 MoodMingle: Login Screen Documentation
+## MoodMingle: Login Screen Documentation
 
 The Login Screen is the secure gateway for existing users to access the MoodMingle community.
 
@@ -91,7 +91,7 @@ To authenticate users and ensure only registered members access their data.
 
 ---
 
-## 👤 MoodMingle: Profile Screen Documentation
+## MoodMingle: Profile Screen Documentation
 
 The Profile Screen is the user’s personal hub to view identity, history, and analytics.
 
@@ -104,36 +104,36 @@ The Profile Screen is the user’s personal hub to view identity, history, and a
 
 ---
 
-## ⚙️ MoodMingle: Settings Screen Documentation
+## MoodMingle: Settings Screen Documentation
 
-### 1️⃣ Personal Information
+### 1️. Personal Information
 
 - Access and modify profile info
 - Update account password
 
-### 2️⃣ Privacy & Security
+### 2️. Privacy & Security
 
 - Configure visibility and privacy
 - Enable 2FA or view login activity
 
-### 3️⃣ Blocked & Favorite Accounts
+### 3️. Blocked & Favorite Accounts
 
 - Manage blocked users
 - Add favorites for prioritized content
 
-### 4️⃣ Encryption & Logout
+### 4️. Encryption & Logout
 
 - View data encryption status
 - Log out securely
 
-### 5️⃣ Navigation
+### 5️. Navigation
 
 - Bottom navigation bar for quick access
 - Back arrow for previous screen navigation
 
 ---
 
-## 📊 MoodMingle: Insights Screen Documentation
+## MoodMingle: Insights Screen Documentation
 
 ### Purpose
 
@@ -171,7 +171,7 @@ Transforms emotional and social activity into data visualization.
 
 ---
 
-## 📱 Summary of Features and Interactions for MoodMingle
+## Summary of Features and Interactions for MoodMingle
 
 ### I. Secure Access & Account Management
 
@@ -212,20 +212,20 @@ Transforms emotional and social activity into data visualization.
 
 ---
 
-## 🧠 Summary
+## Summary
 
 MoodMingle promotes emotional awareness through shared reflection, creating an authentic digital space for users to connect emotionally and understand themselves better.
 
 ---
 
-## 🧾 License
+## License
 
 This project is for educational purposes only.  
 © 2025 MoodMingle Development Team. All rights reserved.
 
 ---
 
-## 💬 Contact
+## Contact
 
 **Lead Developer:** Jhon Lee Marahay  
-📧 [jhonleemarahay@email.com](mailto:jhonleemarahay@email.com)
+[jhonleemarahay@email.com](mailto:jhonleemarahay@email.com)

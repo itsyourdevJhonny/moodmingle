@@ -29,7 +29,7 @@ MoodMingle transforms self-reflection from an isolated task into a dynamic, comm
 | Name                 | Role                                     | Responsibilities                                                                                                                          |
 | -------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | **Jhon Lee Marahay** | Developer (Frontend Lead & Backend Lead) | Translating UI/UX designs into code, managing state, integrating APIs, developing server-side logic, and designing/managing the database. |
-| **Jim Doinog**       | UI/UX Designer                           | Designing wireframes, ensuring consistent and engaging design, and conducting user research/testing.                                      |
+| **Jim Doinog/Ryan Merilles**       | UI/UX Designer                           | Designing wireframes, ensuring consistent and engaging design, and conducting user research/testing.                                      |
 | **Justin Ylar**      | QA/Tester & Multimedia Specialist        | Testing, verifying functionality, ensuring quality, and managing multimedia assets.                                                       |
 
 ---

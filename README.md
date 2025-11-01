@@ -228,4 +228,4 @@ This project is for educational purposes only.
 ## Contact
 
 **Lead Developer:** Jhon Lee Marahay  
-[jhonleemarahay@email.com](mailto:jhonleemarahay@email.com)
+[jhonleemarahay@email.com](mailto:jhonleemarahay@gmail.com)

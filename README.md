@@ -8,7 +8,7 @@
 
 ### Problem Statement
 
-Tracking and understanding one’s emotional landscape often feels isolating and inconsistent. In the digital age, people struggle to maintain regular, meaningful self-reflection and frequently lack a way to relate their current emotional state to the broader community. Traditional journaling is private, while social media is often curated and inauthentic. This results in a disconnect, making it difficult for individuals to recognize emotional trends in themselves and to find supportive, relevant content from others who are experiencing the same specific feelings in the moment.
+Tracking and understanding one's emotional landscape often feels isolating and inconsistent. In the digital age, people struggle to maintain regular, meaningful self-reflection and frequently lack a way to relate their current emotional state to the broader community. Traditional journaling is private, while social media is often curated and inauthentic. This results in a disconnect, making it difficult for individuals to recognize emotional trends in themselves and to find supportive, relevant content from others who are experiencing the same specific feelings in the moment.
 
 ### Solution
 
@@ -17,7 +17,7 @@ MoodMingle provides an intuitive, real-time solution by synthesizing mood tracki
 The core solution lies in its discovery features:
 
 - **Mood Logging:** A fast, simple way to answer "What's on your mood?"
-- **Emotional Filtering:** Users can effortlessly filter the community feed to view only posts matching a specific feeling—allowing a person feeling "Confused" to quickly find and "mingle" with others sharing that exact state.
+- **Emotional Filtering:** Users can effortlessly filter the community feed to view only posts matching a specific feeling, allowing a person feeling "Confused" to quickly find and "mingle" with others sharing that exact state.
 - **Trending Insights:** The "Trending Moods" feature provides a snapshot of the collective emotional atmosphere, turning private feelings into a shared, relatable social experience.
 
 MoodMingle transforms self-reflection from an isolated task into a dynamic, communal journey toward better emotional understanding.
@@ -93,7 +93,7 @@ To authenticate users and ensure only registered members access their data.
 
 ## MoodMingle: Profile Screen Documentation
 
-The Profile Screen is the user’s personal hub to view identity, history, and analytics.
+The Profile Screen is the user's personal hub to view identity, history, and analytics.
 
 | Component       | Example          | Purpose                  |
 | --------------- | ---------------- | ------------------------ |

@@ -1,7 +1,9 @@
 package com.emc.moodmingle.ui.screens
 
-import android.annotation.SuppressLint
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,83 +29,117 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.emc.moodmingle.data.firebase.model.SearchEntityFirebase
+import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.di.AppDatabase
+import com.emc.moodmingle.ui.post.action.formatText
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
-import com.emc.moodmingle.ui.theme.SecondaryDark
-
-data class Search(
-    val id: Int,
-    val avatar: String,
-    val username: String
-)
+import com.emc.moodmingle.ui.theme.PrimaryDark
+import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.firebase.SearchViewModelFirebase
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
-fun SearchScreen(onBackClick: () -> Unit) {
+fun SearchScreen(
+    onBackClick: () -> Unit,
+    onSearchClick: (List<SearchEntityFirebase>) -> Unit,
+    onViewClick: (String) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        TopBar(onBackClick)
+        TopBar(onBackClick, onSearchClick, onViewClick)
     }
 }
 
 @Composable
-fun TopBar(onBackClick: () -> Unit) {
-    val searchList = List(50) { index ->
-        Search(
-            id = index + 1,
-            avatar = listOf("😀", "😎", "😊", "😇", "🥳", "🤩").random(),
-            username = "User ${index + 1}"
-        )
+fun TopBar(
+    onBackClick: () -> Unit,
+    onSearchClick: (List<SearchEntityFirebase>) -> Unit,
+    onViewClick: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val searchViewModel = hiltViewModel<SearchViewModelFirebase>()
+
+    val userDao = remember { AppDatabase.getDatabase(context).userDao() }
+    var currentUserUid by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        userDao.getLoggedUser()?.uid?.let { currentUserUid = it }
     }
 
+    val searchHistory by remember(currentUserUid) {
+        searchViewModel.getSearchesBySearcherId(currentUserUid)
+    }.collectAsState(initial = emptyList())
+
     var searchText by remember { mutableStateOf("") }
-    val filteredList = searchList.filter { it.username.contains(searchText, ignoreCase = true) }
-    var showSearchScreen by remember { mutableStateOf(false) }
+    var isSearching by remember { mutableStateOf(false) }
+    var searchResults by remember { mutableStateOf<List<SearchEntityFirebase>?>(null) }
 
-    if (showSearchScreen) {
-        SearchResultsScreen(filteredList) {
-            showSearchScreen = false
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 40.dp, bottom = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TopIconButton(onBackClick, Icons.AutoMirrored.Filled.ArrowBack, "Back")
+
+            SearchInputField(
+                searchText = searchText,
+                onSearchTextChange = { searchText = it },
+                onSearching = { isSearching = it }
+            )
+
+            TopIconButton(
+                onClick = {
+                    Log.d("TOP BAR", "FOUND: ${searchResults?.size}")
+                    if (searchText.trim().isNotEmpty() && searchResults != null) {
+                        searchResults?.let { onSearchClick(it) }
+                    } else {
+                        Toast.makeText(context, "Try to search by username.", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                },
+                icon = Icons.Default.Search,
+                description = "Search"
+            )
         }
-    } else {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 40.dp, bottom = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TopIconButton(onBackClick, Icons.AutoMirrored.Filled.ArrowBack, "Back")
 
-                SearchInputField(
-                    searchText = searchText,
-                    onSearchTextChange = { searchText = it }
-                )
-
-                TopIconButton(
-                    onClick = { if (searchText.isNotEmpty()) showSearchScreen = true },
-                    icon = Icons.Default.Search,
-                    description = "Search"
-                )
+        if (isSearching) {
+            SearchingContent(searchText, onSearchResults = { searchResults = it }, onViewClick)
+        } else {
+            if (searchHistory.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    NoSearchResult()
+                }
+            } else {
+                SearchContent(searchHistory, onViewClick)
             }
-
-            SearchResults(searchList, false)
         }
     }
 }
@@ -133,7 +169,11 @@ fun RecentSearchesText() {
 }
 
 @Composable
-fun SearchInputField(searchText: String, onSearchTextChange: (String) -> Unit) {
+fun SearchInputField(
+    searchText: String,
+    onSearchTextChange: (String) -> Unit,
+    onSearching: (Boolean) -> Unit
+) {
     TextField(
         modifier = Modifier
             .width(250.dp)
@@ -142,11 +182,20 @@ fun SearchInputField(searchText: String, onSearchTextChange: (String) -> Unit) {
                 shape = RoundedCornerShape(30.dp)
             ),
         value = searchText,
-        onValueChange = onSearchTextChange,
+        onValueChange = {
+            onSearchTextChange(it)
+
+            onSearching(it.isNotEmpty())
+        },
         placeholder = { Text(text = "Search", color = GrayTextColor) },
         trailingIcon = {
             if (searchText.isNotBlank()) {
-                IconButton(onClick = { onSearchTextChange("") }) {
+                IconButton(
+                    onClick = {
+                        onSearchTextChange("")
+                        onSearching(false)
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Clear text",
@@ -167,9 +216,36 @@ fun SearchInputField(searchText: String, onSearchTextChange: (String) -> Unit) {
     )
 }
 
-@SuppressLint("MutableCollectionMutableState")
 @Composable
-fun SearchResults(searchResults: List<Search>, isFromSearched: Boolean) {
+fun SearchingContent(
+    searchText: String,
+    onSearchResults: (List<SearchEntityFirebase>) -> Unit,
+    onViewClick: (String) -> Unit
+) {
+    if (searchText.trim().isNotEmpty()) {
+        val searchViewModel = hiltViewModel<SearchViewModelFirebase>()
+        val searchResults by searchViewModel.searchResults.collectAsState()
+
+        LaunchedEffect(Unit) {
+            searchViewModel.searchUsers(searchText)
+        }
+
+        if (searchResults.isNotEmpty()) {
+            onSearchResults(searchResults)
+            SearchingResult(searchResults, onViewClick)
+        } else {
+            NoSearchResult()
+        }
+    }
+}
+
+@Composable
+fun SearchingResult(searchResults: List<SearchEntityFirebase>, onViewClick: (String) -> Unit) {
+    val scope = rememberCoroutineScope()
+    val searchViewModel = hiltViewModel<SearchViewModelFirebase>()
+    val userViewModel = hiltViewModel<FirebaseUserViewModel>()
+    val currentUser by userViewModel.loggedUser
+
     var results by remember { mutableStateOf(searchResults) }
 
     LazyColumn(
@@ -180,16 +256,91 @@ fun SearchResults(searchResults: List<Search>, isFromSearched: Boolean) {
     ) {
         item { RecentSearchesText() }
 
-        /*if (results.isEmpty()) {
-            item { NoSearchResult() }
-        }*/
-
-        items(results, key = { it.id }) { result ->
+        items(results, key = { it.userUid }) { result ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(30.dp))
-                    .background(SecondaryDark),
+                    .background(PrimaryDark)
+                    .clickable {
+                        scope.launch {
+                            val search = searchViewModel.getSearchBySearcherIdAndUserId(
+                                currentUser?.uid ?: "", result.userUid
+                            )
+
+                            if (search == null) {
+                                searchViewModel.addSearch(
+                                    SearchEntityFirebase(
+                                        searcherId = currentUser?.uid ?: "",
+                                        userUid = result.userUid,
+                                        username = result.username
+                                    )
+                                )
+                            }
+
+                            onViewClick(result.userUid)
+                        }
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier.padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    var user by remember { mutableStateOf<UserEntityFirebase?>(null) }
+
+                    LaunchedEffect(result.userUid) {
+                        user = userViewModel.getUserByUid(result.userUid).first().getOrNull()
+                    }
+
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(user?.avatarUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Avatar",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                    )
+
+                    Text(text = formatText(result.username, 27), color = Color.White)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SearchContent(searchHistory: List<SearchEntityFirebase>, onViewClick: (String) -> Unit) {
+    val userViewModel = hiltViewModel<FirebaseUserViewModel>()
+    val searchViewModel = hiltViewModel<SearchViewModelFirebase>()
+
+    val allUsers by userViewModel.getAllUsers().collectAsState(initial = emptyList())
+    val userLookup = remember(allUsers) { allUsers.associateBy { it.uid } }
+
+    if (searchHistory.isEmpty()) NoSearchResult()
+
+    LazyColumn(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        item { RecentSearchesText() }
+
+        items(searchHistory, key = { it.searcherId + it.time }) { history ->
+            val user = userLookup[history.userUid]
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(30.dp))
+                    .background(PrimaryDark)
+                    .clickable { onViewClick(history.userUid) },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -198,80 +349,33 @@ fun SearchResults(searchResults: List<Search>, isFromSearched: Boolean) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    Box(
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(user?.avatarUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Avatar",
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .size(45.dp)
+                            .size(40.dp)
                             .clip(CircleShape)
-                            .background(BrushPrimaryGradient),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = result.avatar,
-                            fontSize = 26.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+
+                    )
 
                     Text(
-                        text = result.username,
+                        text = formatText(user?.username ?: "", 20),
                         color = Color.White
                     )
                 }
 
-                if (!isFromSearched) {
-                    IconButton(onClick = {
-                        results = results.filterNot { it == result }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Remove",
-                            tint = Color.Red,
-                        )
-                    }
+                IconButton(onClick = { searchViewModel.deleteSearch(history) }) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Remove",
+                        tint = Color.Red,
+                    )
                 }
             }
         }
     }
-}
-
-/*@Composable
-fun NoSearchResult() {
-    Column(
-        modifier = Modifier
-            .height(300.dp)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.no_search),
-            contentDescription = "No Result",
-            modifier = Modifier
-                .padding(bottom = 10.dp)
-                .size(50.dp)
-                .graphicsLayer(alpha = 0.99f)
-                .drawWithCache {
-                    onDrawWithContent {
-                        drawContent()
-                        drawRect(
-                            brush = BrushPrimaryGradient,
-                            blendMode = BlendMode.SrcAtop
-                        )
-                    }
-                },
-            tint = Color.Unspecified
-        )
-
-        Text(
-            text = "No results found. Try adjusting your search.",
-            color = GrayTextColor,
-            textAlign = TextAlign.Center
-        )
-    }
-}*/
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewSearchScreen() {
-    SearchScreen {}
 }

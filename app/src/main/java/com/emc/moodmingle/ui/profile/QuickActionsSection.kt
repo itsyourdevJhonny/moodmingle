@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,11 +35,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.emc.moodmingle.di.AppDatabase
+import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PurpleDark
 import com.emc.moodmingle.ui.theme.PurplePrimary
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun QuickActionsSection(
@@ -47,17 +56,20 @@ fun QuickActionsSection(
     onInsightsClick: () -> Unit = {},
     onExploreClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     var showLogoutDialog by remember { mutableStateOf(false) }
+    val userDao = remember { AppDatabase.getDatabase(context).userDao() }
+    var currentUserUid by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        currentUserUid = userDao.getLoggedUser()?.uid ?: ""
+    }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .background(
-                Brush.linearGradient(colors = listOf(PurplePrimary, PurpleDark)),
-                shape = RoundedCornerShape(16.dp)
-            ),
-        shape = RoundedCornerShape(16.dp),
+            .padding(horizontal = 8.dp)
+            .background(brush = BrushPrimaryGradient, shape = RoundedCornerShape(8.dp)),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Column(
@@ -90,7 +102,15 @@ fun QuickActionsSection(
             confirmButton = {
                 TextButton(onClick = {
                     showLogoutDialog = false
-                    onLogoutClick()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        userDao.clearUser(currentUserUid)
+
+                        withContext(Dispatchers.Main) {
+                            FirebaseAuth.getInstance().signOut()
+                            onLogoutClick()
+                        }
+                    }
+//                    onLogoutClick()
                 }) {
                     Text("Yes")
                 }

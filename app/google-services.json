@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "104603243881",
+    "project_id": "moodmingle-69d12",
+    "storage_bucket": "moodmingle-69d12.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:104603243881:android:e01137a891e67015bf59f8",
+        "android_client_info": {
+          "package_name": "com.emc.moodmingle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD27StC-SBXvBFrF9hT2ycq98fiyXpK6S8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

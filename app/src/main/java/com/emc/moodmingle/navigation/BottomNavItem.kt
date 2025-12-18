@@ -2,7 +2,9 @@ package com.emc.moodmingle.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -14,6 +16,8 @@ data class BottomNavItem(
 
 val bottomNavItems = listOf(
     BottomNavItem("home_tab", "Home", Icons.Filled.Home),
+    BottomNavItem("notification_tab", "Notification", Icons.Default.Notifications),
+    BottomNavItem("video_tab", "Video", Icons.Filled.PlayArrow),
     BottomNavItem("profile_tab", "Profile", Icons.Filled.Person),
     BottomNavItem("settings_tab", "Settings", Icons.Filled.Settings)
 )

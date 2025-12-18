@@ -25,10 +25,7 @@ fun StatCard(title: String, value: String, color: Color) {
         modifier = Modifier
             .width(150.dp)
             .height(90.dp)
-            .background(
-                brush = BrushPrimaryGradient,
-                shape = RoundedCornerShape(16.dp)
-            ),
+            .background(brush = BrushPrimaryGradient, shape = RoundedCornerShape(16.dp)),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Column(

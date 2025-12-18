@@ -1,3 +1,4 @@
+/*
 package com.emc.moodmingle.ui.profile
 
 import androidx.annotation.DrawableRes
@@ -38,3 +39,4 @@ fun getPosts(@DrawableRes avatarId: Int, avatar: String, username: String): List
 
     return dummyPosts
 }
+*/

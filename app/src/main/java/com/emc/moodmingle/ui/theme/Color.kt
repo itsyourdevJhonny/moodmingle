@@ -15,20 +15,31 @@ val Pink40 = Color(0xFF7D5260)
 val PurplePrimary = Color(0xFF8E2DE2)
 val PurpleDark = Color(0xFF4A00E0)
 val GrayTextColor = Color(0xFFBCBBBF)
-val SecondaryDark = Color(0xFF1E1E1E)
 
-val LightBackground = Color(0xFFF9F9FF)
-val AccentPink = Color(0xFFFF77A9)
-val CalmBlue = Color(0xFF64B5F6)
+val PrimaryDark = Color(0xFF121212)
+val SecondaryDark = Color(0xFF1E1E1E)
+val TertiaryDark = Color(0xFF313030)
 
 // Gradient Colors
 val PrimaryGradient = listOf(PurplePrimary, PurpleDark)
 val BrushPrimaryGradient = Brush.linearGradient(PrimaryGradient)
+val BrushSecondaryTertiaryGradient =
+    Brush.linearGradient(colors = listOf(SecondaryDark, TertiaryDark))
 
-// Reaction Colors
+val BrushSecondaryDarkGradient =
+    Brush.linearGradient(colors = listOf(SecondaryDark, SecondaryDark))
+
+val BrushGrayGradient = Brush.linearGradient(
+    listOf(
+        Color.Gray.copy(
+            alpha = 0.5f
+        ), Color.Gray.copy(
+            alpha = 0.5f
+        )
+    )
+)
+
+// Reaction Color
 val HeartColor = Color(0xFFD50000)
-val ScaryColor = Color(0xFFCF8CF6)
-val HappyColor = Color(0xFFFFD600)
-val WowColor = Color(0xFFFFAB00)
-val SadColor = Color(0xFF00B8D4)
-val AngryColor = Color(0xFFD50000)
+
+val VerifiedColor = Color(0xFF21DFFD)

@@ -24,8 +24,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -36,6 +39,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,16 +48,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -61,33 +68,70 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.emc.moodmingle.cloudinary.CloudinaryManager
+import com.emc.moodmingle.di.AppDatabase
 import com.emc.moodmingle.navigation.BottomNavItem
 import com.emc.moodmingle.navigation.Routes
 import com.emc.moodmingle.navigation.bottomNavItems
+import com.emc.moodmingle.ui.network.CheckInternetConnection
+import com.emc.moodmingle.ui.screens.ChatScreen
+import com.emc.moodmingle.ui.screens.ConversationScreen
 import com.emc.moodmingle.ui.screens.CreatePostScreen
+import com.emc.moodmingle.ui.screens.DecryptionScreen
+import com.emc.moodmingle.ui.screens.EncryptionScreen
+import com.emc.moodmingle.ui.screens.FavoritesScreen
 import com.emc.moodmingle.ui.screens.HomeScreen
 import com.emc.moodmingle.ui.screens.InsightsScreen
 import com.emc.moodmingle.ui.screens.LoginScreen
+import com.emc.moodmingle.ui.screens.NotificationScreen
+import com.emc.moodmingle.ui.screens.PrivacyScreen
 import com.emc.moodmingle.ui.screens.ProfileScreen
 import com.emc.moodmingle.ui.screens.RegisterScreen
+import com.emc.moodmingle.ui.screens.SavedScreen
+import com.emc.moodmingle.ui.screens.SearchResultsScreen
 import com.emc.moodmingle.ui.screens.SearchScreen
+import com.emc.moodmingle.ui.screens.SecurityScreen
 import com.emc.moodmingle.ui.screens.SettingsScreen
+import com.emc.moodmingle.ui.screens.VideoFeedScreen
+import com.emc.moodmingle.ui.settings.password.ChangePasswordScreen
+import com.emc.moodmingle.ui.settings.password.PasswordScreen
+import com.emc.moodmingle.ui.settings.password.VerifyPasswordScreen
+import com.emc.moodmingle.ui.settings.password.recover.ForgotPasswordScreen
+import com.emc.moodmingle.ui.settings.password.recover.ResetPasswordScreen
+import com.emc.moodmingle.ui.settings.password.recover.VerifyCodeScreen
+import com.emc.moodmingle.ui.settings.personal.PersonalScreen
 import com.emc.moodmingle.ui.theme.MoodMingleTheme
 import com.emc.moodmingle.ui.theme.PrimaryGradient
 import com.emc.moodmingle.ui.theme.PurpleDark
 import com.emc.moodmingle.ui.theme.PurplePrimary
+import com.emc.moodmingle.ui.theme.Typography
+import com.emc.moodmingle.utils.NetworkUtils
+import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.firebase.SearchViewModelFirebase
+import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
+import com.google.firebase.FirebaseApp
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        CloudinaryManager.init(this)
+
+        FirebaseApp.initializeApp(this)
+
         enableEdgeToEdge()
         setContent {
             MoodMingleTheme {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    SplashScreenContent()
+                Surface(color = Color.Black) {
+                    val networkUtils = NetworkUtils(this)
+                    CheckInternetConnection(networkUtils) {
+                        SplashScreenContent()
+                    }
                 }
             }
         }
@@ -144,9 +188,9 @@ fun SplashScreenContent() {
                         painter = painterResource(id = R.drawable.logo),
                         contentDescription = "App Logo",
                         modifier = Modifier
-                            .size(230.dp)
-                            .alpha(alphaAnim.value),
-                        contentScale = ContentScale.Fit
+                            .size(100.dp)
+                            .scale(2f)
+                            .alpha(alphaAnim.value)
                     )
 
                     Column(
@@ -157,7 +201,7 @@ fun SplashScreenContent() {
                             text = "MoodMingle",
                             style = MaterialTheme.typography.headlineSmall.copy(
                                 color = Color.White,
-                                fontWeight = FontWeight.Bold
+                                fontFamily = FontFamily.Monospace
                             ),
                             modifier = Modifier.alpha(alphaAnim.value)
                         )
@@ -182,11 +226,23 @@ fun SplashScreenContent() {
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun AppNavigation() {
-    val navController = rememberNavController()
+    val mainNavController = rememberNavController()
+
+    val context = LocalContext.current
+    val searchViewModel = hiltViewModel<SearchViewModelFirebase>()
+    val userDao = remember { AppDatabase.getDatabase(context).userDao() }
+    var startDestination by remember { mutableStateOf(Routes.Login.route) }
+
+    LaunchedEffect(Unit) {
+        val loggedUser = userDao.getLoggedUser()
+        if (loggedUser != null) {
+            startDestination = Routes.Home.route
+        }
+    }
 
     NavHost(
-        navController = navController,
-        startDestination = Routes.Login.route,
+        navController = mainNavController,
+        startDestination = startDestination,
         enterTransition = {
             slideInHorizontally(initialOffsetX = { 1000 }) + fadeIn(animationSpec = tween(500))
         },
@@ -202,14 +258,14 @@ fun AppNavigation() {
     ) {
         composable(Routes.Login.route) {
             LoginScreen(
-                onCreateProfile = { username, password, selectedAvatar, bio ->
-                    navController.navigate("home/$username&$password&$selectedAvatar&$bio") {
+                onLogin = { ->
+                    mainNavController.navigate("home") {
                         popUpTo(Routes.Login.route) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
                 onRegisterClick = {
-                    navController.navigate(Routes.Register.route) {
+                    mainNavController.navigate(Routes.Register.route) {
                         launchSingleTop = true
                     }
                 }
@@ -219,65 +275,184 @@ fun AppNavigation() {
         composable(Routes.Register.route) {
             RegisterScreen(
                 onLoginClick = {
-                    navController.navigate(Routes.Login.route) {
+                    mainNavController.navigate(Routes.Login.route) {
                         popUpTo(Routes.Register.route) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
-                onRegisterClick = {
-                    navController.navigate(Routes.Login.route) {
-                        popUpTo(Routes.Register.route) { inclusive = true }
+                onRegister = { mainNavController.navigate(Routes.Login.route) }
+            )
+        }
+
+        composable(route = Routes.Home.route) {
+            BottomNavigationContainer(mainNavController)
+        }
+
+        composable(Routes.Search.route) {
+            SearchScreen(
+                onBackClick = { mainNavController.popBackStack() },
+                onSearchClick = { searchResults ->
+                    searchViewModel.setSearchResults(searchResults)
+                    mainNavController.navigate(Routes.SearchResult.route)
+                },
+                onViewClick = { userUid -> mainNavController.navigate("user_profile/$userUid") }
+            )
+        }
+        composable(Routes.SearchResult.route) {
+            val results by searchViewModel.searchResults.collectAsState()
+            SearchResultsScreen(
+                onBackClick = { mainNavController.popBackStack() },
+                searchResults = results,
+                onViewClick = { userUid -> mainNavController.navigate("user_profile/$userUid") }
+            )
+        }
+
+        composable(Routes.CreatePost.route) {
+            CreatePostScreen(onBackClick = { mainNavController.popBackStack() })
+        }
+
+        composable(Routes.Insights.route) {
+            InsightsScreen(onBackClick = { mainNavController.popBackStack() })
+        }
+
+        composable(
+            route = "user_profile/{userUid}",
+            arguments = listOf(navArgument("userUid") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userUid = backStackEntry.arguments?.getString("userUid")
+
+            ProfileScreen(
+                isFromOtherUser = true,
+                otherUserId = userUid!!,
+                onChatClick = { senderId, receiverId ->
+                    mainNavController.navigate("chat/$senderId/$receiverId")
+                },
+                onBack = { mainNavController.popBackStack() }
+            )
+        }
+
+        composable(Routes.Personal.route) {
+            PersonalScreen(onBackClick = { mainNavController.popBackStack() })
+        }
+
+        composable(Routes.Password.route) {
+            PasswordScreen(
+                onBack = { mainNavController.popBackStack() },
+                onChange = { mainNavController.navigate(Routes.ChangePassword.route) }
+            )
+        }
+
+        composable(Routes.VerifyPassword.route) {
+            VerifyPasswordScreen(
+                onBackClick = { mainNavController.popBackStack() },
+                onVerified = { mainNavController.navigate(Routes.Password.route) },
+                onRecover = { mainNavController.navigate(Routes.ForgotPassword.route) }
+            )
+        }
+
+        composable(Routes.ChangePassword.route) {
+            ChangePasswordScreen(
+                onBackClick = { mainNavController.popBackStack() },
+                onContinue = { mainNavController.navigate(Routes.Home.route) }
+            )
+        }
+
+        composable(Routes.ForgotPassword.route) {
+            ForgotPasswordScreen(
+                onSendCodeSuccess = { email ->
+                    mainNavController.navigate(Routes.VerifyCode.route + "/$email")
+                }
+            )
+        }
+
+        composable(Routes.VerifyCode.route + "/{email}") { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            VerifyCodeScreen(
+                email = email,
+                onVerified = {
+                    mainNavController.navigate(Routes.ResetPassword.route) {
+                        popUpTo(Routes.ForgotPassword.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.ResetPassword.route) {
+            ResetPasswordScreen(
+                onContinue = { mainNavController.navigate(Routes.Home.route) },
+                onCancel = { mainNavController.navigate(Routes.Home.route) }
+            )
+        }
+
+        composable(Routes.Save.route) {
+            SavedScreen(
+                onBack = { mainNavController.popBackStack() }
+            )
+        }
+
+        composable(Routes.Favorites.route) {
+            FavoritesScreen(
+                onBackClick = { mainNavController.popBackStack() }
+            )
+        }
+
+        composable(Routes.Privacy.route) {
+            PrivacyScreen(
+                onBack = { mainNavController.popBackStack() }
+            )
+        }
+
+        composable(Routes.Security.route) {
+            SecurityScreen(
+                onBack = { mainNavController.popBackStack() }
+            )
+        }
+
+        composable(Routes.Encryption.route) {
+            EncryptionScreen(
+                onBack = { mainNavController.popBackStack() }
+            )
+        }
+
+        composable(Routes.Decryption.route) {
+            DecryptionScreen(
+                onBack = { mainNavController.popBackStack() }
+            )
+        }
+
+        composable(Routes.Conversation.route) {
+            ConversationScreen(
+                onBack = { mainNavController.popBackStack() },
+                onChatClick = { senderId, receiverId ->
+                    mainNavController.navigate("chat/$senderId/$receiverId") {
                         launchSingleTop = true
                     }
                 }
             )
         }
 
-        composable(
-            route = Routes.Home.route,
-            arguments = listOf(
-                navArgument("username") { type = NavType.StringType },
-                navArgument("password") { type = NavType.StringType },
-                navArgument("selectedAvatar") { type = NavType.StringType },
-                navArgument("bio") { type = NavType.StringType }
+        composable(route = "chat/{senderId}/{receiverId}") { backStackEntry ->
+            val senderId = backStackEntry.arguments?.getString("senderId") ?: ""
+            val receiverId = backStackEntry.arguments?.getString("receiverId") ?: ""
+            ChatScreen(senderId, receiverId, onBack = { mainNavController.popBackStack() })
+        }
+
+        composable(Routes.BottomVideo.route) {
+            VideoFeedScreen(
+                onBack = { mainNavController.popBackStack() }
             )
-        ) { backStackEntry ->
-            val name = backStackEntry.arguments?.getString("name").toString()
-            val password = backStackEntry.arguments?.getString("password").toString()
-            val selectedAvatar = backStackEntry.arguments?.getString("selectedAvatar").toString()
-            val bio = backStackEntry.arguments?.getString("bio").toString()
-
-            BottomNavigationContainer(navController, name, password, selectedAvatar, bio)
-        }
-
-        composable(Routes.Search.route) {
-            SearchScreen(onBackClick = { navController.popBackStack() })
-        }
-
-        composable(Routes.CreatePost.route) {
-            CreatePostScreen(onBackClick = { navController.popBackStack() })
-        }
-
-        composable(Routes.Insights.route) {
-            InsightsScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun BottomNavigationContainer(
-    mainNavController: NavHostController,
-    name: String,
-    password: String,
-    avatar: String,
-    bio: String
-) {
+fun BottomNavigationContainer(mainNavController: NavHostController) {
     val bottomNavController = rememberNavController()
+    val userViewModel = hiltViewModel<FirebaseUserViewModel>()
+    val currentUser by userViewModel.loggedUser
 
-    Scaffold(
-        bottomBar = { BottomBar(bottomNavController) }
-    ) { innerPadding ->
+    Scaffold(bottomBar = { BottomBar(bottomNavController, mainNavController) }) { innerPadding ->
         NavHost(
             navController = bottomNavController,
             startDestination = Routes.BottomHome.route,
@@ -297,29 +472,51 @@ fun BottomNavigationContainer(
         ) {
             composable(Routes.BottomHome.route) {
                 HomeScreen(
-                    name = name,
-                    password = password,
-                    selectedAvatar = avatar,
-                    bio = bio,
                     onCreateClick = { mainNavController.navigate(Routes.CreatePost.route) },
-                    onSearchClick = { mainNavController.navigate(Routes.Search.route) }
+                    onSearchClick = { mainNavController.navigate(Routes.Search.route) },
+                    onProfileClick = { userUid ->
+                        if (currentUser?.uid == userUid) {
+                            bottomNavController.navigate(Routes.BottomProfile.route) {
+                                launchSingleTop = true
+                                restoreState = true
+                                popUpTo(bottomNavController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                            }
+                        } else {
+                            mainNavController.navigate("user_profile/$userUid")
+                        }
+                    },
+                    onAvatarClick = {
+                        bottomNavController.navigate(Routes.BottomProfile.route) {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(bottomNavController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                        }
+                    },
+                    onChatClick = { senderId, receiverId ->
+                        mainNavController.navigate("chat/$senderId/$receiverId")
+                    },
+                    onConversationClick = {
+                        mainNavController.navigate(Routes.Conversation.route)
+                    }
+                )
+            }
+
+            composable(Routes.BottomNotification.route) {
+                NotificationScreen(
+                    onBack = {
+                        bottomNavController.popBackStack()
+                    }
                 )
             }
 
             composable(Routes.BottomProfile.route) {
                 ProfileScreen(
-                    R.drawable.profile,
-                    "Jhon Lee Marahay",
-                    "Test bio",
-                    "Joined 10/8/2025",
-                    onCreateClick = { mainNavController.navigate(Routes.CreatePost.route) },
-                    onInsightsClick = { mainNavController.navigate(Routes.Insights.route) },
-                    onExploreClick = { bottomNavController.navigate(Routes.BottomHome.route) },
-                    onLogoutClick = {
-                        mainNavController.navigate(Routes.Login.route) {
-                            popUpTo(0) { inclusive = true }
-                            launchSingleTop = true
-                        }
+                    onChatClick = { senderId, receiverId ->
+                        mainNavController.navigate("chat/$senderId/$receiverId")
                     }
                 )
             }
@@ -329,9 +526,15 @@ fun BottomNavigationContainer(
                     onBackClick = { bottomNavController.navigate(Routes.BottomHome.route) },
                     onClick = { label ->
                         val route = if (label == "Logout") "login" else label.lowercase()
-                        mainNavController.navigate(route) {
-                            popUpTo(0) { inclusive = true }
-                            launchSingleTop = true
+                        if (route == "password") {
+                            mainNavController.navigate(Routes.VerifyPassword.route)
+                        } else {
+                            mainNavController.navigate(route) {
+                                if (route == "login") {
+                                    popUpTo(0) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            }
                         }
                     }
                 )
@@ -341,7 +544,7 @@ fun BottomNavigationContainer(
 }
 
 @Composable
-fun BottomBar(navController: NavHostController) {
+fun BottomBar(navController: NavHostController, mainNavController: NavHostController) {
     val items = bottomNavItems
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -350,38 +553,66 @@ fun BottomBar(navController: NavHostController) {
     val gradientBrush = Brush.linearGradient(PrimaryGradient)
     val unselectedBrush = Brush.linearGradient(listOf(Color.White, Color.White))
 
+    val userViewModelFirebase = hiltViewModel<FirebaseUserViewModel>()
+    val notificationViewModel = hiltViewModel<NotificationViewModel>()
+
+    val currentUserId = userViewModelFirebase.loggedUser.value?.uid ?: ""
+    val unreadNotifications by remember(currentUserId) {
+        notificationViewModel.getUnreadNotificationsByUserId(currentUserId)
+    }.collectAsState(initial = emptyList())
+
     NavigationBar(
+        modifier = Modifier.height(94.dp),
         containerColor = MaterialTheme.colorScheme.surface
     ) {
         items.forEach { item ->
             val isSelected = currentRoute == item.route
 
             NavigationBarItem(
-                icon = { NavIcon(item, isSelected, gradientBrush, unselectedBrush) },
-                label = {
-                    Text(
-                        text = item.label,
-                        modifier = Modifier
-                            .graphicsLayer(alpha = 0.99f)
-                            .drawWithCache {
-                                onDrawWithContent {
-                                    drawContent()
-                                    drawRect(
-                                        brush = if (isSelected) gradientBrush else unselectedBrush,
-                                        blendMode = BlendMode.SrcAtop
+                icon = {
+                    if (item.route == "notification_tab") {
+                        Box {
+                            NavIcon(item, isSelected, gradientBrush, unselectedBrush)
+
+                            if (unreadNotifications.isNotEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .offset(x = 3.dp, y = (-5).dp)
+                                        .background(Color.Red, CircleShape)
+                                ) {
+                                    Text(
+                                        text = "${unreadNotifications.size}",
+                                        style = Typography.bodyMedium.copy(
+                                            color = Color.White,
+                                        ),
+                                        modifier = Modifier.padding(horizontal = 4.dp)
                                     )
                                 }
                             }
-                    )
+                        }
+                    } else {
+                        NavIcon(item, isSelected, gradientBrush, unselectedBrush)
+                    }
                 },
                 selected = currentRoute == item.route,
                 onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
-                            popUpTo(navController.graph.startDestinationId) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+                    if (item.route == "notification_tab" && unreadNotifications.isNotEmpty()) {
+                        unreadNotifications.forEach { notification ->
+                            notificationViewModel.updateNotification(notification!!.copy(read = true))
                         }
+                    }
+
+                    if (item.route != "video_tab") {
+                        if (currentRoute != item.route) {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    } else {
+                        mainNavController.navigate(Routes.BottomVideo.route)
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(indicatorColor = Color.Transparent)
@@ -397,20 +628,31 @@ fun NavIcon(
     gradientBrush: Brush,
     unselectedBrush: Brush
 ) {
-    Icon(
-        imageVector = item.icon,
-        contentDescription = "Gradient Icon",
+    Box(
         modifier = Modifier
-            .graphicsLayer(alpha = 0.99f)
-            .drawWithCache {
-                onDrawWithContent {
-                    drawContent()
-                    drawRect(
-                        brush = if (isSelected) unselectedBrush else gradientBrush,
-                        blendMode = BlendMode.SrcAtop
-                    )
-                }
-            },
-        tint = Color.White
-    )
+            .background(
+                if (isSelected) gradientBrush
+                else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)),
+                CircleShape
+            )
+            .size(if (isSelected) 42.dp else Dp.Unspecified),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = item.icon,
+            contentDescription = "Gradient Icon",
+            modifier = Modifier
+                .graphicsLayer(alpha = 0.99f)
+                .drawWithCache {
+                    onDrawWithContent {
+                        drawContent()
+                        drawRect(
+                            brush = if (isSelected) unselectedBrush else gradientBrush,
+                            blendMode = BlendMode.SrcAtop
+                        )
+                    }
+                },
+            tint = Color.White
+        )
+    }
 }

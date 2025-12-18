@@ -1,228 +1,187 @@
 package com.emc.moodmingle.ui.post.action
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.ui.theme.AngryColor
-import com.emc.moodmingle.ui.theme.HappyColor
-import com.emc.moodmingle.ui.theme.HeartColor
-import com.emc.moodmingle.ui.theme.SadColor
-import com.emc.moodmingle.ui.theme.ScaryColor
-import com.emc.moodmingle.ui.theme.WowColor
-import kotlin.collections.get
+import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.ReactionEntityFirebase
+import com.emc.moodmingle.data.firebase.model.notification.NotificationEntity
+import com.emc.moodmingle.ui.theme.SecondaryDark
+import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.firebase.ReactionViewModelFirebase
+import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReactionAction(globalLikesState: MutableState<Int>) {
-    var isReacted by remember { mutableStateOf(false) }
+fun ReactionAction(
+    postEntity: PostEntityFirebase,
+    reactionViewModel: ReactionViewModelFirebase,
+    currentUserId: String,
+    modifier: Modifier = Modifier
+) {
+    val scope = rememberCoroutineScope()
+    val notificationViewModel = hiltViewModel<NotificationViewModel>()
+    val userViewModel = hiltViewModel<FirebaseUserViewModel>()
 
-    var selectedReaction by remember { mutableStateOf<Int?>(null) }
+    val currentUser by userViewModel.loggedUser
 
-    var showSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val localReaction by remember(currentUserId, postEntity.id) {
+        reactionViewModel.getReactionByReactorIdAndPostId(currentUserId, postEntity.id)
+            .stateIn(scope, SharingStarted.WhileSubscribed(5000), null)
+    }.collectAsState()
 
-    val displayIcon = when (selectedReaction) {
-        R.drawable.scary -> R.drawable.scary
-        R.drawable.happy -> R.drawable.happy
-        R.drawable.wow -> R.drawable.wow
-        R.drawable.sad -> R.drawable.sad
-        R.drawable.angry -> R.drawable.angry
-        else -> null
-    }
-
-    val displayColor = mapOf(
-        R.drawable.scary to ScaryColor,
-        R.drawable.happy to HappyColor,
-        R.drawable.wow to WowColor,
-        R.drawable.sad to SadColor,
-        R.drawable.angry to AngryColor
-    )
+    val scale = remember { Animatable(1f) }
+    val floatingHearts =
+        remember { mutableStateListOf<Triple<Float, Animatable<Float, AnimationVector1D>, Float>>() }
 
     Box(
-        modifier = Modifier
-            .background(Color.Transparent)
+        modifier = modifier
+            .size(40.dp)
+            .background(SecondaryDark, CircleShape)
             .border(
                 width = 1.dp,
-                color = displayColor[selectedReaction] ?: Color.White,
+                color = if (localReaction != null) Color.Red else Color.White,
                 shape = CircleShape
-            )
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        if (displayIcon != null) {
-            Icon(
-                painter = painterResource(displayIcon),
-                contentDescription = "Reaction Icon",
-                modifier = Modifier
-                    .padding(10.dp)
-                    .size(32.dp)
-                    .combinedClickable(
-                        onClick = {
-                            isReacted = false
-                            selectedReaction = null
-                            globalLikesState.value--
-                        },
-                        onLongClick = {
-                            showSheet = true
-                        }
-                    ),
-                tint = displayColor[selectedReaction] ?: Color.Unspecified
-            )
-        } else {
-            Icon(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .size(32.dp)
-                    .combinedClickable(
-                        onClick = {
-                            isReacted = !isReacted
-                            if (isReacted) globalLikesState.value++ else globalLikesState.value--
-                        },
-                        onLongClick = {
-                            showSheet = true
-                        }
-                    ),
-                imageVector = Icons.Default.Favorite,
-                contentDescription = "Favorite",
-                tint = if (isReacted) HeartColor else Color.White
-            )
-        }
-    }
-
-    if (showSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showSheet = false },
-            sheetState = sheetState,
-            containerColor = Color(0xFF121212)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    text = "Choose your reaction",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val reactions = listOf(
-                        R.drawable.scary to "Scary",
-                        R.drawable.happy to "Happy",
-                        R.drawable.wow to "Wow",
-                        R.drawable.sad to "Sad",
-                        R.drawable.angry to "Angry"
-                    )
-
-                    reactions.forEach { (emoji, label) ->
-                        var clicked by remember { mutableStateOf(false) }
-                        val scale by animateFloatAsState(
-                            targetValue = if (clicked) 1.4f else 1f,
-                            animationSpec = tween(
-                                durationMillis = 150,
-                                easing = FastOutSlowInEasing
-                            ),
-                            finishedListener = { clicked = false }
-                        )
-
-                        val isReactedAndSelected = isReacted && emoji == selectedReaction
-
-                        val reactedColor = if (isReactedAndSelected) {
-                            displayColor[selectedReaction]?.copy(0.5f) ?: Color.White
+        Icon(
+            painter = painterResource(R.drawable.love),
+            contentDescription = "Reaction Icon",
+            modifier = Modifier
+                .size(20.dp)
+                .graphicsLayer {
+                    scaleX = scale.value
+                    scaleY = scale.value
+                }
+                .combinedClickable(
+                    onClick = {
+                        if (localReaction != null) {
+                            scope.launch {
+                                reactionViewModel.deleteReaction(localReaction!!)
+                            }
                         } else {
-                            Color.White
-                        }
+                            val newReaction = ReactionEntityFirebase(
+                                postId = postEntity.id,
+                                reactorId = currentUserId,
+                                reactionType = "HEART"
+                            )
 
-                        val reactedSize = if (isReactedAndSelected) 62.dp else 45.dp
+                            scope.launch {
+                                reactionViewModel.insertReaction(newReaction)
 
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier
-                                .graphicsLayer(scaleX = scale, scaleY = scale)
-                                .clickable {
-                                    clicked = true
-                                    showSheet = false
+                                val userNotification =
+                                    notificationViewModel.getNotificationPostId(postId = postEntity.id)
 
-                                    if (selectedReaction == emoji) {
-                                        selectedReaction = null
-                                        isReacted = false
-                                        globalLikesState.value--
+                                if (userNotification == null) {
+                                    val newNotification = NotificationEntity(
+                                        userId = postEntity.userId,
+                                        postId = postEntity.id,
+                                        users = listOf(currentUser?.uid ?: ""),
+                                        type = "REACTION"
+                                    )
+
+                                    notificationViewModel.createNotification(newNotification)
+                                } else {
+                                    val isExists =
+                                        userNotification.users.contains(currentUser?.uid ?: "")
+
+                                    if (isExists) {
+                                        notificationViewModel.updateNotification(
+                                            userNotification.copy(timestamp = System.currentTimeMillis())
+                                        )
                                     } else {
-                                        if (!isReacted) {
-                                            globalLikesState.value++
-                                        }
-                                        selectedReaction = emoji
-                                        isReacted = true
+                                        notificationViewModel.updateNotification(
+                                            userNotification.copy(
+                                                users = userNotification.users + (currentUser?.uid
+                                                    ?: ""),
+                                                timestamp = System.currentTimeMillis()
+                                            )
+                                        )
                                     }
                                 }
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(reactedSize),
-                                painter = painterResource(emoji),
-                                contentDescription = label,
-                                tint = displayColor[emoji] ?: Color.Unspecified
-                            )
+                            }
 
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    color = reactedColor,
-                                    fontWeight = if (isReactedAndSelected) FontWeight.Bold else FontWeight.Normal,
-                                    fontSize = if (isReactedAndSelected) 16.sp else TextUnit.Unspecified
+                            scope.launch {
+                                scale.animateTo(
+                                    1.5f,
+                                    animationSpec = tween(500, easing = LinearOutSlowInEasing)
                                 )
-                            )
+                                scale.animateTo(
+                                    1f,
+                                    animationSpec = tween(500, easing = LinearOutSlowInEasing)
+                                )
+                            }
+
+                            repeat(16) { index ->
+                                scope.launch {
+                                    delay(index * 100L)
+
+                                    val animY = Animatable(0f)
+                                    val randomX = (-15..15).random().toFloat()
+                                    val randomScale = 0.8f + Random.nextFloat() * 0.4f
+                                    floatingHearts.add(Triple(randomX, animY, randomScale))
+
+                                    animY.animateTo(
+                                        targetValue = -150f - Random.nextFloat() * 30f,
+                                        animationSpec = tween(
+                                            durationMillis = 800 + Random.nextInt(
+                                                200
+                                            ), easing = LinearOutSlowInEasing
+                                        )
+                                    )
+
+                                    floatingHearts.remove(Triple(randomX, animY, randomScale))
+                                }
+                            }
                         }
                     }
-                }
-            }
+                ),
+            tint = if (localReaction != null) Color.Red else Color.White
+        )
+
+        floatingHearts.forEach { (xOffset, animY, scaleFactor) ->
+            Icon(
+                painter = painterResource(R.drawable.love),
+                contentDescription = null,
+                tint = Color.Red,
+                modifier = Modifier
+                    .size(24.dp)
+                    .graphicsLayer {
+                        scaleX = scaleFactor
+                        scaleY = scaleFactor
+                    }
+                    .offset(x = xOffset.dp, y = animY.value.dp)
+            )
         }
     }
 }

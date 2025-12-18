@@ -1,3 +1,4 @@
+/*
 package com.emc.moodmingle.ui.post.data
 
 import androidx.annotation.DrawableRes
@@ -44,7 +45,8 @@ fun dummyPosts(): List<Post> {
             val randomVideo = videoList.random()
             val randomAudio = audioList.random()
 
-            Post(
+            */
+/*Post(
                 name = "User ${index + 1}",
                 avatar = listOf(
                     R.raw.boy1,
@@ -69,7 +71,8 @@ fun dummyPosts(): List<Post> {
                 imageRes = randomImage,
                 videoRes = randomVideo,
                 audioRes = randomAudio
-            )
+            )*//*
+
         }.shuffled()
     }
 
@@ -104,4 +107,4 @@ fun getAudioList(): List<Int> {
         R.raw.tothapi_panata,
         R.raw.zack_tabudlo_pulso
     )
-}
+}*/

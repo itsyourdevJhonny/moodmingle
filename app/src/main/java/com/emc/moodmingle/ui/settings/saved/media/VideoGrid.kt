@@ -28,18 +28,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.firebase.model.saved.SaveEntityFirebase
 import com.emc.moodmingle.ui.post.getVideoThumbnail
 import com.emc.moodmingle.ui.post.skeleton.ShimmerAnimation
 import com.emc.moodmingle.viewmodel.local.PostViewModel
-import kotlinx.coroutines.delay
 
 @Composable
 fun VideoGrid(

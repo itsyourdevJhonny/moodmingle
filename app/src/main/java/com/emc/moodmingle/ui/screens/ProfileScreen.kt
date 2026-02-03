@@ -24,7 +24,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -33,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -41,16 +39,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.request.ImageRequest
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
-import com.emc.moodmingle.data.model.UserEntity
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.model.post.user.CombinedPost
-import com.emc.moodmingle.di.AppDatabase
 import com.emc.moodmingle.ui.profile.ProfileSection
 import com.emc.moodmingle.ui.profile.UserPostContent
 import com.emc.moodmingle.ui.profile.tab.FilterUserPosts
 import com.emc.moodmingle.ui.profile.tab.ProfileTabs
-import com.emc.moodmingle.ui.settings.saved.utils.NoResult
+import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.utils.text.TextFormatter
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
@@ -71,27 +67,26 @@ fun ProfileScreen(
     onBack: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val userDao = remember { AppDatabase.getDatabase(context).userDao() }
-    val loggedUser by produceState<UserEntity?>(initialValue = null) {
-        value = userDao.getLoggedUser()
-    }
+    val userViewModel = hiltViewModel<FirebaseUserViewModel>()
+
+    val loggedUser by userViewModel.loggedUser
 
     val userUid = if (isFromOtherUser) otherUserId else loggedUser?.uid ?: ""
 
-    val userViewModel = hiltViewModel<FirebaseUserViewModel>()
     val postViewModel = hiltViewModel<PostViewModelFirebase>()
     val shareViewModel = hiltViewModel<ShareViewModelFirebase>()
     val saveViewModel = hiltViewModel<SaveViewModelFirebase>()
     val favoritesViewModel = hiltViewModel<FavoritesViewModelFirebase>()
 
-//    val currentUser by userViewModel.loggedUser
     var user by remember { mutableStateOf<UserEntityFirebase?>(null) }
 
-    if (!isFromOtherUser) {
-        user = userViewModel.loggedUser.value
-    } else {
-        LaunchedEffect(otherUserId) {
-            user = userViewModel.getUserCached(otherUserId)
+    LaunchedEffect(userUid) {
+        if (!isFromOtherUser) {
+            user = userViewModel.loggedUser.value
+        } else {
+            userViewModel.getUserByUid(userUid).collect {
+                user = it.getOrNull()
+            }
         }
     }
 
@@ -183,7 +178,8 @@ fun ProfileScreen(
                 .verticalScroll(scrollState)
         ) {
             ProfileSection(
-                loggedUser = user,
+                isFromOtherUser = isFromOtherUser,
+                user = user,
                 postCount = posts.size.toLong(),
                 shareCount = shares.size.toLong(),
                 saveCount = saves.size.toLong(),
@@ -192,25 +188,13 @@ fun ProfileScreen(
 
             ProfileTabs(onSelectedTab = { selectedTab = it })
 
-            Text(
-                modifier = Modifier.padding(bottom = 8.dp, top = 8.dp, start = 16.dp),
-                text = when (selectedTab) {
-                    "Text" -> "Text posts"
-                    "Media" -> "Media posts"
-                    else -> "All posts"
-                },
-                style = MaterialTheme.typography.titleMedium.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-
             when (selectedTab) {
                 "Text" -> FilterUserPosts("TEXT", pagedPosts, onChatClick)
                 "Media" -> FilterUserPosts("MEDIA", pagedPosts, onChatClick)
+                "Reposts" -> {}
                 else -> {
                     if (pagedPosts.isEmpty()) {
-                        NoResult(R.drawable.empty, "No posts.")
+                        EmptyComponent(R.drawable.empty, "No posts.")
                     } else {
                         pagedPosts.forEach { post ->
                             UserPostContent(post, postViewModel, onChatClick)

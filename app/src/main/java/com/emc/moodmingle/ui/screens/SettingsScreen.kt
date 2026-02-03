@@ -1,7 +1,6 @@
 package com.emc.moodmingle.ui.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -91,7 +90,6 @@ import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.firebase.favorites.FavoritesViewModelFirebase
 import com.emc.moodmingle.viewmodel.firebase.saved.SaveViewModelFirebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -202,7 +200,6 @@ private fun LogoutButton(onShowLogoutDialog: (Boolean) -> Unit) {
 @Composable
 private fun ShowLogoutDialog(onShowLogoutDialog: (Boolean) -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val userDao = remember { AppDatabase.getDatabase(context).userDao() }
     var currentUserUid by remember { mutableStateOf("") }
 
@@ -265,9 +262,6 @@ private fun ShowLogoutDialog(onShowLogoutDialog: (Boolean) -> Unit) {
                 Button(
                     onClick = {
                         onShowLogoutDialog(false)
-                       /* scope.launch {
-                            performLogout(currentUserUid, context, globalOnClick)
-                        }*/
                         CoroutineScope(Dispatchers.IO).launch {
                             val dao = AppDatabase.getDatabase(context).userDao()
                             dao.clearUser(currentUserUid)
@@ -288,22 +282,6 @@ private fun ShowLogoutDialog(onShowLogoutDialog: (Boolean) -> Unit) {
             }
         }
     )
-}
-
-suspend fun performLogout(currentUserUid: String, context: Context, globalOnClick: (String) -> Unit) {
-    FirebaseFirestore.getInstance().terminate()
-    FirebaseFirestore.getInstance().clearPersistence()
-
-    withContext(Dispatchers.Main) {
-        FirebaseAuth.getInstance().signOut()
-    }
-
-    withContext(Dispatchers.IO) {
-        val dao = AppDatabase.getDatabase(context).userDao()
-        dao.clearUser(currentUserUid)
-    }
-
-    globalOnClick("Logout")
 }
 
 @Composable
@@ -589,7 +567,6 @@ fun ActionButton(icon: Painter, label: String, description: String) {
 @SuppressLint("FrequentlyChangingValue")
 @Composable
 fun Preferences() {
-    val scope = rememberCoroutineScope()
     var expanded by rememberSaveable { mutableStateOf(false) }
     Column(modifier = Modifier.padding(horizontal = 8.dp)) {
         ExpandableTitle("Images/Videos/Audios", expanded, onExpanded = {

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
 import com.emc.moodmingle.data.firebase.model.saved.SaveEntityFirebase
 import com.emc.moodmingle.data.model.post.formatTimeAgo
 import com.emc.moodmingle.ui.theme.GrayTextColor

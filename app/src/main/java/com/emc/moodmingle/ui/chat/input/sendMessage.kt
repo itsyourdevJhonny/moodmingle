@@ -14,23 +14,27 @@ suspend fun sendMessage(
     postId: String = "",
     replyMessage: String = ""
 ) {
-    conversation?.let {
+    conversation?.let { conversation ->
         val chatMessage = ChatMessage(
             senderId = senderId,
             receiverId = receiverId,
             message = message,
-            conversationId = it.id,
+            conversationId = conversation.id,
             type = type,
-            postId = postId,
+            entity = postId,
             replyMessage = replyMessage
         )
 
         conversationViewModel.updateConversation(
-            conversation = it.copy(
+            conversation = conversation.copy(
                 lastMessage = message,
                 lastMessageTime = System.currentTimeMillis(),
+                lastMessageUserId = senderId,
                 messages = conversation.messages + chatMessage
-            )
+            ),
+            senderId = senderId,
+            receiverId = receiverId,
+            message = message
         )
     }
 }

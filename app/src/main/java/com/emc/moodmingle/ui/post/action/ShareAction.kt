@@ -30,7 +30,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,12 +47,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.ShareEntityFirebase
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.ShareEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.firebase.model.notification.NotificationEntity
 import com.emc.moodmingle.di.AppDatabase
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
-import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.firebase.ShareViewModelFirebase
 import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
@@ -238,8 +236,6 @@ fun ShareButton(
         userDao.getLoggedUser()?.uid?.let { currentUserId = it }
     }
 
-    Log.d("SHARE", "CURRENT USER ID $currentUserId")
-
     Button(
         onClick = { onLoading(true) },
         modifier = Modifier
@@ -282,12 +278,12 @@ fun executeShareOperation(
         )
 
         scope.launch {
-            val userNotification = notificationViewModel.getNotificationPostId(postId)
+            val userNotification = notificationViewModel.getNotificationByEntityId(postId)
 
             if (userNotification == null) {
                 val newNotification = NotificationEntity(
                     userId = postUserId,
-                    postId = postId,
+                    entityId = postId,
                     users = listOf(userUid),
                     type = "SHARE"
                 )

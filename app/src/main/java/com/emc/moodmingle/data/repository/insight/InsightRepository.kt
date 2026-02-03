@@ -1,9 +1,8 @@
 package com.emc.moodmingle.data.repository.insight
 
-import com.emc.moodmingle.data.dao.UserDao
-import com.emc.moodmingle.data.dao.post.CommentDao
-import com.emc.moodmingle.data.dao.post.PostDao
-import com.emc.moodmingle.data.dao.post.ReactionDao
+import com.emc.moodmingle.data.firebase.repository.post.CommentRepositoryFirebase
+import com.emc.moodmingle.data.firebase.repository.post.PostRepositoryFirebase
+import com.emc.moodmingle.data.firebase.repository.post.reaction.ReactionRepositoryFirebase
 import com.emc.moodmingle.ui.screens.InsightData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -13,19 +12,11 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-/**
- * Repository responsible for fetching and combining post, comment,
- * and reaction counts for a given user to generate insight statistics.
- */
 class InsightRepository @Inject constructor(
-    private val userDao: UserDao,
-    private val postDao: PostDao,
-    private val commentDao: CommentDao,
-    private val reactionDao: ReactionDao
+    private val postRepository: PostRepositoryFirebase,
+    private val commentRepository: CommentRepositoryFirebase,
+    private val reactionRepository: ReactionRepositoryFirebase
 ) {
-    /**
-     * Returns a Flow emitting InsightData for the specified user.
-     */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getUserInsights(userId: String, period: String): Flow<InsightData> {
         val now = System.currentTimeMillis()
@@ -36,43 +27,47 @@ class InsightRepository @Inject constructor(
             else -> 0L
         }
 
-        val postsFlow = postDao.getPostsByUserId(userId).map { posts ->
+        val postsFlow = postRepository.getPostsByUserIdFlow(userId).map { posts ->
             posts.filter { post -> post.timeAgo >= startTime }.size
         }
 
-        val commentsFlow = postDao.getPostsByUserId(userId).flatMapLatest { posts ->
+        val commentsFlow = postRepository.getPostsByUserIdFlow(userId).flatMapLatest { posts ->
             if (posts.isEmpty()) {
                 flowOf(0)
             } else {
-                combine(posts.map { post ->
-                    commentDao.getCommentCountByPostId(post.id)
+                combine(posts.map {
+                    commentRepository.getCommentCountByPostId(it.id)
                 }) { counts ->
                     counts.sum()
                 }
             }
         }
 
-        val reactionsFlow = postDao.getPostsByUserId(userId).flatMapLatest { posts ->
+        val reactionsFlow = postRepository.getPostsByUserIdFlow(userId).flatMapLatest { posts ->
             if (posts.isEmpty()) {
                 flowOf(0)
             } else {
                 combine(posts.map { post ->
-                    reactionDao.getReactionsCountByPostId(post.id)
+                    reactionRepository.getReactionsCountByPostId(post.id)
                 }) { counts ->
                     counts.sum()
                 }
             }
         }
 
-        // (total reactions + total comments) / number of posts
-        val avgScoreFlow = combine(postsFlow, commentsFlow, reactionsFlow) { posts, comments, reactions ->
-            if (posts > 0) {
-                ((comments + reactions).toDouble() / posts)
-            } else 0.0
-        }
+        val avgScoreFlow =
+            combine(postsFlow, commentsFlow, reactionsFlow) { posts, comments, reactions ->
+                if (posts > 0) {
+                    ((comments + reactions).toDouble() / posts)
+                } else 0.0
+            }
 
-        // combine all flows into a single InsightData stream
-        return combine(postsFlow, commentsFlow, reactionsFlow, avgScoreFlow) { posts, comments, reactions, avgScore ->
+        return combine(
+            postsFlow,
+            commentsFlow,
+            reactionsFlow,
+            avgScoreFlow
+        ) { posts, comments, reactions, avgScore ->
             InsightData(
                 posts = posts,
                 comments = comments.toInt(),
@@ -86,7 +81,6 @@ class InsightRepository @Inject constructor(
     fun getPreviousUserInsights(userId: String, period: String): Flow<InsightData> {
         val now = System.currentTimeMillis()
 
-        // define the current period duration
         val duration = when (period) {
             "Week" -> 7 * 24 * 60 * 60 * 1000L
             "Month" -> 30 * 24 * 60 * 60 * 1000L
@@ -94,17 +88,16 @@ class InsightRepository @Inject constructor(
             else -> 7 * 24 * 60 * 60 * 1000L
         }
 
-        // previous period range
         val previousEndTime = now - duration
         val previousStartTime = previousEndTime - duration
 
-        val postsFlow = postDao.getPostsByUserId(userId).map { posts ->
+        val postsFlow = postRepository.getPostsByUserIdFlow(userId).map { posts ->
             posts.filter { post ->
                 post.timeAgo in previousStartTime..previousEndTime
             }.size
         }
 
-        val commentsFlow = postDao.getPostsByUserId(userId).flatMapLatest { posts ->
+        val commentsFlow = postRepository.getPostsByUserIdFlow(userId).flatMapLatest { posts ->
             val filteredPosts = posts.filter { post ->
                 post.timeAgo in previousStartTime..previousEndTime
             }
@@ -112,14 +105,14 @@ class InsightRepository @Inject constructor(
                 flowOf(0)
             } else {
                 combine(filteredPosts.map { post ->
-                    commentDao.getCommentCountByPostId(post.id)
+                    commentRepository.getCommentCountByPostId(post.id)
                 }) { counts ->
                     counts.sum()
                 }
             }
         }
 
-        val reactionsFlow = postDao.getPostsByUserId(userId).flatMapLatest { posts ->
+        val reactionsFlow = postRepository.getPostsByUserIdFlow(userId).flatMapLatest { posts ->
             val filteredPosts = posts.filter { post ->
                 post.timeAgo in previousStartTime..previousEndTime
             }
@@ -127,18 +120,24 @@ class InsightRepository @Inject constructor(
                 flowOf(0)
             } else {
                 combine(filteredPosts.map { post ->
-                    reactionDao.getReactionsCountByPostId(post.id)
+                    reactionRepository.getReactionsCountByPostId(post.id)
                 }) { counts ->
                     counts.sum()
                 }
             }
         }
 
-        val avgScoreFlow = combine(postsFlow, commentsFlow, reactionsFlow) { posts, comments, reactions ->
-            if (posts > 0) ((comments + reactions).toDouble() / posts) else 0.0
-        }
+        val avgScoreFlow =
+            combine(postsFlow, commentsFlow, reactionsFlow) { posts, comments, reactions ->
+                if (posts > 0) ((comments + reactions).toDouble() / posts) else 0.0
+            }
 
-        return combine(postsFlow, commentsFlow, reactionsFlow, avgScoreFlow) { posts, comments, reactions, avgScore ->
+        return combine(
+            postsFlow,
+            commentsFlow,
+            reactionsFlow,
+            avgScoreFlow
+        ) { posts, comments, reactions, avgScore ->
             InsightData(
                 posts = posts,
                 comments = comments.toInt(),

@@ -49,8 +49,6 @@ import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
-import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
 import com.emc.moodmingle.viewmodel.local.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -64,7 +62,9 @@ fun HomeScreen(
     onProfileClick: (String) -> Unit,
     onAvatarClick: () -> Unit,
     onChatClick: (String, String) -> Unit,
-    onConversationClick: () -> Unit
+    onConversationClick: () -> Unit,
+    onRemix: (String, String) -> Unit,
+    onCreate: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -72,7 +72,7 @@ fun HomeScreen(
             .background(Color.Black)
     ) {
         TopNavigationBar(onCreateClick, onSearchClick, onAvatarClick, onConversationClick)
-        MoodFeedScreen(onCreateClick, onProfileClick, onChatClick)
+        FeedScreen(onCreateClick, onProfileClick, onChatClick, onRemix, onCreate)
     }
 }
 
@@ -148,7 +148,7 @@ fun TopNavigationBar(
                                 scope.launch {
                                     unreadConversations.forEach { conversation ->
                                         conversationViewModel.updateConversation(
-                                            conversation.copy(lastMessageRead = true)
+                                            conversation = conversation.copy(lastMessageRead = true)
                                         )
                                     }
                                 }

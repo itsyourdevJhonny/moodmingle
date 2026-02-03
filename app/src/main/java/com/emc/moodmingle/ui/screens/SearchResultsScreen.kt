@@ -48,9 +48,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.SearchEntityFirebase
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
-import com.emc.moodmingle.data.model.UserEntity
+import com.emc.moodmingle.data.firebase.model.search.SearchEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.model.search.SearchEntity
 import com.emc.moodmingle.ui.post.action.formatText
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient

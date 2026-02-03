@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,7 +63,7 @@ fun PostMedia(mediaUrls: List<String>, onShowShareSheet: (Boolean) -> Unit) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
     var showFullImage by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableIntStateOf(0) }
+    var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
     val selectedUrl = mediaUrls[selectedIndex]
     val offsetX = remember { Animatable(0f) }
 
@@ -82,9 +83,7 @@ fun PostMedia(mediaUrls: List<String>, onShowShareSheet: (Boolean) -> Unit) {
             modifier = Modifier
                 .heightIn(min = 360.dp, max = 360.dp)
                 .fillMaxWidth()
-                .onSizeChanged { size ->
-                    boxWidth = size.width
-                }
+                .onSizeChanged { size -> boxWidth = size.width }
                 .pointerInput(selectedIndex) {
                     if (mediaUrls.size != 1) {
                         detectHorizontalDragGestures(
@@ -115,9 +114,7 @@ fun PostMedia(mediaUrls: List<String>, onShowShareSheet: (Boolean) -> Unit) {
                             }
                         ) { change, dragAmount ->
                             change.consume()
-                            scope.launch {
-                                offsetX.snapTo(offsetX.value + dragAmount)
-                            }
+                            scope.launch { offsetX.snapTo(offsetX.value + dragAmount) }
                         }
                     }
                 }
@@ -165,92 +162,86 @@ fun PostMedia(mediaUrls: List<String>, onShowShareSheet: (Boolean) -> Unit) {
             }
         }
 
-        PositionDotsIndicator(mediaUrls, selectedIndex)
+        if (mediaUrls.size > 1) {
+            PositionDotsIndicator(mediaUrls, selectedIndex)
 
-        LazyRow(
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            state = state
-        ) {
-            items(mediaUrls) { url ->
-                val idx = mediaUrls.indexOf(url)
-                val mediaType = detectMediaType(url)
+            LazyRow(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                state = state
+            ) {
+                items(mediaUrls) { url ->
+                    val idx = mediaUrls.indexOf(url)
+                    val mediaType = detectMediaType(url)
 
-                val animatedScale by animateFloatAsState(
-                    targetValue = if (idx == selectedIndex) 1.15f else 1f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessLow
-                    ),
-                    label = ""
-                )
+                    val animatedScale by animateFloatAsState(
+                        targetValue = if (idx == selectedIndex) 1.15f else 1f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = ""
+                    )
 
-                val borderAlpha by animateFloatAsState(
-                    targetValue = if (idx == selectedIndex) 1f else 0f,
-                    animationSpec = tween(250),
-                    label = ""
-                )
+                    val borderAlpha by animateFloatAsState(
+                        targetValue = if (idx == selectedIndex) 1f else 0f,
+                        animationSpec = tween(250),
+                        label = ""
+                    )
 
-                val transition = updateTransition(selectedIndex, label = "")
+                    val transition = updateTransition(selectedIndex, label = "")
 
-                val slideX by transition.animateFloat(
-                    transitionSpec = { tween(150) },
-                    label = ""
-                ) { selected ->
-                    when {
-                        idx == selected -> 0f
-                        idx < selected -> -20f
-                        else -> 20f
+                    val slideX by transition.animateFloat(
+                        transitionSpec = { tween(150) },
+                        label = ""
+                    ) { selected ->
+                        when {
+                            idx == selected -> 0f
+                            idx < selected -> -20f
+                            else -> 20f
+                        }
                     }
-                }
 
-                val fadeAlpha by animateFloatAsState(
-                    targetValue = if (idx == selectedIndex) 1f else 0.6f,
-                    animationSpec = tween(150),
-                    label = ""
-                )
+                    val fadeAlpha by animateFloatAsState(
+                        targetValue = if (idx == selectedIndex) 1f else 0.6f,
+                        animationSpec = tween(150),
+                        label = ""
+                    )
 
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .graphicsLayer {
-                            scaleX = animatedScale
-                            scaleY = animatedScale
-                            translationX = slideX
-                            alpha = fadeAlpha
-                        }
-                        .clip(RoundedCornerShape(8.dp))
-                        .border(
-                            width = 2.dp,
-                            color = Color.White.copy(alpha = borderAlpha),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .clickable {
-                            scope.launch {
-                                offsetX.animateTo(
-                                    if (idx > selectedIndex) -300f else 300f,
-                                    tween(200)
-                                )
-                                selectedIndex = idx
-                                offsetX.animateTo(0f, tween(250))
-                                state.animateScrollToItem(selectedIndex)
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .graphicsLayer {
+                                scaleX = animatedScale
+                                scaleY = animatedScale
+                                translationX = slideX
+                                alpha = fadeAlpha
                             }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    when (mediaType) {
-                        "image" -> {
-                            ImageThumbnail(url, context)
-                        }
-
-                        "video" -> {
-                            VideoThumbnail(url, postViewModel)
-                        }
-
-                        "audio" -> {
-                            AudioThumbnail()
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(
+                                width = 2.dp,
+                                color = Color.White.copy(alpha = borderAlpha),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clickable {
+                                scope.launch {
+                                    offsetX.animateTo(
+                                        if (idx > selectedIndex) -300f else 300f,
+                                        tween(200)
+                                    )
+                                    selectedIndex = idx
+                                    offsetX.animateTo(0f, tween(250))
+                                    state.animateScrollToItem(selectedIndex)
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when (mediaType) {
+                            "image" -> ImageThumbnail(url, context)
+                            "video" -> VideoThumbnail(url, postViewModel)
+                            "audio" -> AudioThumbnail()
                         }
                     }
                 }
@@ -270,17 +261,9 @@ fun PostMedia(mediaUrls: List<String>, onShowShareSheet: (Boolean) -> Unit) {
 @Composable
 fun RenderMedia(url: String, context: Context, onShowFullImage: (Boolean) -> Unit) {
     when (detectMediaType(url)) {
-        "image" -> {
-            PostImage(url, onShowFullImage, context)
-        }
-
-        "video" -> {
-            PostVideo(url)
-        }
-
-        "audio" -> {
-            PostAudio(url)
-        }
+        "image" -> PostImage(url, onShowFullImage, context)
+        "video" -> PostVideo(url)
+        "audio" -> PostAudio(url)
     }
 }
 

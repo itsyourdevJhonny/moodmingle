@@ -45,18 +45,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.firebase.model.saved.CollectionEntityFirebase
 import com.emc.moodmingle.data.firebase.model.saved.SaveEntityFirebase
 import com.emc.moodmingle.ui.post.action.DrawNoPaddingLine
 import com.emc.moodmingle.ui.screens.NewCollectionButton
 import com.emc.moodmingle.ui.settings.saved.text.TextCard
-import com.emc.moodmingle.ui.settings.saved.utils.NoResult
+import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.LoadingDialog
+import com.emc.moodmingle.utils.components.LoadingDialog
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
@@ -301,7 +301,7 @@ fun ItemContent(
                     )
 
                     if (collectionNames.isEmpty()) {
-                        NoResult(
+                        EmptyComponent(
                             R.drawable.empty,
                             text = "No collections yet. Create one."
                         )

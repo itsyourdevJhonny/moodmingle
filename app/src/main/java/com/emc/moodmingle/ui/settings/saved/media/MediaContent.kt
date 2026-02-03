@@ -52,22 +52,22 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.firebase.model.saved.CollectionEntityFirebase
 import com.emc.moodmingle.data.firebase.model.saved.SaveEntityFirebase
 import com.emc.moodmingle.data.model.post.formatTimeAgo
 import com.emc.moodmingle.ui.post.action.DrawNoPaddingLine
 import com.emc.moodmingle.ui.screens.NewCollectionButton
 import com.emc.moodmingle.ui.settings.saved.BottomSheetItem
-import com.emc.moodmingle.ui.settings.saved.utils.NoResult
+import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
 import com.emc.moodmingle.ui.theme.BrushGrayGradient
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.LoadingDialog
+import com.emc.moodmingle.utils.components.LoadingDialog
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
@@ -364,7 +364,7 @@ fun MediaContent(saves: List<SaveEntityFirebase>, userId: String) {
                                         DrawNoPaddingLine(thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 8.dp))
 
                                         if (collectionNames.isEmpty()) {
-                                            NoResult(
+                                            EmptyComponent(
                                                 R.drawable.empty,
                                                 text = "No collections yet. Create one."
                                             )

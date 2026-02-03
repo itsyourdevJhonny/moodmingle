@@ -10,5 +10,6 @@ data class Conversation(
     val lastMessageTime: Long = 0L,
     val lastMessageRead: Boolean = false,
     val messages: List<ChatMessage> = emptyList(),
-    val lastMessage: String = ""
+    val lastMessage: String = "",
+    val lastMessageUserId: String = ""
 )

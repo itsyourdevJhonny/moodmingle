@@ -19,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -47,8 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.model.post.formatTimeAgo
 import com.emc.moodmingle.di.AppDatabase
 import com.emc.moodmingle.ui.post.action.ChatAction
@@ -69,7 +70,7 @@ import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.LoadingDialog
+import com.emc.moodmingle.utils.components.LoadingDialog
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.firebase.CommentViewModelFirebase
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
@@ -135,129 +136,7 @@ fun MultimediaCard(
     }
 
     if (showShareSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { onShowShareSheet(false) },
-            sheetState = sheetState,
-            containerColor = Color.Black,
-            dragHandle = null,
-        ) {
-            val scope = rememberCoroutineScope()
-            val context = LocalContext.current
-            val commentViewModelFirebase = hiltViewModel<CommentViewModelFirebase>()
-            val shareViewModelFirebase = hiltViewModel<ShareViewModelFirebase>()
-            val notificationViewModel = hiltViewModel<NotificationViewModel>()
-            val reactionViewModelFirebase = hiltViewModel<ReactionViewModelFirebase>()
-
-            val userDao = remember { AppDatabase.getDatabase(context).userDao() }
-            var currentUserId by remember { mutableStateOf("") }
-            var isLoading by remember { mutableStateOf(false) }
-
-            LaunchedEffect(Unit) {
-                userDao.getLoggedUser()?.uid?.let { currentUserId = it }
-            }
-
-            val shareEntity by remember(postEntity.id, currentUserId) {
-                shareViewModelFirebase.getSharedByPostIdAndUserUid(postEntity.id, currentUserId)
-                    .stateIn(scope, SharingStarted.WhileSubscribed(5000), null)
-            }.collectAsState()
-
-            val totalReactions by remember(postEntity.id) {
-                reactionViewModelFirebase.getReactionsCountByPostId(postEntity.id)
-                    .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0L)
-            }.collectAsState()
-
-            val totalComments by remember(postEntity.id) {
-                commentViewModelFirebase.getCommentCountByPostId(postEntity.id)
-                    .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0L)
-            }.collectAsState()
-
-            val totalShares by remember(postEntity.id) {
-                shareViewModelFirebase.getShareCountByPostId(postEntity.id)
-                    .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0L)
-            }.collectAsState()
-
-            Column(
-                modifier = Modifier
-                    .background(Color.Black)
-                    .padding(horizontal = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ShareTitle(shareEntity != null)
-
-                DrawLine()
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(PrimaryDark, RoundedCornerShape(12.dp))
-                        .padding(horizontal = 8.dp)
-                ) {
-                    Column(modifier = Modifier.padding(4.dp)) {
-                        Text(
-                            modifier = Modifier.padding(top = 4.dp),
-                            text = "Post Information",
-                            style = MaterialTheme.typography.titleSmall
-                        )
-
-                        PostInformation(
-                            text = formatText(postEntity.hashtag.replace("#", ""), 23),
-                            iconRes = R.drawable.hashtag,
-                            style = MaterialTheme.typography.headlineMedium.copy(fontFamily = FontFamily.SansSerif)
-                        )
-
-                        PostInformation(
-                            text = "\"" + formatText(postEntity.caption, 35) + "\"",
-                            iconRes = R.drawable.caption,
-                            style = MaterialTheme.typography.titleSmall.copy(fontStyle = FontStyle.Italic)
-                        )
-
-                        PostInformation(
-                            text = formatText(postEntity.description, 39),
-                            iconRes = R.drawable.description,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        PostInteractions(userEntity, totalReactions, totalComments, totalShares)
-                    }
-                }
-
-                ShareButton(
-                    onShowSheet = onShowShareSheet,
-                    shareEntity = shareEntity,
-                    shareViewModel = shareViewModelFirebase,
-                    postId = postEntity.id,
-                    username = userEntity?.username,
-                    onLoading = { isLoading = it },
-                    isLoading = isLoading
-                )
-
-                val isShared = shareEntity != null
-
-                if (isLoading) {
-                    LoadingDialog(if (isShared) "Unsharing post..." else "Sharing post...") {
-                        scope.launch {
-                            delay(3000)
-
-                            onShowShareSheet(false)
-                            isLoading = false
-
-                            executeShareOperation(
-                                isShared = isShared,
-                                shareEntity = shareEntity,
-                                shareViewModel = shareViewModelFirebase,
-                                userUid = currentUserId,
-                                postId = postEntity.id,
-                                username = userEntity?.username,
-                                context = context,
-                                scope = scope,
-                                notificationViewModel = notificationViewModel,
-                                postUserId = postEntity.userId
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        ShareSheet(onShowShareSheet, sheetState, postEntity, userEntity)
     }
 
     if (isViewPost) {
@@ -270,6 +149,135 @@ fun MultimediaCard(
             onChatClick,
             onDismiss = { isViewPost = false }
         )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun ShareSheet(
+    onShowShareSheet: (Boolean) -> Unit,
+    sheetState: SheetState,
+    postEntity: PostEntityFirebase,
+    userEntity: UserEntityFirebase?
+) {
+    ModalBottomSheet(
+        onDismissRequest = { onShowShareSheet(false) },
+        sheetState = sheetState,
+        containerColor = Color.Black,
+        dragHandle = null,
+    ) {
+        val scope = rememberCoroutineScope()
+        val context = LocalContext.current
+        val commentViewModelFirebase = hiltViewModel<CommentViewModelFirebase>()
+        val shareViewModelFirebase = hiltViewModel<ShareViewModelFirebase>()
+        val notificationViewModel = hiltViewModel<NotificationViewModel>()
+        val reactionViewModelFirebase = hiltViewModel<ReactionViewModelFirebase>()
+
+        val userDao = remember { AppDatabase.getDatabase(context).userDao() }
+        var currentUserId by remember { mutableStateOf("") }
+        var isLoading by remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            userDao.getLoggedUser()?.uid?.let { currentUserId = it }
+        }
+
+        val shareEntity by remember(postEntity.id, currentUserId) {
+            shareViewModelFirebase.getSharedByPostIdAndUserUid(postEntity.id, currentUserId)
+        }.collectAsState(initial = null)
+
+        val totalReactions by remember(postEntity.id) {
+            reactionViewModelFirebase.getReactionsCountByPostId(postEntity.id)
+        }.collectAsState(initial = 0L)
+
+        val totalComments by remember(postEntity.id) {
+            commentViewModelFirebase.getCommentCountByPostId(postEntity.id)
+        }.collectAsState(initial = 0L)
+
+        val totalShares by remember(postEntity.id) {
+            shareViewModelFirebase.getShareCountByPostId(postEntity.id)
+        }.collectAsState(initial = 0L)
+
+        Column(
+            modifier = Modifier
+                .background(Color.Black)
+                .padding(horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ShareTitle(shareEntity != null)
+
+            DrawLine()
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(PrimaryDark, RoundedCornerShape(12.dp))
+                    .padding(horizontal = 8.dp)
+            ) {
+                Column(modifier = Modifier.padding(4.dp)) {
+                    Text(
+                        modifier = Modifier.padding(top = 4.dp),
+                        text = "Post Information",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+
+                    PostInformation(
+                        text = formatText(postEntity.hashtag.replace("#", ""), 23),
+                        iconRes = R.drawable.hashtag,
+                        style = MaterialTheme.typography.headlineMedium.copy(fontFamily = FontFamily.SansSerif)
+                    )
+
+                    PostInformation(
+                        text = "\"" + formatText(postEntity.caption, 35) + "\"",
+                        iconRes = R.drawable.caption,
+                        style = MaterialTheme.typography.titleSmall.copy(fontStyle = FontStyle.Italic)
+                    )
+
+                    PostInformation(
+                        text = formatText(postEntity.description, 39),
+                        iconRes = R.drawable.description,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+
+                    PostInteractions(userEntity, totalReactions, totalComments, totalShares)
+                }
+            }
+
+            ShareButton(
+                onShowSheet = onShowShareSheet,
+                shareEntity = shareEntity,
+                shareViewModel = shareViewModelFirebase,
+                postId = postEntity.id,
+                username = userEntity?.username,
+                onLoading = { isLoading = it },
+                isLoading = isLoading
+            )
+
+            val isShared = shareEntity != null
+
+            if (isLoading) {
+                LoadingDialog(if (isShared) "Unsharing post..." else "Sharing post...") {
+                    scope.launch {
+                        delay(2000)
+
+                        onShowShareSheet(false)
+                        isLoading = false
+
+                        executeShareOperation(
+                            isShared = isShared,
+                            shareEntity = shareEntity,
+                            shareViewModel = shareViewModelFirebase,
+                            userUid = currentUserId,
+                            postId = postEntity.id,
+                            username = userEntity?.username,
+                            context = context,
+                            scope = scope,
+                            notificationViewModel = notificationViewModel,
+                            postUserId = postEntity.userId
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

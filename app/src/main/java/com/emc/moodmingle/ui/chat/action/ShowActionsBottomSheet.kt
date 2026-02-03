@@ -99,7 +99,12 @@ private fun CreateAction(
                                 messages = newMessages
                             )
 
-                            conversationViewModel.updateConversation(updatedConversation)
+                            conversationViewModel.updateConversation(
+                                updatedConversation,
+                                chatMessage.senderId,
+                                chatMessage.receiverId,
+                                chatMessage.message
+                            )
                         }
                     }
 

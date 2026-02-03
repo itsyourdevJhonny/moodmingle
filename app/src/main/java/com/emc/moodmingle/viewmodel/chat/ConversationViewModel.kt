@@ -36,7 +36,7 @@ class ConversationViewModel @Inject constructor(
     fun getConversationByPairUser(user1: String, user2: String, callback: (Conversation?) -> Unit) =
         conversationRepository.getConversationByPairUser(user1, user2, callback)
 
-    suspend fun updateConversation(conversation: Conversation) =
+    suspend fun updateConversation(conversation: Conversation, senderId: String = "", receiverId: String = "", message: String = "") =
         conversationRepository.update(conversation)
 
     suspend fun deleteConversation(conversation: Conversation) =

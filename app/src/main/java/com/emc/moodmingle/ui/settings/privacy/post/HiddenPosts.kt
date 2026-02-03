@@ -54,9 +54,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.HideEntityFirebase
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.HideEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.post.action.DrawNoPaddingLine
 import com.emc.moodmingle.ui.settings.favorites.FavoriteSkeletonCard
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
@@ -64,7 +64,7 @@ import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.dialogFullSizeProperties
+import com.emc.moodmingle.utils.components.dialogFullSizeProperties
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.utils.pagination.executePagination
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel

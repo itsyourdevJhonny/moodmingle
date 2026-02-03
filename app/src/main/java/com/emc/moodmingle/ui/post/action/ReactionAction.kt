@@ -27,8 +27,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.ReactionEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.reaction.ReactionEntityFirebase
 import com.emc.moodmingle.data.firebase.model.notification.NotificationEntity
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
@@ -100,12 +100,12 @@ fun ReactionAction(
                                 reactionViewModel.insertReaction(newReaction)
 
                                 val userNotification =
-                                    notificationViewModel.getNotificationPostId(postId = postEntity.id)
+                                    notificationViewModel.getNotificationByEntityId(entityId = postEntity.id)
 
                                 if (userNotification == null) {
                                     val newNotification = NotificationEntity(
                                         userId = postEntity.userId,
-                                        postId = postEntity.id,
+                                        entityId = postEntity.id,
                                         users = listOf(currentUser?.uid ?: ""),
                                         type = "REACTION"
                                     )

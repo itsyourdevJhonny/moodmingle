@@ -1,10 +1,8 @@
 package com.emc.moodmingle.data.remote
 
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 

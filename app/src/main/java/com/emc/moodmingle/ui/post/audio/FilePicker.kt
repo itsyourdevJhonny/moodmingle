@@ -13,7 +13,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -22,16 +24,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.emc.moodmingle.R
 import com.emc.moodmingle.ui.create.AllMediaGallery
+import com.emc.moodmingle.ui.create.formatDuration
 import com.emc.moodmingle.ui.create.getFileName
-import com.emc.moodmingle.ui.post.action.formatText
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
+import com.emc.moodmingle.ui.theme.Typography
 
 @Composable
-fun FilePicker(onSelectedType: (String) -> Unit, onUploadedUri: (List<Uri?>) -> Unit) {
+fun FilePicker(
+    mediaUris: List<Uri>,
+    onSelectedType: (String) -> Unit,
+    onUploadedUri: (List<Uri>) -> Unit
+) {
     var showDialog by remember { mutableStateOf(false) }
 
     Row(
@@ -69,8 +77,9 @@ fun FilePicker(onSelectedType: (String) -> Unit, onUploadedUri: (List<Uri?>) -> 
 
     if (showDialog) {
         AllMediaGallery(
+            mediaUris,
             onSelectedType = onSelectedType,
-            onShowDialog = { showDialog = it },
+            onDismiss = { showDialog = it },
             onUploadedUri = onUploadedUri
         )
     }
@@ -86,31 +95,60 @@ fun AudioItemMini(
 ) {
     val context = LocalContext.current
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+    Box(
         modifier = modifier
             .background(BrushPrimaryGradient, RoundedCornerShape(8.dp))
-            .padding(horizontal = 8.dp)
-            .size(80.dp)
+            .padding(horizontal = 4.dp)
+            .size(100.dp),
+        contentAlignment = Alignment.Center
     ) {
-        val iconRes = if (isPlaying) R.drawable.pause else R.drawable.play
-        Icon(
-            painter = painterResource(iconRes),
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier
-                .size(20.dp)
-                .clickable {
-                    if (isPlaying) onClickPause() else onClickPlay()
-                }
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            val iconRes = if (isPlaying) R.drawable.pause else R.drawable.play
+
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable { if (isPlaying) onClickPause() else onClickPlay() }
+            )
+
+            Text(
+                text = getFileName(context, uri),
+                style = Typography.bodySmall.copy(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                ),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+        }
+
+        var duration by remember { mutableLongStateOf(0L) }
+
+        LaunchedEffect(Unit) {
+            val retriever = android.media.MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(context, uri)
+                duration =
+                    retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)
+                        ?.toLong() ?: 0L
+            } catch (_: Exception) {
+                duration = 0L
+            }
+            retriever.release()
+        }
 
         Text(
-            text = formatText(getFileName(context, uri), 6),
-            color = Color.White,
-            fontSize = 8.sp,
-            maxLines = 1
+            text = formatDuration(duration),
+            style = Typography.bodySmall.copy(color = Color.White),
+            modifier = Modifier
+                .padding(vertical = 4.dp)
+                .align(Alignment.BottomEnd)
         )
     }
 }

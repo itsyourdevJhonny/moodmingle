@@ -1,18 +1,15 @@
 package com.emc.moodmingle.viewmodel.firebase
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.firebase.model.ReactionEntityFirebase
-import com.emc.moodmingle.data.firebase.repository.ReactionRepositoryFirebase
+import com.emc.moodmingle.data.firebase.model.post.reaction.ReactionEntityFirebase
+import com.emc.moodmingle.data.firebase.repository.post.reaction.ReactionRepositoryFirebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject

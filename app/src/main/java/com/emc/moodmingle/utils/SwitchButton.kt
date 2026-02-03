@@ -33,8 +33,7 @@ fun SwitchButton(
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -45,11 +44,7 @@ fun SwitchButton(
                 .width(46.dp)
                 .height(24.dp)
                 .clip(CircleShape)
-                .border(
-                    width = 1.dp,
-                    color = GrayTextColor,
-                    shape = CircleShape
-                )
+                .border(width = 1.dp, color = GrayTextColor, shape = CircleShape)
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = if (isChecked) listOf(Color(0xFF6A11CB), Color(0xFF2575FC))
@@ -64,18 +59,13 @@ fun SwitchButton(
                 modifier = Modifier
                     .width(50.dp)
                     .height(24.dp)
-                    .align(
-                        if (isChecked) Alignment.CenterEnd else Alignment.CenterStart
-                    ),
+                    .align(if (isChecked) Alignment.CenterEnd else Alignment.CenterStart),
                 thumbContent = {
                     Canvas(modifier = Modifier.size(18.dp)) {
                         drawCircle(
-                            brush = if (isChecked) Brush.linearGradient(
-                                listOf(
-                                    Color.White,
-                                    Color.White
-                                )
-                            ) else BrushPrimaryGradient,
+                            brush = if (isChecked)
+                                Brush.linearGradient(listOf(Color.White, Color.White))
+                            else BrushPrimaryGradient,
                             radius = size.minDimension / 2
                         )
                     }

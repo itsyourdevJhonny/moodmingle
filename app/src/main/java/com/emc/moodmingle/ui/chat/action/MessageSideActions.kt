@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
 import com.emc.moodmingle.data.firebase.model.chat.ChatMessage
 import com.emc.moodmingle.ui.chat.utils.CopyIcon
 import com.emc.moodmingle.ui.chat.utils.ReplyIcon

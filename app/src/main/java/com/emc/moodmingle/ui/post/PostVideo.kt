@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -57,10 +58,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
 import com.emc.moodmingle.R
 import com.emc.moodmingle.ui.create.formatDuration
+import com.emc.moodmingle.ui.post.audio.AudioCache
 import com.emc.moodmingle.ui.post.skeleton.PostSkeletonItem
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.local.PostViewModel
@@ -76,7 +81,6 @@ fun PostVideo(videoUrl: String, viewModel: PostViewModel = hiltViewModel()) {
     val scope = rememberCoroutineScope()
     var showFullVideo by remember { mutableStateOf(false) }
     val cachedThumbnail = viewModel.post.getCachedThumbnail(videoUrl)
-//    var thumbnail by remember { mutableStateOf(cachedThumbnail) }/* = cachedThumbnail*/
     var thumbnail by remember(videoUrl) { mutableStateOf(cachedThumbnail) }
     var durationText by remember { mutableStateOf("") }
     val videoUri = videoUrl.toUri()
@@ -102,12 +106,19 @@ fun PostVideo(videoUrl: String, viewModel: PostViewModel = hiltViewModel()) {
     }
 
     LaunchedEffect(videoUrl) {
-        val exoPlayer = ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(videoUri))
-            prepare()
-        }
+        val cacheDataSource = CacheDataSource.Factory()
+            .setCache(AudioCache.get(context))
+            .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
-        // Continuously check until duration is valid
+        val exoPlayer = ExoPlayer.Builder(context)
+            .setMediaSourceFactory(DefaultMediaSourceFactory(cacheDataSource))
+            .build()
+            .apply {
+                setMediaItem(MediaItem.fromUri(videoUri))
+                prepare()
+            }
+
         while (durationText.isEmpty()) {
             val durationMs = exoPlayer.duration
             if (durationMs > 0) {
@@ -117,26 +128,23 @@ fun PostVideo(videoUrl: String, viewModel: PostViewModel = hiltViewModel()) {
         }
     }
 
-    /*val exoPlayer = remember(videoUrl) {
-        videoPlayers[videoUrl] ?: ExoPlayer.Builder(context).build().also { newPlayer ->
+    val cacheDataSource = CacheDataSource.Factory()
+        .setCache(AudioCache.get(context))
+        .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
+        .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+
+    val exoPlayer = videoPlayers[videoUrl] ?: ExoPlayer.Builder(context)
+        .setMediaSourceFactory(DefaultMediaSourceFactory(cacheDataSource))
+        .build()
+        .also { newPlayer ->
             val mediaItem = MediaItem.fromUri(videoUrl)
             newPlayer.setMediaItem(mediaItem)
             newPlayer.prepare()
             videoPlayers[videoUrl] = newPlayer
         }
-    }*/
-
-    val exoPlayer = videoPlayers[videoUrl] ?: ExoPlayer.Builder(context).build().also { newPlayer ->
-        val mediaItem = MediaItem.fromUri(videoUrl)
-        newPlayer.setMediaItem(mediaItem)
-        newPlayer.prepare()
-        videoPlayers[videoUrl] = newPlayer
-    }
-
 
     LaunchedEffect(exoPlayer) {
         exoPlayer.addListener(object : Player.Listener {
-
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) {
                     isPlaying = false
@@ -169,12 +177,6 @@ fun PostVideo(videoUrl: String, viewModel: PostViewModel = hiltViewModel()) {
             if (thumbnail != null) {
                 Image(
                     bitmap = thumbnail!!.asImageBitmap(),
-                    /*model = ImageRequest.Builder(LocalContext.current)
-                        .data(thumbnail)
-                        .diskCachePolicy(CachePolicy.ENABLED)
-                        .crossfade(true)
-                        .memoryCachePolicy(CachePolicy.ENABLED)
-                        .build(),*/
                     contentDescription = "Video thumbnail",
                     modifier = Modifier
                         .fillMaxSize()
@@ -255,7 +257,6 @@ fun PostVideo(videoUrl: String, viewModel: PostViewModel = hiltViewModel()) {
                     .fillMaxHeight()
                     .width(120.dp)
                     .align(Alignment.CenterStart)
-//                    .weight(1f)
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onDoubleTap = {
@@ -306,7 +307,6 @@ fun PostVideo(videoUrl: String, viewModel: PostViewModel = hiltViewModel()) {
                     .fillMaxHeight()
                     .width(120.dp)
                     .align(Alignment.CenterEnd)
-//                    .weight(1f)
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onDoubleTap = {
@@ -370,24 +370,31 @@ fun PostVideo(videoUrl: String, viewModel: PostViewModel = hiltViewModel()) {
         }
 
         if (thumbnail != null) {
-            Icon(
-                painter = painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
-                contentDescription = "Play/Pause",
+            Box(
                 modifier = Modifier
-                    .size(20.dp)
-                    .offset(x = (-8).dp, y = 4.dp)
-                    .align(Alignment.TopEnd)
-                    .clickable {
-                        if (!isPlaying) {
-                            exoPlayer.seekTo(0)
-                            exoPlayer.play()
-                        } else {
-                            exoPlayer.pause()
-                        }
-                        isPlaying = !isPlaying
-                    },
-                tint = Color.White
-            )
+                    .size(24.dp)
+                    .padding(top = 4.dp, end = 8.dp)
+                    .background(Color.Black.copy(alpha = 0.7f), CircleShape)
+                    .align(Alignment.TopEnd),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
+                    contentDescription = "Play/Pause",
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            if (!isPlaying) {
+                                exoPlayer.seekTo(0)
+                                exoPlayer.play()
+                            } else {
+                                exoPlayer.pause()
+                            }
+                            isPlaying = !isPlaying
+                        },
+                    tint = Color.White
+                )
+            }
         }
     }
 

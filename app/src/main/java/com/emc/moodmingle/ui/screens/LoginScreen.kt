@@ -61,7 +61,7 @@ import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.theme.SecondaryDark
-import com.emc.moodmingle.utils.LoadingDialog
+import com.emc.moodmingle.utils.components.LoadingDialog
 import com.emc.moodmingle.viewmodel.firebase.UserViewModelFirebase
 import kotlinx.coroutines.launch
 

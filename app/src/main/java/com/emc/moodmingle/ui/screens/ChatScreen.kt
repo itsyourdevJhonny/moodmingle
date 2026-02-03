@@ -1,6 +1,5 @@
 package com.emc.moodmingle.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -59,17 +58,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.firebase.model.chat.ChatMessage
 import com.emc.moodmingle.data.firebase.model.chat.Conversation
+import com.emc.moodmingle.ui.chat.DeletedMessageContent
 import com.emc.moodmingle.ui.chat.DraggableSuggestions
+import com.emc.moodmingle.ui.chat.EditMessage
+import com.emc.moodmingle.ui.chat.EditedMessageContent
 import com.emc.moodmingle.ui.chat.PostMessageContent
 import com.emc.moodmingle.ui.chat.SayHiContent
 import com.emc.moodmingle.ui.chat.TextMessageContent
-import com.emc.moodmingle.ui.chat.DeletedMessageContent
-import com.emc.moodmingle.ui.chat.EditMessage
-import com.emc.moodmingle.ui.chat.EditedMessageContent
 import com.emc.moodmingle.ui.chat.action.MessageSideActions
 import com.emc.moodmingle.ui.chat.action.ShowActionsBottomSheet
 import com.emc.moodmingle.ui.chat.input.ChatTextField
@@ -90,7 +89,7 @@ import com.emc.moodmingle.ui.theme.PurpleDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.TertiaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.TimerFormatter
+import com.emc.moodmingle.utils.text.TimerFormatter
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
@@ -100,7 +99,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @Composable
-fun ChatScreen(senderId: String, receiverId: String, onBack: () -> Unit) {
+fun ChatScreen(senderId: String, receiverId: String, onBack: () -> Unit, onView: () -> Unit) {
     val scope = rememberCoroutineScope()
     val state = rememberScrollState()
 
@@ -186,7 +185,7 @@ fun ChatScreen(senderId: String, receiverId: String, onBack: () -> Unit) {
                             .padding(bottom = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        conversation?.let { ReceiverInformation(sender, it) }
+                        conversation?.let { ReceiverInformation(sender, it, onView) }
 
                         var lastMessageDate: String? = null
                         visibleMessages.forEach { msg ->
@@ -203,9 +202,9 @@ fun ChatScreen(senderId: String, receiverId: String, onBack: () -> Unit) {
                             ) {
                                 MessageBubble(
                                     conversation,
-                                    msg,
+                                    chatMessage = msg,
                                     senderId,
-                                    sender?.avatarUrl.orEmpty(),
+                                    avatarUrl = sender?.avatarUrl.orEmpty(),
                                     isPostReplyEnabled,
                                     isTextReplyEnabled,
                                     onPostReplyEnabled = { isPostReplyEnabled = it },
@@ -221,8 +220,6 @@ fun ChatScreen(senderId: String, receiverId: String, onBack: () -> Unit) {
                                     onEditMessage = { isEdited, editMessage ->
                                         isMessageEdited = isEdited
                                         messageToEdit = editMessage
-
-                                        Log.d("CHAT SCREEN", "CHAT MESSAGE TO EDIT: $messageToEdit")
                                     }
                                 )
                             }
@@ -306,7 +303,11 @@ private fun DateDivider(label: String) {
 }
 
 @Composable
-private fun ReceiverInformation(sender: UserEntityFirebase?, conversation: Conversation) {
+private fun ReceiverInformation(
+    sender: UserEntityFirebase?,
+    conversation: Conversation,
+    onView: () -> Unit
+) {
     Column(
         modifier = Modifier
             .padding(bottom = 8.dp)
@@ -359,7 +360,9 @@ private fun ReceiverInformation(sender: UserEntityFirebase?, conversation: Conve
             modifier = Modifier.background(BrushPrimaryGradient, CircleShape),
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                modifier = Modifier
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .clickable { onView() },
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -383,8 +386,6 @@ private fun ReceiverInformation(sender: UserEntityFirebase?, conversation: Conve
             style = Typography.bodySmall.copy(color = GrayTextColor),
             modifier = Modifier.padding(bottom = 8.dp)
         )
-
-//        DrawNoPaddingLine(thickness = 0.5.dp)
     }
 }
 
@@ -407,6 +408,11 @@ fun BottomTextField(
     onMessageEdited: (Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val userViewModel = hiltViewModel<FirebaseUserViewModel>()
+    val receiver by remember(receiverId) {
+        userViewModel.getUserByUid(receiverId)
+    }.collectAsState(initial = null)
+
     val textSuggestions = MessageSuggestion.textSuggestions
     val emojiSuggestions = MessageSuggestion.emojiSuggestions
 
@@ -499,7 +505,8 @@ fun BottomTextField(
 
                                 messageToEdit?.let {
                                     conversation?.let {
-                                        val updatedMessage = messageToEdit.copy(type = "EDITED", message = message)
+                                        val updatedMessage =
+                                            messageToEdit.copy(type = "EDITED", message = message)
 
                                         val newMessages = conversation.messages.map { msg ->
                                             if (msg.timestamp == updatedMessage.timestamp) updatedMessage else msg
@@ -511,17 +518,24 @@ fun BottomTextField(
                                             messages = newMessages
                                         )
 
-                                        conversationViewModel.updateConversation(updatedConversation)
+                                        conversationViewModel.updateConversation(
+                                            updatedConversation,
+                                            senderId,
+                                            receiverId,
+                                            message
+                                        )
                                     }
                                 }
                             } else {
-                                sendMessage(
-                                    message,
-                                    senderId,
-                                    receiverId,
-                                    conversation,
-                                    conversationViewModel
-                                )
+                                receiver?.let {
+                                    sendMessage(
+                                        message,
+                                        senderId,
+                                        receiverId,
+                                        conversation,
+                                        conversationViewModel
+                                    )
+                                }
                             }
                         }
                     }
@@ -617,7 +631,7 @@ fun MessageBubble(
 ) {
     val isOwn = chatMessage.senderId == senderId
     val postViewModelFirebase = hiltViewModel<PostViewModelFirebase>()
-    val post by postViewModelFirebase.getPostById(chatMessage.postId).collectAsState(initial = null)
+    val post by postViewModelFirebase.getPostById(chatMessage.entity).collectAsState(initial = null)
 
     var isShowActions by remember { mutableStateOf(false) }
 
@@ -743,4 +757,3 @@ fun MessageBubble(
         )
     }
 }
-

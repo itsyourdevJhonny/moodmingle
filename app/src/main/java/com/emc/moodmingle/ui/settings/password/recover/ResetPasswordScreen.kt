@@ -36,7 +36,7 @@ import com.emc.moodmingle.ui.settings.password.PasswordChangeSuccessScreen
 import com.emc.moodmingle.ui.settings.password.utils.PasswordField
 import com.emc.moodmingle.ui.settings.password.utils.TopIcon
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
-import com.emc.moodmingle.utils.LoadingDialog
+import com.emc.moodmingle.utils.components.LoadingDialog
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 import kotlinx.coroutines.launch
 

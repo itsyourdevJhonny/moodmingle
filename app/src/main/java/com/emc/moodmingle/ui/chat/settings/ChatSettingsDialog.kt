@@ -29,7 +29,7 @@ import androidx.compose.ui.window.Dialog
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.chat.Conversation
 import com.emc.moodmingle.ui.theme.PrimaryDark
-import com.emc.moodmingle.utils.dialogFullSizeProperties
+import com.emc.moodmingle.utils.components.dialogFullSizeProperties
 import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
 import kotlinx.coroutines.launch
 

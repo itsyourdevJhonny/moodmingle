@@ -38,13 +38,13 @@ import com.emc.moodmingle.data.firebase.model.favorites.FavoritesEntityFirebase
 import com.emc.moodmingle.ui.post.action.DrawNoPaddingLine
 import com.emc.moodmingle.ui.settings.saved.collection.CollectionsBottomSheet
 import com.emc.moodmingle.ui.settings.saved.collection.ShowEditCollectionDialog
-import com.emc.moodmingle.ui.settings.saved.utils.NoResult
+import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
 import com.emc.moodmingle.ui.settings.utils.ShowRemoveDialog
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.LoadingDialog
+import com.emc.moodmingle.utils.components.LoadingDialog
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.firebase.favorites.FavoritesCollectionViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -172,7 +172,7 @@ private fun Content(
     var newName by remember { mutableStateOf("") }
 
     if (collections.isEmpty()) {
-        NoResult(iconRes = R.drawable.no_collections, text = "No collections yet. Create one.")
+        EmptyComponent(iconRes = R.drawable.no_collections, text = "No collections yet. Create one.")
     }
 
     LazyColumn(

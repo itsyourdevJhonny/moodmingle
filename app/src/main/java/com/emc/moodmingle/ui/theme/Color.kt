@@ -29,17 +29,22 @@ val BrushSecondaryTertiaryGradient =
 val BrushSecondaryDarkGradient =
     Brush.linearGradient(colors = listOf(SecondaryDark, SecondaryDark))
 
-val BrushGrayGradient = Brush.linearGradient(
-    listOf(
-        Color.Gray.copy(
-            alpha = 0.5f
-        ), Color.Gray.copy(
-            alpha = 0.5f
-        )
-    )
-)
+val BrushGrayGradient =
+    Brush.linearGradient(listOf(Color.Gray.copy(alpha = 0.5f), Color.Gray.copy(alpha = 0.5f)))
 
 // Reaction Color
 val HeartColor = Color(0xFFD50000)
 
 val VerifiedColor = Color(0xFF21DFFD)
+
+val HashtagTextColor = Color(0xFFFFB74D)
+val EmailTextColor = Color(0xFFBA68C8)
+val PhoneTextColor = Color(0xFFE57373)
+val UrlTextColor = Color(0xFF64B5F6)
+val UrlBackgroundColor = UrlTextColor.copy(alpha = 0.3f)
+
+val MentionBackground = Color(0x330D99E3)
+val MentionTextColor = Color(0xFF2196F3)
+
+val TagTextColor = Color(0xFF7C4DFF)
+val TagBackground = Color(0x331B74E4)

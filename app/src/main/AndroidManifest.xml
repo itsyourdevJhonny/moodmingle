@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:name=".MoodMingleApp"
@@ -25,23 +27,63 @@
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.MoodMingle.Splash">
+<!--            android:windowSoftInputMode="adjustNothing">-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="moodmingle"
+                    android:host="callback" />
+            </intent-filter>
         </activity>
 
-        <service
+        <activity
+            android:name="com.spotify.sdk.android.auth.LoginActivity"
+            android:exported="false" />
+
+
+        <!--<service
             android:name=".service.AudioPlayerService"
             android:foregroundServiceType="mediaPlayback"
-            android:exported="false" />
+            android:exported="false" />-->
 
         <service
             android:name=".service.UploadPostService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+
+        <service
+            android:name=".service.post.NormalPostService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <service android:name=".service.UploadVideoCommentService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <service
+            android:name=".service.ChatMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_API_KEY" />
+
     </application>
 
 </manifest>

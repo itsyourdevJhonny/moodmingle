@@ -1,10 +1,11 @@
-plugins {
+ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("dagger.hilt.android.plugin")
     id("com.google.devtools.ksp")
     id("com.google.gms.google-services")
+     id("kotlin-parcelize")
 }
 
 android {
@@ -71,10 +72,12 @@ dependencies {
     implementation(libs.androidx.media)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.datasource.okhttp)
     implementation("org.jellyfin.media3:media3-ffmpeg-decoder:1.8.0+1")
 
     // coil
     implementation(libs.coil.compose)
+    implementation(libs.coil.video)
     implementation(libs.coil.gif)
 
     // navigation
@@ -110,8 +113,40 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.play.services.auth)
     implementation(libs.firebase.storage)
+    implementation(libs.firebase.messaging.ktx)
 
     // cloudinary
     implementation(libs.okhttp)
     implementation(libs.cloudinary.android.v302)
+
+    // spotify
+    implementation(files("libs/spotify-app-remote-release-0.8.0.aar"))
+    implementation(libs.auth)
+
+    // network + pagination
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.converter.moshi)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.paging.compose)
+
+    // datastore
+    implementation(libs.androidx.datastore.preferences)
+
+    //color picker
+    implementation(libs.colorpicker.compose)
+
+    // google map
+    implementation(libs.places)
+    implementation(libs.play.services.location)
+
+    // jsoup
+    implementation(libs.jsoup)
+
+    // emoji
+    implementation("com.vanniktech:emoji-google:0.23.0")
+    implementation(libs.androidx.emoji2)
+    implementation(libs.emoji.core)
 }

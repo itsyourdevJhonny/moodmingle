@@ -1,5 +1,6 @@
 package com.emc.moodmingle.ui.post.comment
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,8 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.CommentEntityFirebase
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.CommentEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
 import com.emc.moodmingle.data.firebase.model.chat.Conversation
 import com.emc.moodmingle.data.firebase.model.notification.NotificationEntity
 import com.emc.moodmingle.data.model.UserEntity
@@ -105,7 +106,7 @@ fun DisplayComment(postEntity: PostEntityFirebase, onChatClick: (String, String)
                 onSendClick = {
                     if (newCommentText.isNotBlank()) {
                         val commentEntityFirebase = CommentEntityFirebase(
-                            userUid = currentUserEntity?.uid ?: "",
+                            userUid = currentUserId,
                             postId = postId,
                             message = newCommentText
                         )
@@ -121,20 +122,21 @@ fun DisplayComment(postEntity: PostEntityFirebase, onChatClick: (String, String)
                             Toast.makeText(context, "Comment Posted", Toast.LENGTH_SHORT).show()
 
                             val userNotification =
-                                notificationViewModel.getNotificationPostId(postId)
+                                notificationViewModel.getNotificationByEntityId(postId)
 
                             if (userNotification == null) {
                                 val newNotification = NotificationEntity(
                                     userId = postUserId,
-                                    postId = postId,
-                                    users = listOf(currentUserEntity?.uid ?: ""),
+                                    entityId = postId,
+                                    users = listOf(currentUserId),
                                     type = "COMMENT"
                                 )
 
+                                Log.d("DisplayComment", "Notification created: $newNotification")
+
                                 notificationViewModel.createNotification(newNotification)
                             } else {
-                                val isExists =
-                                    userNotification.users.contains(currentUserEntity?.uid ?: "")
+                                val isExists = userNotification.users.contains(currentUserId)
 
                                 if (isExists) {
                                     notificationViewModel.updateNotification(

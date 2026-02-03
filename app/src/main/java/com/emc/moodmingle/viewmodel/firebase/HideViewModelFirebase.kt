@@ -2,8 +2,8 @@ package com.emc.moodmingle.viewmodel.firebase
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.firebase.model.HideEntityFirebase
-import com.emc.moodmingle.data.firebase.repository.HideRepositoryFirebase
+import com.emc.moodmingle.data.firebase.model.post.HideEntityFirebase
+import com.emc.moodmingle.data.firebase.repository.post.HideRepositoryFirebase
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

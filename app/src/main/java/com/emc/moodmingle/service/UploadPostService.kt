@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.repository.UploadRepository
+import com.emc.moodmingle.data.firebase.repository.post.UploadRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +62,7 @@ class UploadPostService : Service() {
                         caption = caption,
                         description = description,
                         type = type,
-                        onProgress = { progress ->   // progress = 0f..1f
+                        onProgress = { progress ->
                             updateNotification(progress, "Uploading post...", ongoing = true)
                         }
                     )

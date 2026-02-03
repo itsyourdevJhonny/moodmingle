@@ -2,6 +2,7 @@ package com.emc.moodmingle.viewmodel.firebase
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -9,9 +10,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emc.moodmingle.cloudinary.CloudinaryService
 import com.emc.moodmingle.data.dao.UserDao
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
-import com.emc.moodmingle.data.firebase.repository.UserRepositoryFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.repository.user.UserRepositoryFirebase
 import com.emc.moodmingle.data.model.UserEntity
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -32,13 +38,54 @@ class FirebaseUserViewModel @Inject constructor(
     private val _user = mutableStateOf<UserEntityFirebase?>(null)
     val loggedUser: State<UserEntityFirebase?> = _user
 
+    private val _pagedUsers = MutableStateFlow<List<UserEntityFirebase>>(emptyList())
+    val pagedUsers: StateFlow<List<UserEntityFirebase>> = _pagedUsers
+
+    private var lastUserSnapshot: DocumentSnapshot? = null
+    private var isLoading = false
+    private var hasMoreUsers = true
+
     init {
         viewModelScope.launch {
-            userRepositoryFirebase.getLoggedUserByUid().collectLatest {
+            userRepositoryFirebase.getLoggedUser().collectLatest {
                 _user.value = it
             }
         }
     }
+
+    fun loadNextUsersPage(limit: Long = 20) {
+        if (isLoading || !hasMoreUsers) return
+        isLoading = true
+
+        viewModelScope.launch {
+            try {
+                var query = FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .orderBy("joinedDate")
+                    .limit(limit)
+
+                lastUserSnapshot?.let { snapshot ->
+                    query = query.startAfter(snapshot)
+                }
+
+                val result = query.get().await()
+
+                val newUsers = result.toObjects(UserEntityFirebase::class.java)
+
+                if (newUsers.isEmpty() || newUsers.size < limit) {
+                    hasMoreUsers = false
+                }
+
+                lastUserSnapshot = result.documents.lastOrNull()
+
+                _pagedUsers.value += newUsers
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun getLoggedUser() = userRepositoryFirebase.getLoggedUser()
 
     suspend fun getUserCached(uid: String): UserEntityFirebase? {
         if (userCache.containsKey(uid)) {
@@ -57,6 +104,9 @@ class FirebaseUserViewModel @Inject constructor(
     fun getAllUsers() = userRepositoryFirebase.getAllUsers()
 
     fun getUserByUid(uid: String) = userRepositoryFirebase.getUserByUid(uid)
+
+    fun getUserById(id: String) = userRepositoryFirebase.getUserById(id)
+
     suspend fun getUserByUidOnce(uid: String) = userRepositoryFirebase.getUserByUidOnce(uid)
 
     private val _isUploaded = MutableStateFlow(false)
@@ -134,5 +184,12 @@ class FirebaseUserViewModel @Inject constructor(
 
     suspend fun resetPassword(newPassword: String): Result<Unit> {
         return userRepositoryFirebase.resetPassword(newPassword)
+    }
+
+    fun saveFcmToken(userId: String, token: String) {
+        val userRef = Firebase.firestore.collection("users").document(userId)
+        userRef.update("fcmToken", token)
+            .addOnSuccessListener { Log.d("FCM", "Token saved") }
+            .addOnFailureListener { Log.e("FCM", it.message ?: "") }
     }
 }

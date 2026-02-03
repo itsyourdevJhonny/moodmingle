@@ -59,7 +59,6 @@ fun VideoGallery(
     var isLoading by remember { mutableStateOf(true) }
     val pageSize = 10
 
-    // LRU Cache for HD thumbnails
     val thumbnailCache = remember { androidx.collection.LruCache<Uri, Bitmap>(50) }
 
     val permissionLauncher = rememberMediaPermissionLauncher(

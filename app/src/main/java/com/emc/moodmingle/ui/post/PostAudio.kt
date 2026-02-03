@@ -36,8 +36,6 @@ import kotlin.random.Random
 @OptIn(UnstableApi::class)
 @Composable
 fun PostAudio(url: String) {
-//    val audioUri = url.toUri()
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -45,7 +43,7 @@ fun PostAudio(url: String) {
             .background(SecondaryDark),
         contentAlignment = Alignment.Center
     ) {
-        AudioMediaPlayer(url = url)
+        AudioMediaPlayer(url)
 
         Box(
             modifier = Modifier.padding(start = 8.dp, top = 4.dp).fillMaxSize()

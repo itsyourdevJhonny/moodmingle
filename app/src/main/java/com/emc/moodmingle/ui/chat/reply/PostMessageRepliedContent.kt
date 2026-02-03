@@ -45,7 +45,7 @@ fun PostMessageRepliedContent(message: ChatMessage, isOwn: Boolean) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val postViewModelFirebase = hiltViewModel<PostViewModelFirebase>()
-        val post by postViewModelFirebase.getPostById(message.postId).collectAsState(initial = null)
+        val post by postViewModelFirebase.getPostById(message.entity).collectAsState(initial = null)
 
         val informationTypes = listOf(
             post?.hashtag to R.drawable.hashtag,

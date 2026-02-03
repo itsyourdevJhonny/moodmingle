@@ -24,7 +24,7 @@ import com.emc.moodmingle.R
 import com.emc.moodmingle.ui.post.image.downloadImage
 import com.emc.moodmingle.ui.post.image.isImageInGallery
 import com.emc.moodmingle.ui.theme.PrimaryDark
-import com.emc.moodmingle.utils.dialogFullSizeProperties
+import com.emc.moodmingle.utils.components.dialogFullSizeProperties
 import com.emc.moodmingle.utils.modifier.drawGradient
 
 @Composable

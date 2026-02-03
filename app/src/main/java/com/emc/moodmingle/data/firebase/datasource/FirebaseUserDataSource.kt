@@ -1,7 +1,6 @@
 package com.emc.moodmingle.data.firebase.datasource
 
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
-import com.emc.moodmingle.data.remote.FirebaseUser
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -86,7 +85,7 @@ class FirebaseUserDataSource(
 
                 val user = snapshot.toObject(UserEntityFirebase::class.java)
                 if (user == null) {
-                    trySend(Result.failure<UserEntityFirebase>(Exception("Failed to convert Firestore document to UserEntityFirebase")))
+                    trySend(Result.failure(Exception("Failed to convert Firestore document to UserEntityFirebase")))
                 } else {
                     trySend(Result.success(user))
                 }

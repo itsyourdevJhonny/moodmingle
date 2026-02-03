@@ -16,7 +16,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,7 +29,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -45,11 +46,12 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -66,6 +68,7 @@ import com.emc.moodmingle.ui.post.audio.AudioItemMini
 import com.emc.moodmingle.ui.profile.DrawUserNoPaddingLine
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
+import com.emc.moodmingle.utils.components.BackIcon
 import com.emc.moodmingle.utils.modifier.drawGradient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -74,12 +77,13 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AllMediaGallery(
+    mediaUris: List<Uri>,
     onSelectedType: (String) -> Unit,
-    onShowDialog: (Boolean) -> Unit,
+    onDismiss: (Boolean) -> Unit,
     onUploadedUri: (List<Uri>) -> Unit
 ) {
     val context = LocalContext.current
-    var mediaUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var mediaUris by remember { mutableStateOf(mediaUris) }
     val mediaTypes = listOf("Image", "Video", "Audio")
     var type by remember { mutableStateOf("Image") }
 
@@ -97,91 +101,10 @@ fun AllMediaGallery(
         ) {
             Spacer(Modifier.height(38.dp))
 
-            Column(
-                modifier = Modifier.padding(horizontal = 12.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier.clickable {
-                        onUploadedUri(emptyList())
-                        onShowDialog(false)
-                    }
-                )
-
-                Text(
-                    text = "Select Image/Video/Audio",
-                    modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Center,
-                        fontStyle = FontStyle.Italic,
-                        color = GrayTextColor
-                    )
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-//                    mediaTypes.forEach { mediaType ->
-//                        val isActive = mediaType == type
-
-                    mediaTypes.forEach { mediaType ->
-                        val isActive = mediaType == type
-
-                        // animate scale
-                        val scale by animateFloatAsState(
-                            targetValue = if (isActive) 1.15f else 1f,
-                            animationSpec = tween(250)
-                        )
-
-                        // animate alpha (fade effect)
-                        val alpha by animateFloatAsState(
-                            targetValue = if (isActive) 1f else 0.6f,
-                            animationSpec = tween(250)
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .graphicsLayer(
-                                    scaleX = scale,
-                                    scaleY = scale,
-                                    alpha = alpha
-                                )
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    brush = if (isActive) BrushPrimaryGradient
-                                    else Brush.linearGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            Color.Transparent
-                                        )
-                                    )
-                                )
-                                .size(59.dp)
-                                .clickable { type = mediaType },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                painter = painterResource(
-                                    when (mediaType) {
-                                        "Image" -> R.drawable.image
-                                        "Video" -> R.drawable.video
-                                        "Audio" -> R.drawable.audio
-                                        else -> R.drawable.image
-                                    }
-                                ),
-                                contentDescription = mediaType,
-                                tint = Color.White
-                            )
-                        }
-                    }
-                }
-
+            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+                BackIcon(onClick = { onUploadedUri(emptyList()); onDismiss(false) })
+                SelectMediaTitle()
+                Tabs(mediaTypes, type, onSelectedType = { type = it })
 
                 if (mediaUris.isEmpty()) {
                     Spacer(Modifier.height(8.dp))
@@ -189,15 +112,11 @@ fun AllMediaGallery(
                     val mediaPlayers = remember { mutableStateMapOf<Uri, MediaPlayer>() }
                     var currentlyPlaying by remember { mutableStateOf<Uri?>(null) }
 
-                    DisposableEffect(Unit) {
-                        onDispose {
-                            mediaPlayers.values.forEach { it.release() }
-                        }
-                    }
+                    DisposableEffect(Unit) { onDispose { mediaPlayers.values.forEach { it.release() } } }
 
                     DrawUserNoPaddingLine(
-                        modifier = Modifier.padding(top = 8.dp),
-                        thickness = 0.5.dp
+                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(top = 8.dp)
                     )
 
                     Selected(context, mediaUris)
@@ -231,26 +150,8 @@ fun AllMediaGallery(
                                         val mimeType = getMimeType(context, uri) ?: ""
 
                                         when {
-                                            mimeType.startsWith("image") -> {
-                                                Image(
-                                                    painter = rememberAsyncImagePainter(uri),
-                                                    contentDescription = "Selected image",
-                                                    contentScale = ContentScale.Crop,
-                                                    modifier = Modifier
-                                                        .fillMaxSize()
-                                                        .clip(RoundedCornerShape(8.dp))
-                                                        .border(
-                                                            width = 1.dp,
-                                                            brush = BrushPrimaryGradient,
-                                                            shape = RoundedCornerShape(8.dp)
-                                                        )
-                                                )
-                                            }
-
-                                            mimeType.startsWith("video") -> {
-                                                VideoThumbnail(videoUri = uri)
-                                            }
-
+                                            mimeType.startsWith("image") -> ImageThumbnail(uri)
+                                            mimeType.startsWith("video") -> VideoThumbnail(videoUri = uri)
                                             mimeType.startsWith("audio") -> {
                                                 val isPlaying = currentlyPlaying == uri
 
@@ -275,117 +176,225 @@ fun AllMediaGallery(
                                             }
                                         }
 
-                                        // remove single item
-                                        IconButton(
-                                            onClick = {
-                                                // trigger exit animation first
-                                                itemVisibility[uri] = false
-                                                CoroutineScope(Dispatchers.IO).launch {
-                                                    delay(300)
-                                                    mediaUris = mediaUris - uri
-                                                    itemVisibility.remove(uri)
-                                                }
-                                            },
-                                            modifier = Modifier
-                                                .align(Alignment.TopEnd)
-                                                .size(20.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = "Remove",
-                                                tint = Color.Red
-                                            )
-                                        }
+                                        RemoveSingleIcon(
+                                            itemVisibility,
+                                            uri,
+                                            mediaUris,
+                                            onUrisSelected = { mediaUris = it }
+                                        )
                                     }
                                 }
                             }
                         }
 
-                        // remove all icon
                         if (mediaUris.isNotEmpty() && mediaUris.size > 1) {
                             item("remove_all") {
-                                IconButton(
-                                    onClick = {
-                                        // fade out all items
-                                        mediaUris.forEach { uri ->
-                                            itemVisibility[uri] = false
-                                        }
-
-                                        // remove items after animation
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            delay(300)
-                                            mediaUris = emptyList()
-                                            itemVisibility.clear()
-                                        }
-                                    },
-                                    modifier = Modifier.size(24.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Remove all",
-                                        tint = Color.Red
-                                    )
-                                }
+                                RemoveAllIcon(
+                                    mediaUris,
+                                    itemVisibility,
+                                    onUrisSelected = { mediaUris = it }
+                                )
                             }
                         }
                     }
 
-                    Button(
-                        onClick = {
-                            if (mediaUris.isNotEmpty()) {
-                                onSelectedType(type)
-                                onUploadedUri(mediaUris)
-                            }
-                            onShowDialog(false)
-                        },
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .align(Alignment.CenterHorizontally)
-                            .background(
-                                brush = BrushPrimaryGradient,
-                                shape = RoundedCornerShape(12.dp)
-                            ),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.upload_image),
-                            contentDescription = "Upload",
-                            modifier = Modifier.size(24.dp),
-                            tint = Color.White
-                        )
-                        Text(
-                            text = "Upload (${mediaUris.size})",
-                            color = Color.White,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
+                    UploadButton(type, mediaUris, onSelectedType, onUploadedUri, onDismiss)
                 }
             }
 
             if (type.isNotBlank()) {
-                when (type) {
-                    "Image" -> ImageGallery(
-                        selectedImages = mediaUris,
-                        onSelectedImage = { mediaUris = it },
-                    )
-
-                    "Video" -> VideoGallery(
-                        selectedVideos = mediaUris,
-                        onSelectedVideo = { mediaUris = it },
-                    )
-
-                    "Audio" -> AudioGallery(
-                        selectedAudios = mediaUris,
-                        onSelectedAudio = { mediaUris = it },
-                    )
-                }
+                DisplayGallery(type, mediaUris, onUrisSelected = { mediaUris = it })
             }
         }
     }
 }
 
 @Composable
-fun Selected(context: Context, mediaUris: List<Uri> = emptyList()) {
+private fun ImageThumbnail(uri: Uri) {
+    Image(
+        painter = rememberAsyncImagePainter(uri),
+        contentDescription = "Selected image",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(8.dp))
+            .border(
+                width = 1.dp,
+                brush = BrushPrimaryGradient,
+                shape = RoundedCornerShape(8.dp)
+            )
+    )
+}
+
+@Composable
+private fun SelectMediaTitle() {
+    Text(
+        text = "Select Image/Video/Audio",
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.titleMedium.copy(
+            fontWeight = FontWeight.Normal,
+            textAlign = TextAlign.Center,
+            fontStyle = FontStyle.Italic,
+            color = GrayTextColor
+        )
+    )
+}
+
+@Composable
+private fun Tabs(mediaTypes: List<String>, type: String, onSelectedType: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, bottom = 4.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        mediaTypes.forEach { mediaType ->
+            val isActive = mediaType == type
+
+            // animate scale
+            val scale by animateFloatAsState(
+                targetValue = if (isActive) 1.15f else 1f,
+                animationSpec = tween(250)
+            )
+
+            // animate alpha (fade effect)
+            val alpha by animateFloatAsState(
+                targetValue = if (isActive) 1f else 0.6f,
+                animationSpec = tween(250)
+            )
+
+            Box(
+                modifier = Modifier
+                    .graphicsLayer(scaleX = scale, scaleY = scale, alpha = alpha)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(brush = if (isActive) BrushPrimaryGradient else SolidColor(Color.Transparent))
+                    .size(59.dp)
+                    .clickable { onSelectedType(mediaType) },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(
+                        when (mediaType) {
+                            "Image" -> R.drawable.image
+                            "Video" -> R.drawable.video
+                            "Audio" -> R.drawable.audio
+                            else -> R.drawable.image
+                        }
+                    ),
+                    contentDescription = mediaType,
+                    tint = Color.White
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.RemoveSingleIcon(
+    itemVisibility: SnapshotStateMap<Uri, Boolean>,
+    uri: Uri,
+    mediaUris: List<Uri>,
+    onUrisSelected: (List<Uri>) -> Unit
+) {
+    IconButton(
+        onClick = {
+            // trigger exit animation first
+            itemVisibility[uri] = false
+            CoroutineScope(Dispatchers.IO).launch {
+                delay(300)
+                onUrisSelected(mediaUris - uri)
+                itemVisibility.remove(uri)
+            }
+        },
+        modifier = Modifier
+            .align(Alignment.TopEnd)
+            .size(20.dp)
+    ) {
+        Icon(imageVector = Icons.Default.Close, contentDescription = "Remove", tint = Color.Red)
+    }
+}
+
+@Composable
+private fun RemoveAllIcon(
+    mediaUris: List<Uri>,
+    itemVisibility: SnapshotStateMap<Uri, Boolean>,
+    onUrisSelected: (List<Uri>) -> Unit
+) {
+    IconButton(
+        onClick = {
+            // fade out all items
+            mediaUris.forEach { uri -> itemVisibility[uri] = false }
+
+            // remove items after animation
+            CoroutineScope(Dispatchers.IO).launch {
+                delay(300)
+                onUrisSelected(emptyList())
+                itemVisibility.clear()
+            }
+        },
+        modifier = Modifier.size(24.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Remove all",
+            tint = Color.Red
+        )
+    }
+}
+
+@Composable
+private fun ColumnScope.UploadButton(
+    type: String,
+    mediaUris: List<Uri>,
+    onSelectedType: (String) -> Unit,
+    onUploadedUri: (List<Uri>) -> Unit,
+    onShowDialog: (Boolean) -> Unit
+) {
+    Button(
+        onClick = {
+            if (mediaUris.isNotEmpty()) {
+                onSelectedType(type)
+                onUploadedUri(mediaUris)
+            }
+
+            onShowDialog(false)
+        },
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .align(Alignment.CenterHorizontally)
+            .background(brush = BrushPrimaryGradient, shape = RoundedCornerShape(12.dp)),
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.upload_image),
+            contentDescription = "Upload",
+            modifier = Modifier.size(24.dp),
+            tint = Color.White
+        )
+        Text(
+            text = "Upload (${mediaUris.size})",
+            color = Color.White,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun DisplayGallery(
+    type: String,
+    mediaUris: List<Uri>,
+    onUrisSelected: (List<Uri>) -> Unit
+) {
+    when (type) {
+        "Image" -> ImageGallery(selectedImages = mediaUris, onSelectedImage = onUrisSelected)
+        "Video" -> VideoGallery(selectedVideos = mediaUris, onSelectedVideo = onUrisSelected)
+        "Audio" -> AudioGallery(selectedAudios = mediaUris, onSelectedAudio = onUrisSelected)
+    }
+}
+
+@Composable
+private fun Selected(context: Context, mediaUris: List<Uri> = emptyList()) {
     val (images, videos, audios) = countMediaTypes(context, mediaUris)
 
     Column(
@@ -423,7 +432,7 @@ fun Selected(context: Context, mediaUris: List<Uri> = emptyList()) {
 }
 
 @Composable
-fun Count(count: Int, type: String) {
+private fun Count(count: Int, type: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),

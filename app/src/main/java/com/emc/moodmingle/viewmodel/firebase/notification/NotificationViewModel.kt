@@ -23,8 +23,8 @@ class NotificationViewModel @Inject constructor(
     fun getUnreadNotificationsByUserId(userId: String) =
         notificationRepository.getUnreadNotificationsByUserId(userId)
 
-    suspend fun getNotificationPostId(postId: String) =
-        notificationRepository.getNotificationPostId(postId)
+    suspend fun getNotificationByEntityId(entityId: String) =
+        notificationRepository.getNotificationByEntityId(entityId)
 
     fun markNotificationsAsRead(unreadNotifications: List<NotificationEntity?>) {
         viewModelScope.launch {

@@ -1,6 +1,7 @@
 package com.emc.moodmingle.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,10 +39,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.firebase.model.chat.Conversation
 import com.emc.moodmingle.ui.chat.conversation.UsersRowList
 import com.emc.moodmingle.ui.chat.utils.ChatTimerFormatter
+import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
@@ -160,14 +162,19 @@ private fun DisplayConversations(
                         contentDescription = "Avatar",
                         modifier = Modifier
                             .size(50.dp)
-                            .clip(CircleShape),
+                            .clip(CircleShape)
+                            .border(
+                                width = 0.5.dp,
+                                brush = BrushPrimaryGradient,
+                                shape = CircleShape
+                            ),
                         contentScale = ContentScale.Crop
                     )
 
                     Column {
                         Text(
                             text = receiver?.username ?: "",
-                            style = Typography.bodyLarge.copy(fontWeight = FontWeight.W800),
+                            style = Typography.bodyLarge.copy(color = Color.White, fontWeight = FontWeight.Black),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -177,9 +184,11 @@ private fun DisplayConversations(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            val prefix = if (currentUserId == conversation.lastMessageUserId) "You" else receiver?.username ?: ""
+
                             Text(
-                                text = conversation.lastMessage,
-                                style = Typography.bodyMedium.copy(color = GrayTextColor),
+                                text = "$prefix: ${conversation.lastMessage}",
+                                style = Typography.bodyMedium,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.width(180.dp)

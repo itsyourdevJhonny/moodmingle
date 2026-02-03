@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.sp
 import com.emc.moodmingle.R
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
-import com.emc.moodmingle.utils.NetworkStatus
-import com.emc.moodmingle.utils.NetworkUtils
+import com.emc.moodmingle.utils.network.NetworkStatus
+import com.emc.moodmingle.utils.network.NetworkUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

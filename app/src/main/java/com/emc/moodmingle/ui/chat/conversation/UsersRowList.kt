@@ -3,6 +3,7 @@ package com.emc.moodmingle.ui.chat.conversation
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,13 +42,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.firebase.model.chat.Conversation
 import com.emc.moodmingle.ui.screens.getOtherUserId
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
@@ -55,7 +57,7 @@ import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.dialogFullSizeProperties
+import com.emc.moodmingle.utils.components.dialogFullSizeProperties
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
@@ -126,23 +128,26 @@ private fun AddIcon(onShowAddDialog: (Boolean) -> Unit) {
 
 @Composable
 private fun ReceiverAvatar(avatarUrl: String) {
-    Box {
-        AsyncImage(
-            model = avatarUrl,
-            contentDescription = "Avatar",
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop
-        )
-    }
+    AsyncImage(
+        model = avatarUrl,
+        contentDescription = "Avatar",
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .border(
+                width = 0.5.dp,
+                brush = BrushPrimaryGradient,
+                shape = CircleShape
+            ),
+        contentScale = ContentScale.Crop
+    )
 }
 
 @Composable
 private fun ReceiverUsername(username: String?) {
     Text(
         text = username ?: "",
-        style = Typography.bodySmall,
+        style = Typography.bodySmall.copy(color = Color.White, fontWeight = FontWeight.Bold),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.width(42.dp)

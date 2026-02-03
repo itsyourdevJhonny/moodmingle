@@ -3,14 +3,11 @@ package com.emc.moodmingle.ui.post.text
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,17 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -39,9 +32,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.emc.moodmingle.ui.theme.EmailTextColor
+import com.emc.moodmingle.ui.theme.HashtagTextColor
+import com.emc.moodmingle.ui.theme.MentionTextColor
+import com.emc.moodmingle.ui.theme.PhoneTextColor
+import com.emc.moodmingle.ui.theme.UrlTextColor
 import java.util.regex.Pattern
 
 @Composable
@@ -49,12 +44,11 @@ fun ExpandableAutoDetectClickableText(
     fullText: String,
     style: TextStyle,
     hasPadding: Boolean,
+    minLines: Int = 1,
     onMentionClick: (String) -> Unit = {},
     onHashtagClick: (String) -> Unit = {}
 ) {
-    val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
     var highlightedRange by remember { mutableStateOf<IntRange?>(null) }
     var isTapped by remember { mutableStateOf(false) }
@@ -79,7 +73,14 @@ fun ExpandableAutoDetectClickableText(
             fun collect(pattern: Pattern, type: MatchType) {
                 val matcher = pattern.matcher(fullText)
                 while (matcher.find()) {
-                    allMatches.add(MatchRange(matcher.start(), matcher.end(), matcher.group() ?: "", type))
+                    allMatches.add(
+                        MatchRange(
+                            matcher.start(),
+                            matcher.end(),
+                            matcher.group() ?: "",
+                            type
+                        )
+                    )
                 }
             }
 
@@ -108,24 +109,26 @@ fun ExpandableAutoDetectClickableText(
                 val isHighlighted = highlightedRange?.let { m.start in it || m.end in it } == true
 
                 val color = when (m.type) {
-                    MatchType.MENTION -> Color(0xFF81C784)
-                    MatchType.HASHTAG -> Color(0xFFFFB74D)
-                    MatchType.EMAIL -> Color(0xFFBA68C8)
-                    MatchType.PHONE -> Color(0xFFE57373)
-                    MatchType.URL -> Color(0xFF64B5F6)
+                    MatchType.MENTION -> MentionTextColor
+                    MatchType.HASHTAG -> HashtagTextColor
+                    MatchType.EMAIL -> EmailTextColor
+                    MatchType.PHONE -> PhoneTextColor
+                    MatchType.URL -> UrlTextColor
                 }
 
                 val background = if (isHighlighted) color.copy(alpha = 0.25f) else Color.Transparent
 
                 pushStringAnnotation(tag = m.type.name, annotation = m.value)
-                withStyle(SpanStyle(
-                    color = color,
-                    background = background,
-                    fontWeight = FontWeight.Bold,
-                    fontStyle = FontStyle.Italic,
-                    textDecoration = TextDecoration.Underline,
-                    fontSize = 16.sp
-                )) {
+                withStyle(
+                    SpanStyle(
+                        color = color,
+                        background = background,
+                        fontWeight = if (color == MentionTextColor) FontWeight.Black else FontWeight.Bold,
+                        fontStyle = FontStyle.Italic,
+                        textDecoration = if (color == MentionTextColor) TextDecoration.None else TextDecoration.Underline,
+                        fontSize = 16.sp
+                    )
+                ) {
                     append(m.value)
                 }
                 pop()
@@ -139,7 +142,7 @@ fun ExpandableAutoDetectClickableText(
     Text(
         text = annotatedText,
         style = style,
-        maxLines = if (expanded) Int.MAX_VALUE else 1,
+        maxLines = if (expanded) Int.MAX_VALUE else minLines,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .fillMaxWidth()
@@ -154,7 +157,8 @@ fun ExpandableAutoDetectClickableText(
                         expanded = !expanded // toggle expand/collapse anywhere
                     },
                     onLongPress = {
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard =
+                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText("text", fullText)
                         clipboard.setPrimaryClip(clip)
                         Toast.makeText(context, "Text copied", Toast.LENGTH_SHORT).show()

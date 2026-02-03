@@ -1,10 +1,15 @@
 package com.emc.moodmingle
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
@@ -23,12 +28,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -57,8 +64,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -69,14 +78,16 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.emc.moodmingle.cloudinary.CloudinaryManager
+import com.emc.moodmingle.data.model.UserEntity
 import com.emc.moodmingle.di.AppDatabase
 import com.emc.moodmingle.navigation.BottomNavItem
 import com.emc.moodmingle.navigation.Routes
 import com.emc.moodmingle.navigation.bottomNavItems
-import com.emc.moodmingle.ui.network.CheckInternetConnection
 import com.emc.moodmingle.ui.screens.ChatScreen
 import com.emc.moodmingle.ui.screens.ConversationScreen
 import com.emc.moodmingle.ui.screens.CreatePostScreen
+import com.emc.moodmingle.ui.screens.CreateScreen
+import com.emc.moodmingle.ui.screens.DailyMoodScreen
 import com.emc.moodmingle.ui.screens.DecryptionScreen
 import com.emc.moodmingle.ui.screens.EncryptionScreen
 import com.emc.moodmingle.ui.screens.FavoritesScreen
@@ -87,7 +98,9 @@ import com.emc.moodmingle.ui.screens.NotificationScreen
 import com.emc.moodmingle.ui.screens.PrivacyScreen
 import com.emc.moodmingle.ui.screens.ProfileScreen
 import com.emc.moodmingle.ui.screens.RegisterScreen
+import com.emc.moodmingle.ui.screens.RemixScreen
 import com.emc.moodmingle.ui.screens.SavedScreen
+import com.emc.moodmingle.ui.screens.SearchMusicScreen
 import com.emc.moodmingle.ui.screens.SearchResultsScreen
 import com.emc.moodmingle.ui.screens.SearchScreen
 import com.emc.moodmingle.ui.screens.SecurityScreen
@@ -105,42 +118,62 @@ import com.emc.moodmingle.ui.theme.PrimaryGradient
 import com.emc.moodmingle.ui.theme.PurpleDark
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.NetworkUtils
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 import com.emc.moodmingle.viewmodel.firebase.SearchViewModelFirebase
 import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
 import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.Q)
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        CloudinaryManager.init(this)
+        installSplashScreen()
+        enableEdgeToEdge()
 
+        CloudinaryManager.init(this)
         FirebaseApp.initializeApp(this)
 
-        enableEdgeToEdge()
         setContent {
             MoodMingleTheme {
                 Surface(color = Color.Black) {
-                    val networkUtils = NetworkUtils(this)
-                    CheckInternetConnection(networkUtils) {
-                        SplashScreenContent()
-                    }
+//                    val networkUtils = NetworkUtils(this)
+//                    CheckInternetConnection(networkUtils) {
+                    SplashScreenContent()
+//                    }
                 }
             }
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+
+        val channel = NotificationChannel(
+            "chat_channel",
+            "Chat Messages",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
+    }
+
+    override fun onStop() {
+        super.onStop()
+    }
 }
 
-@RequiresApi(Build.VERSION_CODES.Q)
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun SplashScreenContent() {
+    val mainNavController = rememberNavController()
+
     var startAnimation by remember { mutableStateOf(false) }
     var showSplash by remember { mutableStateOf(true) }
 
@@ -217,26 +250,34 @@ fun SplashScreenContent() {
             }
         } else {
             Surface(color = MaterialTheme.colorScheme.background) {
-                AppNavigation()
+                AppNavigation(mainNavController)
             }
         }
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.Q)
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun AppNavigation() {
-    val mainNavController = rememberNavController()
-
+fun AppNavigation(mainNavController: NavHostController) {
     val context = LocalContext.current
     val searchViewModel = hiltViewModel<SearchViewModelFirebase>()
+    val userViewModel = hiltViewModel<FirebaseUserViewModel>()
+
     val userDao = remember { AppDatabase.getDatabase(context).userDao() }
-    var startDestination by remember { mutableStateOf(Routes.Login.route) }
+    var loggedUser by remember { mutableStateOf<UserEntity?>(null) }
+
+    var startDestination by remember { mutableStateOf("permission") }
 
     LaunchedEffect(Unit) {
-        val loggedUser = userDao.getLoggedUser()
+        loggedUser = userDao.getLoggedUser()
         if (loggedUser != null) {
             startDestination = Routes.Home.route
+        }
+    }
+
+    loggedUser?.let {
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            userViewModel.saveFcmToken(loggedUser!!.uid, token)
         }
     }
 
@@ -256,10 +297,18 @@ fun AppNavigation() {
             slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut(animationSpec = tween(500))
         }
     ) {
+        composable("permission") {
+            PermissionGate {
+                mainNavController.navigate(if (loggedUser != null) Routes.Home.route else Routes.Login.route) {
+                    popUpTo("permission") { inclusive = true }
+                }
+            }
+        }
+
         composable(Routes.Login.route) {
             LoginScreen(
                 onLogin = { ->
-                    mainNavController.navigate("home") {
+                    mainNavController.navigate(Routes.Home.route) {
                         popUpTo(Routes.Login.route) { inclusive = true }
                         launchSingleTop = true
                     }
@@ -298,6 +347,7 @@ fun AppNavigation() {
                 onViewClick = { userUid -> mainNavController.navigate("user_profile/$userUid") }
             )
         }
+
         composable(Routes.SearchResult.route) {
             val results by searchViewModel.searchResults.collectAsState()
             SearchResultsScreen(
@@ -307,8 +357,20 @@ fun AppNavigation() {
             )
         }
 
+        composable(Routes.Create.route) {
+            CreateScreen(
+                onCreatePost = { mainNavController.navigate(Routes.CreatePost.route) },
+                onCreateDailyMood = { mainNavController.navigate(Routes.CreateDailyMood.route) },
+                onBack = { mainNavController.popBackStack() }
+            )
+        }
+
         composable(Routes.CreatePost.route) {
-            CreatePostScreen(onBackClick = { mainNavController.popBackStack() })
+            CreatePostScreen(onBack = { mainNavController.popBackStack() })
+        }
+
+        composable(Routes.CreateDailyMood.route) {
+            DailyMoodScreen(onBack = { mainNavController.popBackStack() })
         }
 
         composable(Routes.Insights.route) {
@@ -319,14 +381,12 @@ fun AppNavigation() {
             route = "user_profile/{userUid}",
             arguments = listOf(navArgument("userUid") { type = NavType.StringType })
         ) { backStackEntry ->
-            val userUid = backStackEntry.arguments?.getString("userUid")
+            val userId = backStackEntry.arguments?.getString("userUid").orEmpty()
 
             ProfileScreen(
                 isFromOtherUser = true,
-                otherUserId = userUid!!,
-                onChatClick = { senderId, receiverId ->
-                    mainNavController.navigate("chat/$senderId/$receiverId")
-                },
+                otherUserId = userId,
+                onChatClick = { senderId, receiverId -> mainNavController.navigate("chat/$senderId/$receiverId") },
                 onBack = { mainNavController.popBackStack() }
             )
         }
@@ -434,13 +494,91 @@ fun AppNavigation() {
         composable(route = "chat/{senderId}/{receiverId}") { backStackEntry ->
             val senderId = backStackEntry.arguments?.getString("senderId") ?: ""
             val receiverId = backStackEntry.arguments?.getString("receiverId") ?: ""
-            ChatScreen(senderId, receiverId, onBack = { mainNavController.popBackStack() })
+
+            ChatScreen(
+                senderId,
+                receiverId,
+                onBack = { mainNavController.popBackStack() },
+                onView = { mainNavController.navigate("user_profile/$receiverId") }
+            )
         }
 
         composable(Routes.BottomVideo.route) {
             VideoFeedScreen(
-                onBack = { mainNavController.popBackStack() }
+                onBack = { mainNavController.popBackStack() },
+                onUserClick = { userId ->
+                    mainNavController.navigate("user_profile/$userId")
+                },
+                onChatClick = { senderId, receiverId ->
+                    mainNavController.navigate("chat/$senderId/$receiverId") {
+                        launchSingleTop = true
+                    }
+                },
+                onRemix = { entityId, type ->
+                    mainNavController.navigate("remix/$entityId/$type")
+                }
             )
+        }
+
+        composable(Routes.Remix.route) { backStackEntry ->
+            val entityId = backStackEntry.arguments?.getString("entityId") ?: ""
+            val type = backStackEntry.arguments?.getString("type") ?: ""
+            RemixScreen(entityId, type, onBack = { mainNavController.popBackStack() })
+        }
+
+        composable(Routes.Music.route) {
+            SearchMusicScreen()
+        }
+    }
+}
+
+@Composable
+fun PermissionGate(onAllGranted: () -> Unit) {
+    val permissions = remember {
+        buildList {
+            add(Manifest.permission.RECORD_AUDIO)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.READ_MEDIA_IMAGES)
+                add(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+    }
+
+    var allGranted by remember { mutableStateOf(false) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        allGranted = results.values.all { it }
+    }
+
+    LaunchedEffect(Unit) {
+        launcher.launch(permissions.toTypedArray())
+    }
+
+    if (allGranted) {
+        onAllGranted()
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF121212))
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                "This app needs permissions to function properly.",
+                color = Color.White,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { launcher.launch(permissions.toTypedArray()) }) {
+                Text("Grant Permissions")
+            }
         }
     }
 }
@@ -472,7 +610,7 @@ fun BottomNavigationContainer(mainNavController: NavHostController) {
         ) {
             composable(Routes.BottomHome.route) {
                 HomeScreen(
-                    onCreateClick = { mainNavController.navigate(Routes.CreatePost.route) },
+                    onCreateClick = { mainNavController.navigate(Routes.Create.route) },
                     onSearchClick = { mainNavController.navigate(Routes.Search.route) },
                     onProfileClick = { userUid ->
                         if (currentUser?.uid == userUid) {
@@ -501,6 +639,12 @@ fun BottomNavigationContainer(mainNavController: NavHostController) {
                     },
                     onConversationClick = {
                         mainNavController.navigate(Routes.Conversation.route)
+                    },
+                    onRemix = { entityId, type ->
+                        mainNavController.navigate("remix/$entityId/$type")
+                    },
+                    onCreate = {
+                        mainNavController.navigate(Routes.Create.route)
                     }
                 )
             }
@@ -526,6 +670,7 @@ fun BottomNavigationContainer(mainNavController: NavHostController) {
                     onBackClick = { bottomNavController.navigate(Routes.BottomHome.route) },
                     onClick = { label ->
                         val route = if (label == "Logout") "login" else label.lowercase()
+
                         if (route == "password") {
                             mainNavController.navigate(Routes.VerifyPassword.route)
                         } else {
@@ -538,6 +683,16 @@ fun BottomNavigationContainer(mainNavController: NavHostController) {
                         }
                     }
                 )
+            }
+
+            composable(Routes.BottomMusic.route) {
+                /*SpotifyScreen(
+                    viewModel = hiltViewModel(),
+                    onLogin = {
+//                        authManager.login(activity)
+                    },
+                    miniPlayerManager = miniPlayerManager
+                )*/
             }
         }
     }

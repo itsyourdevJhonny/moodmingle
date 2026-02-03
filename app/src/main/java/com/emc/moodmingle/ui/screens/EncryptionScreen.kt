@@ -43,7 +43,7 @@ import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.SwitchButton
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.utils.encryptData
+import com.emc.moodmingle.utils.text.encryptData
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 
 @Composable

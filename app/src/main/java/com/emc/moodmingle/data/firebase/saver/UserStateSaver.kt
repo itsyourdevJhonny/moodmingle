@@ -3,7 +3,7 @@ package com.emc.moodmingle.data.firebase.saver
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 val UserStateSaver: Saver<MutableState<UserEntityFirebase?>, List<Any?>> = Saver(
     save = { state ->
         val u = state.value

@@ -17,9 +17,7 @@ import com.emc.moodmingle.ui.theme.GrayTextColor
 
 @Composable
 fun GrowthComparison(current: InsightData, previous: InsightData) {
-    val percent = { new: Int, old: Int ->
-        if (old == 0) 0 else ((new - old) * 100 / old)
-    }
+    val percent = { new: Int, old: Int -> if (old == 0) 0 else ((new - old) * 100 / old) }
 
     val postsGrowth = percent(current.posts, previous.posts)
     val reactsGrowth = percent(current.reactions, previous.reactions)

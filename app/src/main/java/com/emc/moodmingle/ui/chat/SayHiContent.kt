@@ -68,7 +68,10 @@ fun SayHiContent(
                             lastMessage = "Hi!",
                             lastMessageTime = System.currentTimeMillis(),
                             messages = conversation.messages + chatMessage
-                        )
+                        ),
+                        senderId = senderId,
+                        receiverId = receiverId,
+                        message = "Hi!"
                     )
                 }
             },

@@ -9,7 +9,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.model.post.user.CombinedPost
 import com.emc.moodmingle.ui.profile.UserPostContent
-import com.emc.moodmingle.ui.settings.saved.utils.NoResult
+import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
 import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
 
 @Composable
@@ -28,7 +28,7 @@ fun FilterUserPosts(
     }
 
     if (filteredPosts.isEmpty()) {
-        NoResult(R.drawable.empty, "No ${filterType.lowercase()} posts.")
+        EmptyComponent(R.drawable.empty, "No ${filterType.lowercase()} posts.")
     } else {
         filteredPosts.forEach { post ->
             UserPostContent(

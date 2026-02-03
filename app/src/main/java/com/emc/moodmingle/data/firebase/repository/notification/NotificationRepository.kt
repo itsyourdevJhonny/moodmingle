@@ -61,12 +61,12 @@ class NotificationRepository @Inject constructor(
             }
         }
 
-    suspend fun getNotificationPostId(postId: String): NotificationEntity? {
-        if (postId.isBlank()) return null
+    suspend fun getNotificationByEntityId(entityId: String): NotificationEntity? {
+        if (entityId.isBlank()) return null
 
         return try {
             val snapshot = collection
-                .whereEqualTo("postId", postId)
+                .whereEqualTo("entityId", entityId)
                 .get()
                 .await()
 

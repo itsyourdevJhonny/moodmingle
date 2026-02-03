@@ -2,20 +2,15 @@ package com.emc.moodmingle.viewmodel.firebase
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emc.moodmingle.data.dao.UserDao
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
-import com.emc.moodmingle.data.firebase.repository.UserRepositoryFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.repository.user.UserRepositoryFirebase
 import com.emc.moodmingle.data.model.UserEntity
-import com.emc.moodmingle.di.AppDatabase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,7 +25,7 @@ class UserViewModelFirebase @Inject constructor(
     init {
         // listen to current user in real time
         viewModelScope.launch {
-            userRepository.getLoggedUserByUid().collectLatest {
+            userRepository.getLoggedUser().collectLatest {
                 _user.value = it
             }
         }

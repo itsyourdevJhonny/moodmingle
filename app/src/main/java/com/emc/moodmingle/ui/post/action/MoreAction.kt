@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -46,8 +47,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.HideEntityFirebase
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.HideEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
 import com.emc.moodmingle.data.firebase.model.favorites.FavoritesEntityFirebase
 import com.emc.moodmingle.data.firebase.model.saved.SaveEntityFirebase
 import com.emc.moodmingle.di.AppDatabase
@@ -56,6 +57,8 @@ import com.emc.moodmingle.ui.post.action.more.PostChat
 import com.emc.moodmingle.ui.profile.DrawUserNoPaddingLine
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
+import com.emc.moodmingle.ui.theme.SecondaryDark
+import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.firebase.HideViewModelFirebase
 import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
@@ -266,7 +269,7 @@ fun MoreAction(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun BottomSheetDragHandle() {
+fun BottomSheetDragHandle() {
     BottomSheetDefaults.DragHandle(
         modifier = Modifier
             .graphicsLayer(alpha = 0.99f)
@@ -275,7 +278,7 @@ private fun BottomSheetDragHandle() {
 }
 
 @Composable
-private fun ConfirmDeleteAction(
+fun ConfirmDeleteAction(
     postViewModel: PostViewModelFirebase,
     postEntity: PostEntityFirebase,
     context: Context,
@@ -286,7 +289,7 @@ private fun ConfirmDeleteAction(
     var isLoading by remember { mutableStateOf(false) }
 
     Dialog(
-        onDismissRequest = { },
+        onDismissRequest = {},
         content = {
             Box(
                 contentAlignment = Alignment.Center,
@@ -401,24 +404,29 @@ fun CreateMoreAction(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-            .clickable { onClick(true) },
+            .clickable { onClick(true) }
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Icon(
-            painter = painterResource(id = iconRes),
-            contentDescription = "More",
-            tint = Color.White,
+        Box(
             modifier = Modifier
-                .size(28.dp)
-                .graphicsLayer(alpha = 0.99f)
-                .drawGradient()
-        )
+                .background(SecondaryDark, CircleShape)
+                .padding(8.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = "More",
+                tint = Color.White,
+                modifier = Modifier
+                    .size(20.dp)
+                    .drawGradient()
+            )
+        }
 
         Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge.copy(color = Color.White))
-            Text(text = description, fontSize = 12.sp)
+            Text(text = title, color = Color.White)
+            Text(text = description, fontSize = 12.sp, color = GrayTextColor)
         }
     }
 }

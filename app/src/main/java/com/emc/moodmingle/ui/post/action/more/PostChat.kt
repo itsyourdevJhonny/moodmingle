@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
 import com.emc.moodmingle.data.firebase.model.chat.Conversation
 import com.emc.moodmingle.ui.chat.input.sendMessage
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient

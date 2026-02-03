@@ -59,8 +59,8 @@ fun BarChart(values: List<Float>, labels: List<String>, onBarClick: (String) -> 
             )
 
             drawIntoCanvas { canvas ->
-                val labelValue =
-                    if (value % 1f == 0f) value.toInt().toString() else "%.1f".format(value)
+                val labelValue = if (value % 1f == 0f) value.toInt().toString() else "%.1f".format(value)
+
                 val paint = android.graphics.Paint().apply {
                     color = android.graphics.Color.WHITE
                     textSize = 30f

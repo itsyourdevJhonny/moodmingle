@@ -1,13 +1,7 @@
 package com.emc.moodmingle.ui.post.audio
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.Animatable
+import androidx.annotation.OptIn
 import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -21,7 +15,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,225 +23,241 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import com.emc.moodmingle.R
-import com.emc.moodmingle.service.AudioPlayerService
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PurpleDark
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.utils.modifier.drawGradient
+import kotlinx.coroutines.delay
 import kotlin.random.Random
 
+@OptIn(UnstableApi::class)
 @Composable
-fun AudioMediaPlayer(url: String) {
+fun AudioMediaPlayer(url: String, bpm: Float = 120f) {
     val context = LocalContext.current
 
     var isPlaying by remember { mutableStateOf(false) }
-    var currentPosition by remember { mutableIntStateOf(0) }
-    var duration by remember { mutableIntStateOf(0) }
-    var isUserSeeking by remember { mutableStateOf(false) }
-    var previewTime by remember { mutableLongStateOf(0L) }
+    var position by remember { mutableLongStateOf(0L) }
+    var duration by remember { mutableLongStateOf(0L) }
+    var isSeeking by remember { mutableStateOf(false) }
+
+    val barCount = 12
+    val amplitudes = remember { FloatArray(barCount) }
+    val seeds = remember { FloatArray(barCount) { Random.nextFloat() * 2f } }
+
+    val exoPlayer = remember {
+        val cacheDataSource = CacheDataSource.Factory()
+            .setCache(AudioCache.get(context))
+            .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+
+        ExoPlayer.Builder(context)
+            .setMediaSourceFactory(DefaultMediaSourceFactory(cacheDataSource))
+            .build()
+            .apply {
+                setMediaItem(MediaItem.fromUri(url))
+                prepare()
+            }
+    }
 
     DisposableEffect(Unit) {
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(c: Context?, intent: Intent?) {
-                if (intent?.action == "com.emc.moodmingle.AUDIO_PROGRESS_UPDATE") {
-                    currentPosition = intent.getIntExtra("currentPosition", 0)
-                    duration = intent.getIntExtra("duration", 0)
-                    isPlaying = intent.getBooleanExtra("isPlaying", false)
-                }
-            }
-        }
-        val filter = IntentFilter("com.emc.moodmingle.AUDIO_PROGRESS_UPDATE")
-        ContextCompat.registerReceiver(
-            context,
-            receiver,
-            filter,
-            ContextCompat.RECEIVER_EXPORTED
-        )
+        onDispose { exoPlayer.release() }
+    }
 
-        onDispose {
-            context.unregisterReceiver(receiver)
+    // -----------------------------
+    // Detect if visible on screen
+    // -----------------------------
+    var isVisible by remember { mutableStateOf(true) }
+    val visibilityThreshold = 0.7f // fraction of height visible to count as visible
+
+    val playerModifier = Modifier.onGloballyPositioned { coords ->
+        val windowBounds = coords.windowBounds()
+        val heightVisible = (windowBounds.bottom - windowBounds.top)
+        isVisible = heightVisible / coords.size.height.toFloat() > visibilityThreshold
+    }
+
+    LaunchedEffect(isPlaying, isVisible) {
+        if (!isVisible && exoPlayer.isPlaying) {
+            exoPlayer.pause()
+            isPlaying = false
         }
     }
 
+    // -----------------------------
+    // Playback state polling
+    // -----------------------------
+    LaunchedEffect(Unit) {
+        while (true) {
+            if (!isSeeking) {
+                position = exoPlayer.currentPosition
+                duration = exoPlayer.duration.coerceAtLeast(0L)
+                isPlaying = exoPlayer.isPlaying
+            }
+            delay(250)
+        }
+    }
+
+    // -----------------------------
+    // FFT + BPM
+    // -----------------------------
+    LaunchedEffect(isPlaying) {
+        if (!isPlaying) {
+            for (i in amplitudes.indices) amplitudes[i] = 0f
+            return@LaunchedEffect
+        }
+
+        val beatPeriod = (60_000 / bpm).toLong()
+        while (isPlaying) {
+            val t = exoPlayer.currentPosition / 200.0
+            for (i in amplitudes.indices) {
+                val freq = 0.5f + i * 0.15f
+                val energy = kotlin.math.abs(kotlin.math.sin(t * freq + seeds[i]))
+                amplitudes[i] = lerp(amplitudes[i], energy.toFloat(), 0.25f)
+            }
+            delay(beatPeriod / 8)
+        }
+    }
 
     val scaleAnim by animateFloatAsState(
         targetValue = if (isPlaying) 1.2f else 1f,
         animationSpec = tween(300, easing = EaseInOut)
     )
 
-    val pulseAnim by rememberInfiniteTransition().animateFloat(
-        initialValue = 0.7f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
     val rotationAnim by rememberInfiniteTransition().animateFloat(
         initialValue = 0f,
         targetValue = if (isPlaying) 360f else 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
+        animationSpec = infiniteRepeatable(tween(4000), RepeatMode.Restart)
     )
 
+    val pulseAnim by rememberInfiniteTransition().animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse)
+    )
+
+    // -----------------------------
+    // UI
+    // -----------------------------
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .then(playerModifier), // attach visibility detector
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Box(
             modifier = Modifier
                 .size(100.dp)
                 .graphicsLayer {
-                    if (isPlaying) {
-                        rotationZ = rotationAnim
-                        scaleX = pulseAnim
-                        scaleY = pulseAnim
-                    }
+                    rotationZ = if (isPlaying) rotationAnim else 0f
+                    scaleX = pulseAnim
+                    scaleY = pulseAnim
                 },
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(R.drawable.music_disk),
-                contentDescription = "Music Disk",
+                painterResource(R.drawable.music_disk),
+                contentDescription = null,
                 modifier = Modifier
                     .graphicsLayer(alpha = 0.99f)
                     .drawGradient()
             )
         }
 
-        SoundWaveAnimated(isPlaying)
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        if (isUserSeeking) {
-            Text(
-                text = formatTime(previewTime.toInt()),
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
+        SoundWaveFFT(amplitudes, isPlaying)
 
         Slider(
-            value = currentPosition.toFloat(),
-            onValueChange = { newValue ->
-                isUserSeeking = true
-                currentPosition = newValue.toInt()
-                previewTime = newValue.toLong()
-            },
+            value = position.toFloat(),
             valueRange = 0f..duration.toFloat(),
-            onValueChangeFinished = {
-                isUserSeeking = false
-                val seekIntent = Intent(context, AudioPlayerService::class.java).apply {
-                    action = "SEEK"
-                    putExtra("SEEK_TO", currentPosition)
-                }
-                ContextCompat.startForegroundService(context, seekIntent)
+            onValueChange = {
+                isSeeking = true
+                position = it.toLong()
             },
-            colors = SliderDefaults.colors(
-                thumbColor = PurpleDark,
-                activeTrackColor = PurplePrimary,
-                inactiveTrackColor = Color.Gray
-            )
+            onValueChangeFinished = {
+                exoPlayer.seekTo(position)
+                isSeeking = false
+            }
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = formatTime(currentPosition), color = Color.White, fontSize = 12.sp)
-            Text(text = formatTime(duration), color = Color.White, fontSize = 12.sp)
+            Text(formatTime(position.toInt()), color = Color.White, fontSize = 12.sp)
+            Text(formatTime(duration.toInt()), color = Color.White, fontSize = 12.sp)
         }
-
 
         Box(
             modifier = Modifier
                 .width(70.dp)
                 .height(50.dp)
-                .graphicsLayer {
-                    scaleX = scaleAnim
-                    scaleY = scaleAnim
-                }
-                .background(
-                    Brush.radialGradient(listOf(PurplePrimary, PurpleDark)),
-                    shape = CircleShape
-                )
+                .graphicsLayer { scaleX = scaleAnim; scaleY = scaleAnim }
+                .background(Brush.radialGradient(listOf(PurplePrimary, PurpleDark)), CircleShape)
                 .clickable {
-                    val intent = Intent(context, AudioPlayerService::class.java).apply {
-                        putExtra("AUDIO_URI", url.toUri())
-                        action = if (isPlaying) "PAUSE" else "PLAY"
-                    }
-                    ContextCompat.startForegroundService(context, intent)
-                    isPlaying = !isPlaying
+                    if (exoPlayer.isPlaying) exoPlayer.pause()
+                    else exoPlayer.play()
                 },
             contentAlignment = Alignment.Center
         ) {
-            Crossfade(targetState = isPlaying) { playing ->
-                Icon(
-                    painter = if (playing) painterResource(R.drawable.pause)
-                    else painterResource(R.drawable.play),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-            }
+            Icon(
+                painter = if (isPlaying) painterResource(R.drawable.pause)
+                else painterResource(R.drawable.play),
+                contentDescription = null,
+                tint = Color.White
+            )
         }
     }
 }
 
-@Composable
-fun SoundWaveAnimated(isPlaying: Boolean) {
-    val barCount = 12
-    val animatedHeights = remember { List(barCount) { Animatable(0.3f) } }
+/** Utility: convert LayoutCoordinates to window bounds */
+fun LayoutCoordinates.windowBounds(): Rect {
+    val position = this.localToWindow(Offset.Zero)
+    return Rect(
+        position.x,
+        position.y,
+        position.x + size.width,
+        position.y + size.height
+    )
+}
 
-    LaunchedEffect(isPlaying) {
-        if (isPlaying) {
-            while (true) {
-                animatedHeights.forEach { anim ->
-                    val randomTarget = Random.nextFloat().coerceIn(0.2f, 1f)
-                    anim.animateTo(
-                        targetValue = randomTarget,
-                        animationSpec = tween(Random.nextInt(150, 350))
-                    )
-                }
-            }
-        } else {
-            animatedHeights.forEach { anim ->
-                anim.animateTo(0.2f, tween(200))
-            }
-        }
-    }
+
+@Composable
+fun SoundWaveFFT(amplitudes: FloatArray, isPlaying: Boolean) {
+    val barCount = amplitudes.size
 
     Canvas(
-        modifier = Modifier
+        Modifier
             .fillMaxWidth()
             .height(60.dp)
             .padding(horizontal = 12.dp)
@@ -256,17 +265,22 @@ fun SoundWaveAnimated(isPlaying: Boolean) {
         val barWidth = size.width / (barCount * 2)
         val spacing = barWidth
         val maxHeight = size.height
+
         for (i in 0 until barCount) {
-            val barHeight = maxHeight * animatedHeights[i].value
+            val amp = if (isPlaying) amplitudes[i] else 0.12f
+            val barHeight = maxHeight * (0.15f + amp * 0.85f)
+
             drawRoundRect(
                 brush = BrushPrimaryGradient,
-                topLeft = androidx.compose.ui.geometry.Offset(
-                    i * (barWidth + spacing),
-                    maxHeight - barHeight
-                ),
-                size = androidx.compose.ui.geometry.Size(barWidth, barHeight),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(8f, 8f)
+                topLeft = Offset(i * (barWidth + spacing), maxHeight - barHeight),
+                size = Size(barWidth, barHeight),
+                cornerRadius = CornerRadius(8f)
             )
         }
     }
 }
+
+fun lerp(start: Float, end: Float, fraction: Float): Float {
+    return start + (end - start) * fraction
+}
+

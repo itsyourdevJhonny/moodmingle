@@ -19,5 +19,5 @@ val bottomNavItems = listOf(
     BottomNavItem("notification_tab", "Notification", Icons.Default.Notifications),
     BottomNavItem("video_tab", "Video", Icons.Filled.PlayArrow),
     BottomNavItem("profile_tab", "Profile", Icons.Filled.Person),
-    BottomNavItem("settings_tab", "Settings", Icons.Filled.Settings)
+    BottomNavItem("settings_tab", "Settings", Icons.Filled.Settings),
 )

@@ -4,7 +4,9 @@ sealed class Routes(val route: String) {
     object Login : Routes("login")
     object Register : Routes("register")
     object Home : Routes("home")
+    object Create : Routes("create")
     object CreatePost : Routes("create_post")
+    object CreateDailyMood : Routes("create_daily_mood")
     object Insights : Routes("insights")
     object Search : Routes("search")
     object SearchResult : Routes("search_result")
@@ -24,10 +26,13 @@ sealed class Routes(val route: String) {
     object Decryption : Routes("decryption")
     object Chat : Routes("chat/{senderId}/{receiverId}")
     object Conversation : Routes("conversation")
+    object Remix : Routes("remix/{entityId}/{type}")
+    object Music : Routes("music")
 
     object BottomHome : Routes("home_tab")
     object BottomNotification : Routes("notification_tab")
     object BottomVideo : Routes("video_tab")
     object BottomProfile : Routes("profile_tab")
     object BottomSettings : Routes("settings_tab")
+    object BottomMusic : Routes("music_tab")
 }

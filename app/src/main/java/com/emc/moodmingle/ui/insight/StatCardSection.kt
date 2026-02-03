@@ -33,17 +33,8 @@ fun StatCard(title: String, value: String, color: Color) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = value,
-                color = color,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp
-            )
-            Text(
-                text = title,
-                fontSize = 14.sp,
-                color = Color.White
-            )
+            Text(text = value, color = color, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+            Text(text = title, fontSize = 14.sp, color = Color.White)
         }
     }
 }

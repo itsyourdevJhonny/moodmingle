@@ -72,8 +72,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.UserEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.data.firebase.model.favorites.FavoritesCollectionEntity
 import com.emc.moodmingle.data.firebase.model.favorites.FavoritesEntityFirebase
 import com.emc.moodmingle.data.model.post.formatTimeAgo
@@ -83,14 +83,14 @@ import com.emc.moodmingle.ui.settings.saved.BottomSheetItem
 import com.emc.moodmingle.ui.settings.saved.media.isAudio
 import com.emc.moodmingle.ui.settings.saved.media.isImage
 import com.emc.moodmingle.ui.settings.saved.media.isVideo
-import com.emc.moodmingle.ui.settings.saved.utils.NoResult
+import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.HeartColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.LoadingDialog
+import com.emc.moodmingle.utils.components.LoadingDialog
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.firebase.CommentViewModelFirebase
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
@@ -120,7 +120,7 @@ fun FavoritesContent(
         }
 
         favorites != null && favorites.isEmpty() -> {
-            NoResult(R.drawable.empty, "No favorites yet.")
+            EmptyComponent(R.drawable.empty, "No favorites yet.")
             return
         }
 
@@ -384,7 +384,7 @@ fun PaginatedFavoritesGrid(filteredFavorites: List<FavoritesEntityFirebase>, use
                     )
 
                     if (collectionNames.isEmpty()) {
-                        NoResult(
+                        EmptyComponent(
                             R.drawable.empty,
                             text = "No collections yet. Create one."
                         )

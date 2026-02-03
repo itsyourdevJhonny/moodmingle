@@ -2,8 +2,8 @@ package com.emc.moodmingle.viewmodel.firebase
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.firebase.model.SearchEntityFirebase
-import com.emc.moodmingle.data.firebase.repository.SearchRepositoryFirebase
+import com.emc.moodmingle.data.firebase.model.search.SearchEntityFirebase
+import com.emc.moodmingle.data.firebase.repository.search.SearchRepositoryFirebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

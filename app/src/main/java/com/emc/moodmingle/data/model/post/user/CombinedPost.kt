@@ -1,9 +1,7 @@
 package com.emc.moodmingle.data.model.post.user
 
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.ShareEntityFirebase
-import com.emc.moodmingle.data.model.post.PostEntity
-import com.emc.moodmingle.data.model.share.ShareEntity
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.model.post.ShareEntityFirebase
 
 
 data class CombinedPost(
@@ -16,5 +14,7 @@ data class CombinedPost(
 
 enum class PostType {
     USER_POST,
-    SHARED_POST
+    SHARED_POST,
+    REMIX_POST,
+    NORMAL_POST
 }

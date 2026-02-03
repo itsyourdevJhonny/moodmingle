@@ -41,11 +41,9 @@ class ConversationRepository @Inject constructor(
     }
 
     fun getConversationsByUser(userId: String): Flow<List<Conversation>> = callbackFlow {
-
-        // generate potential pairId positions
         val possiblePairs = listOf(
-            "$userId ",      // ID first position
-            " $userId"       // ID second position
+            "$userId ",
+            " $userId"
         )
 
         // Use OR-like behavior by combining two queries
@@ -85,48 +83,6 @@ class ConversationRepository @Inject constructor(
         }
     }
 
-    /*fun getConversationsByUser(userId: String): Flow<List<Conversation>> = callbackFlow {
-        val listener = collection
-
-            .orderBy("timeAgo", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
-                val collections = snapshot?.documents?.mapNotNull {
-                    it.toObject(Conversation::class.java)?.copy(id = it.id)
-                } ?: emptyList()
-                trySend(collections)
-            }
-
-        awaitClose { listener.remove() }
-    }*/
-
-    /*fun getConversationsByUser(userId: String): Flow<List<Conversation>> = callbackFlow {
-        val listener = collection
-            .orderBy("timeAgo", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-
-                val conversations = snapshot?.documents
-                    ?.mapNotNull { doc ->
-                        doc.toObject(Conversation::class.java)?.copy(id = doc.id)
-                    }
-                    ?.filter { conv ->
-                        conv.pairId.split(" ").contains(userId)
-                    }
-                    ?: emptyList()
-
-                trySend(conversations)
-            }
-
-        awaitClose { listener.remove() }
-    }*/
-
     fun getConversationByPairUser(user1: String, user2: String, callback: (Conversation?) -> Unit) {
         val pairIds = generatePairIds(user1, user2)
 
@@ -153,7 +109,7 @@ class ConversationRepository @Inject constructor(
 
         collection
             .whereIn("pairId", pairIds)
-            .limit(1) // only need one
+            .limit(1)
             .get()
             .addOnSuccessListener { snapshot ->
                 if (!snapshot.isEmpty) {
@@ -161,7 +117,7 @@ class ConversationRepository @Inject constructor(
                     val conversation = doc.toObject(Conversation::class.java)?.copy(id = doc.id)
                     callback(conversation)
                 } else {
-                    callback(null) // no conversation exists
+                    callback(null)
                 }
             }
             .addOnFailureListener {

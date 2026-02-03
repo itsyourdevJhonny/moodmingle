@@ -6,7 +6,7 @@ data class ChatMessage(
     val message: String = "",
     val timestamp: Long = System.currentTimeMillis(),
     val conversationId: String = "",
-    val postId: String = "",
+    val entity: String = "",
     val type: String = "TEXT",
     val replyMessage: String = ""
 )

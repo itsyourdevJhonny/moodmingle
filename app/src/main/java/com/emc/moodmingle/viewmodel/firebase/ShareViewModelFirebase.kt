@@ -3,8 +3,8 @@ package com.emc.moodmingle.viewmodel.firebase
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.firebase.model.ShareEntityFirebase
-import com.emc.moodmingle.data.firebase.repository.ShareRepositoryFirebase
+import com.emc.moodmingle.data.firebase.model.post.ShareEntityFirebase
+import com.emc.moodmingle.data.firebase.repository.post.ShareRepositoryFirebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,6 +35,8 @@ class ShareViewModelFirebase @Inject constructor(
     fun insert(shareEntity: ShareEntityFirebase) = viewModelScope.launch {
         repository.insert(shareEntity)
     }
+
+    fun getAllShares() = repository.getAllShares()
 
     fun getSharesByPostId(postId: String): Flow<List<ShareEntityFirebase>> = callbackFlow {
         val listener = sharesCollection

@@ -2,10 +2,11 @@ package com.emc.moodmingle.viewmodel.firebase
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.firebase.model.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.repository.PostRepositoryFirebase
-import com.emc.moodmingle.data.firebase.repository.ShareRepositoryFirebase
-import com.emc.moodmingle.data.model.post.user.CombinedPost
+import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.data.firebase.repository.post.PostRepositoryFirebase
+import com.emc.moodmingle.data.firebase.repository.post.ShareRepositoryFirebase
+import com.emc.moodmingle.data.firebase.repository.post.normal.NormalPostRepository
+import com.emc.moodmingle.data.firebase.repository.remix.RemixRepository
 import com.emc.moodmingle.data.model.post.user.PostType
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -28,7 +28,9 @@ import javax.inject.Inject
 @HiltViewModel
 class PostViewModelFirebase @Inject constructor(
     private val postRepository: PostRepositoryFirebase,
-    private val shareRepository: ShareRepositoryFirebase
+    private val normalPostRepository: NormalPostRepository,
+    private val shareRepository: ShareRepositoryFirebase,
+    private val remixRepository: RemixRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PostUiState(isLoading = true))
@@ -55,17 +57,6 @@ class PostViewModelFirebase @Inject constructor(
                 _filteredPosts.value = posts
             }
     }
-
-    /*fun getFilteredPostsByMood(mood: String) {
-        viewModelScope.launch {
-            postRepository.getFilteredPostsByMood(mood) // your callbackFlow
-                .filterNotNull()
-                .collect { post ->
-                    _filteredPosts.value = post
-                }
-        }
-    }*/
-
 
     fun loadPosts() {
         viewModelScope.launch {
@@ -99,12 +90,12 @@ class PostViewModelFirebase @Inject constructor(
     fun getPostById(id: String) = postRepository.getPostById(id)
     suspend fun getPostByIdOnce(id: String) = postRepository.getPostByIdOnce(id)
 
-//    fun getFilteredPostsByMood(mood: String) = postRepository.getFilteredPostsByMood(mood)
+    fun getPostByVideoUrl(videoUrl: String) = postRepository.getPostByVideoUrl(videoUrl)
 
-    suspend fun getCombinedPostsByUser(userId: String): List<CombinedPost> {
+    suspend fun getCombinedPostsByUser(userId: String): List<com.emc.moodmingle.data.model.post.user.CombinedPost> {
         // get user posts
         val userPosts = postRepository.getPostsByUserId(userId).map {
-            CombinedPost(
+            com.emc.moodmingle.data.model.post.user.CombinedPost(
                 id = it.id,
                 type = PostType.USER_POST,
                 postEntity = it,
@@ -117,25 +108,24 @@ class PostViewModelFirebase @Inject constructor(
         val sharedPosts = shareRepository.getSharedByUserUid(userId)
             .first()
             .map {
-            CombinedPost(
-                id = it.id,
-                type = PostType.SHARED_POST,
-                postEntity = null,
-                shareEntity = it,
-                createdAt = it.time
-            )
-        }
+                com.emc.moodmingle.data.model.post.user.CombinedPost(
+                    id = it.id,
+                    type = PostType.SHARED_POST,
+                    postEntity = null,
+                    shareEntity = it,
+                    createdAt = it.time
+                )
+            }
 
         // merge + sort
-        return (userPosts + sharedPosts)
-            .sortedByDescending { it.createdAt }
+        return (userPosts + sharedPosts).sortedByDescending { it.createdAt }
     }
 
-    fun getCombinedPostsByUserFlow(userId: String): Flow<List<CombinedPost>> {
-        val userPostsFlow: Flow<List<CombinedPost>> = flow {
+    fun getCombinedPostsByUserFlow(userId: String): Flow<List<com.emc.moodmingle.data.model.post.user.CombinedPost>> {
+        val userPostsFlow: Flow<List<com.emc.moodmingle.data.model.post.user.CombinedPost>> = flow {
             val posts = postRepository.getPostsByUserId(userId)
             emit(posts.map {
-                CombinedPost(
+                com.emc.moodmingle.data.model.post.user.CombinedPost(
                     id = it.id,
                     type = PostType.USER_POST,
                     postEntity = it,
@@ -145,10 +135,10 @@ class PostViewModelFirebase @Inject constructor(
             })
         }
 
-        val sharedPostsFlow: Flow<List<CombinedPost>> =
+        val sharedPostsFlow: Flow<List<com.emc.moodmingle.data.model.post.user.CombinedPost>> =
             shareRepository.getSharedByUserUid(userId).map { shares ->
                 shares.map {
-                    CombinedPost(
+                    com.emc.moodmingle.data.model.post.user.CombinedPost(
                         id = it.id,
                         type = PostType.SHARED_POST,
                         postEntity = null,
@@ -162,7 +152,73 @@ class PostViewModelFirebase @Inject constructor(
             (userPosts + sharedPosts).sortedByDescending { it.createdAt }
         }
     }
+
+    fun getAllCombinedPosts(): Flow<List<CombinedPost>> {
+        val postsFlow: Flow<List<CombinedPost>> = flow {
+            val posts = postRepository.getAllPosts().first()
+            emit(posts.map {
+                CombinedPost(
+                    id = it.id,
+                    type = PostType.USER_POST,
+                    entity = it,
+                    createdAt = it.timeAgo
+                )
+            })
+        }
+
+        val normalPostsFlow: Flow<List<CombinedPost>> = flow {
+            val normalPosts = normalPostRepository.getAllPosts().first()
+            emit(normalPosts.map {
+                CombinedPost(
+                    id = it.id,
+                    type = PostType.NORMAL_POST,
+                    entity = it,
+                    createdAt = it.timestamp
+                )
+            })
+        }
+
+        val sharesFlow: Flow<List<CombinedPost>> =
+            shareRepository.getAllShares().map { shares ->
+                shares.map {
+                    CombinedPost(
+                        id = it.id,
+                        type = PostType.SHARED_POST,
+                        entity = it,
+                        createdAt = it.time
+                    )
+                }
+            }
+
+        val remixesFlow: Flow<List<CombinedPost>> =
+            remixRepository.getAllRemixes().map { remixes ->
+                remixes.map {
+                    CombinedPost(
+                        id = it.id,
+                        type = PostType.REMIX_POST,
+                        entity = it,
+                        createdAt = it.timestamp
+                    )
+                }
+            }
+
+        return combine(
+            postsFlow,
+            normalPostsFlow,
+            sharesFlow,
+            remixesFlow
+        ) { userPosts, normalPosts, sharedPosts, remixPosts ->
+            (userPosts + normalPosts + sharedPosts + remixPosts).sortedByDescending { it.createdAt }
+        }
+    }
 }
+
+data class CombinedPost(
+    val id: String,
+    val entity: Any,
+    val type: PostType,
+    val createdAt: Long
+)
 
 data class PostUiState(
     val isLoading: Boolean = false,

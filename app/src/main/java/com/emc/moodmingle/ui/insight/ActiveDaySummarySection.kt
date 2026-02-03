@@ -27,10 +27,7 @@ fun ActiveDaySummary(period: String) {
 
     Card(
         modifier = Modifier
-            .background(
-                brush = BrushPrimaryGradient,
-                shape = RoundedCornerShape(12.dp)
-            ),
+            .background(brush = BrushPrimaryGradient, shape = RoundedCornerShape(12.dp)),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Column(

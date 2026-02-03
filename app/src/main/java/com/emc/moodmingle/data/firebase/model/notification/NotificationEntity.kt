@@ -6,9 +6,10 @@ data class NotificationEntity(
     @DocumentId
     val id: String = "",
     val userId: String = "",
-    val postId: String = "",
+    val entityId: String = "",
     val users: List<String> = emptyList(),
     val type: String = "",
     val timestamp: Long = System.currentTimeMillis(),
-    val read: Boolean = false
+    val read: Boolean = false,
+    val pinned: Boolean = false
 )

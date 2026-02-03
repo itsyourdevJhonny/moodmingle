@@ -1,8 +1,13 @@
 package com.emc.moodmingle.data.firebase.model.post.dailymood
 
 import android.os.Parcelable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import com.emc.moodmingle.data.firebase.model.post.normal.PostDescription
 import com.emc.moodmingle.data.firebase.model.remix.Mood
+import com.emc.moodmingle.utils.color.toHex
+import com.emc.moodmingle.utils.font.FontUtils
 import com.squareup.moshi.Json
 import kotlinx.parcelize.Parcelize
 
@@ -21,10 +26,10 @@ data class DailyMoodEntity(
 @Parcelize
 data class DailyMoodText(
     val text: String = "",
-    val color: String = "",
-    val font: String = "",
-    val align: String = "",
-    val hashtags: List<String> = emptyList(),
+    val font: String = FontUtils.getFontName(FontFamily.Default),
+    val color: String = Color.White.toHex(),
+    val align: String = TextAlign.Unspecified.toString(),
+    val hashtag: String = "",
     val mentions: List<String> = emptyList()
 ) : Parcelable
 

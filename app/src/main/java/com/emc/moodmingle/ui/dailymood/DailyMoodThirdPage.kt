@@ -32,7 +32,8 @@ import com.emc.moodmingle.ui.theme.PrimaryDark
 @Composable
 fun DailyMoodThirdPage(
     dailyMood: DailyMoodEntity,
-    onShowMoodDialog: (Boolean) -> Unit,
+    onMood: (Boolean) -> Unit,
+    onText: () -> Unit,
     onBack: () -> Unit
 ) {
     BackHandler { onBack() }
@@ -41,7 +42,7 @@ fun DailyMoodThirdPage(
         containerColor = Color.Black,
         topBar = { CreatePostDialogHeader(onBack = onBack) },
         floatingActionButton = {
-            Actions(dailyMood, onShowMoodDialog)
+            Actions(dailyMood, onMood, onText)
         }
     ) { paddingValues ->
         Content(paddingValues)
@@ -49,7 +50,7 @@ fun DailyMoodThirdPage(
 }
 
 @Composable
-private fun Actions(dailyMood: DailyMoodEntity, onShowMoodDialog: (Boolean) -> Unit) {
+private fun Actions(dailyMood: DailyMoodEntity, onMood: (Boolean) -> Unit, onText: () -> Unit) {
     val actions = getActions()
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -60,7 +61,8 @@ private fun Actions(dailyMood: DailyMoodEntity, onShowMoodDialog: (Boolean) -> U
                     .background(PrimaryDark, CircleShape)
                     .clickable {
                         when (label) {
-                            "mood" -> onShowMoodDialog(true)
+                            "mood" -> onMood(true)
+                            "text" -> onText()
                         }
                     },
                 contentAlignment = Alignment.Center

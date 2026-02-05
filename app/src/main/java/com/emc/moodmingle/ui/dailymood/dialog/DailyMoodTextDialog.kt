@@ -31,7 +31,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,12 +49,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
+import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodText
 import com.emc.moodmingle.ui.create.post.dialogs.CreatePostHashtagDialog
 import com.emc.moodmingle.ui.create.post.dialogs.CreatePostMentionDialog
-import com.emc.moodmingle.ui.create.post.hashtag.extractHashtags
 import com.emc.moodmingle.ui.create.post.pickers.CreatePostAlignPicker
 import com.emc.moodmingle.ui.create.post.pickers.CreatePostColorPicker
 import com.emc.moodmingle.ui.create.post.pickers.CreatePostFontPicker
@@ -64,17 +62,20 @@ import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.color.toHex
-import com.emc.moodmingle.utils.components.ExpandableAnnotatedText
+import com.emc.moodmingle.utils.components.AnnotatedHashtag
+import com.emc.moodmingle.utils.components.AnnotatedMention
 import com.emc.moodmingle.utils.text.toColor
 import com.emc.moodmingle.utils.text.toFontFamily
 import com.emc.moodmingle.utils.text.toFontName
 import com.emc.moodmingle.utils.text.toTextAlign
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DailyMoodTextDialog(onDismiss: () -> Unit, onTextCreated: (DailyMoodText) -> Unit) {
-    var dailyMoodText by remember { mutableStateOf(DailyMoodText()) }
+fun DailyMoodTextDialog(
+    dailyMood: DailyMoodEntity,
+    onTextEdited: (DailyMoodEntity) -> Unit,
+    onDismiss: () -> Unit
+) {
     var hashtag by remember { mutableStateOf(TextFieldValue("#", selection = TextRange(1))) }
 
     var selectedAction by remember { mutableStateOf("") }
@@ -82,130 +83,29 @@ fun DailyMoodTextDialog(onDismiss: () -> Unit, onTextCreated: (DailyMoodText) ->
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
 
-    BackHandler { onDismiss() }
+    BackHandler { if (selectedAction.isNotBlank()) selectedAction = "" else onDismiss() }
 
     Scaffold(
         containerColor = Color.Black,
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    containerColor = PrimaryDark
-                ),
-                title = { Text(text = "Add Text", fontSize = 20.sp) },
-                navigationIcon = {
-                    IconButton(onClick = { onDismiss() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                actions = {
-                    TextButton(
-                        onClick = {
-                            onTextCreated(dailyMoodText)
-                            onDismiss()
-                        },
-                        colors = ButtonDefaults.textButtonColors(
-                            containerColor = SecondaryDark,
-                            contentColor = Color.White
-                        ),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            top = ContentPadding.calculateTopPadding(),
-                            end = 16.dp,
-                            bottom = ContentPadding.calculateBottomPadding()
-                        ),
-                        enabled = dailyMoodText.text.isNotBlank() || dailyMoodText.hashtag.isNotBlank() || dailyMoodText.mentions.isNotEmpty()
-                    ) {
-                        Text(text = "Done", fontWeight = FontWeight.Bold)
-                    }
-                }
-            )
-        },
-        bottomBar = {
-            BottomAppBar(containerColor = PrimaryDark) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    listOf(
-                        "Text" to R.drawable.text_colored,
-                        "Color" to R.drawable.color_wheel,
-                        "Font" to R.drawable.font_colored,
-                        "Align" to R.drawable.align_colored,
-                        "Hashtag" to R.drawable.hashtag_colored,
-                        "Mention" to R.drawable.mention_colored
-                    ).forEach { (label, icon) ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .clickable {
-                                        if (selectedAction == label) {
-                                            selectedAction = ""
-                                            return@clickable
-                                        }
-
-                                        selectedAction = label
-                                    }
-                                    .background(SecondaryDark, CircleShape)
-                                    .padding(12.dp)
-                            ) {
-                                Image(
-                                    painter = painterResource(icon),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-
-                            Text(
-                                text = label,
-                                style = Typography.bodySmall.copy(color = Color.White)
-                            )
-                        }
-                    }
-                }
-            }
-        },
+        topBar = { TextDialogHeader(onDismiss, onTextEdited, dailyMood) },
+        bottomBar = { TextDialogFooter(selectedAction) { selectedAction = it } },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
-            when (selectedAction) {
-                "Font" -> {
-                    CreatePostFontPicker(selectedFont = dailyMoodText.font.toFontFamily()) {
-                        if (dailyMoodText.font == it.toFontName()) selectedAction = ""
-                        dailyMoodText = dailyMoodText.copy(font = it.toFontName())
-                    }
-                }
-
-                "Color" -> {
-                    CreatePostColorPicker(selectedColor = dailyMoodText.color.toColor()) {
-                        if (dailyMoodText.color == it.toHex()) selectedAction = ""
-                        dailyMoodText = dailyMoodText.copy(color = it.toHex())
-                    }
-                }
-
-                "Align" -> {
-                    CreatePostAlignPicker(selectedAlign = dailyMoodText.align.toTextAlign()) {
-                        if (dailyMoodText.align == it.toString()) selectedAction = ""
-                        dailyMoodText = dailyMoodText.copy(align = it.toString())
-                    }
-                }
-            }
+            FloatingActions(
+                selectedAction,
+                dailyMood,
+                onActionSelected = { selectedAction = it },
+                onTextEdited
+            )
         }
     ) { paddingValues ->
         TextDialogContent(
             paddingValues,
-            dailyMoodText,
+            dailyMood,
             isFocused,
             focusRequester,
             onFocused = { isFocused = it },
-            onTextChange = { dailyMoodText = dailyMoodText.copy(text = it) }
+            onTextChange = { onTextEdited(dailyMood.copy(text = dailyMood.text.copy(description = it))) }
         )
     }
 
@@ -215,22 +115,137 @@ fun DailyMoodTextDialog(onDismiss: () -> Unit, onTextCreated: (DailyMoodText) ->
             hashtag = hashtag,
             onHashtagChange = {
                 hashtag = it
-                dailyMoodText = dailyMoodText.copy(hashtag = it.text)
+                onTextEdited(dailyMood.copy(text = dailyMood.text.copy(hashtag = it.text)))
             },
             onDismiss = { selectedAction = "" }
         )
 
         "Mention" -> CreatePostMentionDialog(
-            mentionUserIds = dailyMoodText.mentions,
-            onMentionedUsers = { dailyMoodText = dailyMoodText.copy(mentions = it) },
+            mentionUserIds = dailyMood.text.mentions,
+            onMentionedUsers = { onTextEdited(dailyMood.copy(text = dailyMood.text.copy(mentions = it))) },
             onDismiss = { selectedAction = "" }
         )
     }
-
 }
 
 @Composable
-fun TextSection(
+@OptIn(ExperimentalMaterial3Api::class)
+private fun TextDialogHeader(
+    onDismiss: () -> Unit,
+    onTextEdited: (DailyMoodEntity) -> Unit,
+    dailyMood: DailyMoodEntity
+) {
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            titleContentColor = Color.White,
+            navigationIconContentColor = Color.White,
+            containerColor = PrimaryDark
+        ),
+        title = { Text(text = "Add Text", fontSize = 20.sp) },
+        navigationIcon = {
+            IconButton(onClick = onDismiss) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            }
+        },
+        actions = {
+            TextButton(
+                onClick = { onTextEdited(dailyMood); onDismiss() },
+                colors = ButtonDefaults.textButtonColors(
+                    containerColor = SecondaryDark,
+                    contentColor = Color.White
+                ),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    top = ContentPadding.calculateTopPadding(),
+                    end = 16.dp,
+                    bottom = ContentPadding.calculateBottomPadding()
+                ),
+                enabled = dailyMood.text.description.isNotBlank() || dailyMood.text.hashtag.isNotBlank() || dailyMood.text.mentions.isNotEmpty()
+            ) {
+                Text(text = "Done", fontWeight = FontWeight.Bold)
+            }
+        }
+    )
+}
+
+@Composable
+private fun TextDialogFooter(selectedAction: String, onActionSelected: (String) -> Unit) {
+    BottomAppBar(containerColor = PrimaryDark) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            listOf(
+                "Text" to R.drawable.text_colored,
+                "Color" to R.drawable.color_wheel,
+                "Font" to R.drawable.font_colored,
+                "Align" to R.drawable.align_colored,
+                "Hashtag" to R.drawable.hashtag_colored,
+                "Mention" to R.drawable.mention_colored
+            ).forEach { (label, icon) ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                                if (selectedAction == label) {
+                                    onActionSelected("")
+                                    return@clickable
+                                }
+                                onActionSelected(label)
+                            }
+                            .background(SecondaryDark, CircleShape)
+                            .padding(12.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                    Text(text = label, style = Typography.bodySmall.copy(color = Color.White))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FloatingActions(
+    selectedAction: String,
+    dailyMood: DailyMoodEntity,
+    onActionSelected: (String) -> Unit,
+    onTextEdited: (DailyMoodEntity) -> Unit
+) {
+    when (selectedAction) {
+        "Font" -> {
+            CreatePostFontPicker(selectedFont = dailyMood.text.font.toFontFamily()) {
+                if (dailyMood.text.font == it.toFontName()) onActionSelected("")
+                onTextEdited(dailyMood.copy(text = dailyMood.text.copy(font = it.toFontName())))
+            }
+        }
+
+        "Color" -> {
+            CreatePostColorPicker(selectedColor = dailyMood.text.color.toColor()) {
+                onTextEdited(dailyMood.copy(text = dailyMood.text.copy(color = it.toHex())))
+            }
+        }
+
+        "Align" -> {
+            CreatePostAlignPicker(selectedAlign = dailyMood.text.align.toTextAlign()) {
+                if (dailyMood.text.align == it.toString()) onActionSelected("")
+                onTextEdited(dailyMood.copy(text = dailyMood.text.copy(align = it.toString())))
+            }
+        }
+    }
+}
+
+@Composable
+private fun DescriptionSection(
     dailyMoodText: DailyMoodText,
     isFocused: Boolean,
     focusRequester: FocusRequester,
@@ -238,13 +253,13 @@ fun TextSection(
     onTextChange: (String) -> Unit
 ) {
     BasicTextField(
-        value = dailyMoodText.text,
+        value = dailyMoodText.description,
         onValueChange = { onTextChange(it) },
         cursorBrush = SolidColor(Color.White),
         textStyle = LocalTextStyle.current.copy(
             color = dailyMoodText.color.toColor(),
             fontSize = 20.sp,
-            textAlign = if (dailyMoodText.align.toTextAlign() == TextAlign.Unspecified && dailyMoodText.text.isEmpty()) TextAlign.Center else dailyMoodText.align.toTextAlign(),
+            textAlign = if (dailyMoodText.align.toTextAlign() == TextAlign.Unspecified && dailyMoodText.description.isEmpty()) TextAlign.Center else dailyMoodText.align.toTextAlign(),
             fontFamily = dailyMoodText.font.toFontFamily()
         ),
         decorationBox = { innerTextField ->
@@ -252,7 +267,7 @@ fun TextSection(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                if (dailyMoodText.text.isEmpty() && !isFocused) {
+                if (dailyMoodText.description.isEmpty() && !isFocused) {
                     Text(text = "Tap to enter text...", fontSize = 16.sp, color = GrayTextColor)
                 }
 
@@ -268,9 +283,9 @@ fun TextSection(
 }
 
 @Composable
-fun TextDialogContent(
+private fun TextDialogContent(
     paddingValues: PaddingValues,
-    dailyMoodText: DailyMoodText,
+    dailyMood: DailyMoodEntity,
     isFocused: Boolean,
     focusRequester: FocusRequester,
     onFocused: (Boolean) -> Unit,
@@ -287,34 +302,15 @@ fun TextDialogContent(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (dailyMoodText.mentions.isNotEmpty()) {
-                val userViewModel = hiltViewModel<FirebaseUserViewModel>()
-
-                val mentionUsernames = dailyMoodText.mentions.map { userId ->
-                    val user by remember(userId) {
-                        userViewModel.getUserById(userId)
-                    }.collectAsState(initial = null)
-
-                    user?.username ?: ""
-                }
-
-                ExpandableAnnotatedText(
-                    fullText = mentionUsernames.joinToString(", ") { "@$it" },
-                    minLines = 1
-                )
-            }
-
-            TextSection(dailyMoodText, isFocused, focusRequester, onFocused, onTextChange)
-
-            if (dailyMoodText.hashtag.isNotBlank()) {
-                val hashtags = extractHashtags(dailyMoodText.hashtag)
-
-                ExpandableAnnotatedText(
-                    fullText = hashtags.joinToString(" ") { "#${it.replace(" ", "")}" },
-                    style = Typography.bodyLarge.copy(lineHeight = 20.sp),
-                    minLines = 1
-                )
-            }
+            AnnotatedMention(mentions = dailyMood.text.mentions)
+            AnnotatedHashtag(hashtag = dailyMood.text.hashtag)
+            DescriptionSection(
+                dailyMoodText = dailyMood.text,
+                isFocused,
+                focusRequester,
+                onFocused,
+                onTextChange
+            )
         }
     }
 }

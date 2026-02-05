@@ -1,4 +1,4 @@
-package com.emc.moodmingle.ui.dailymood
+package com.emc.moodmingle.ui.dailymood.page
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background

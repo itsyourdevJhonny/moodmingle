@@ -320,16 +320,23 @@ private fun Content(
         if (dailyMood.location != null) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                    .padding(8.dp)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.location),
                     contentDescription = null,
-                    modifier = Modifier.size(28.dp)
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
                 )
 
                 Text(
-                    text = dailyMood.location.displayName
+                    text = dailyMood.location.displayName,
+                    style = Typography.bodyMedium.copy(color = Color.White)
                 )
             }
         }

@@ -1,18 +1,24 @@
 package com.emc.moodmingle.ui.dailymood.page
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,12 +30,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,9 +49,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
@@ -56,10 +66,12 @@ import coil.compose.AsyncImage
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodText
+import com.emc.moodmingle.data.firebase.model.post.dailymood.TextStyle
 import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.create.AllMediaGallery
-import com.emc.moodmingle.ui.dailymood.dialog.DailyMoodTextDialog
+import com.emc.moodmingle.ui.dailymood.dialog.DailyMoodEditText
 import com.emc.moodmingle.ui.dailymood.image.DailyMoodEditImage
+import com.emc.moodmingle.ui.dailymood.location.DailyMoodLocation
 import com.emc.moodmingle.ui.remix.MoodPickerDialog
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
@@ -74,6 +86,7 @@ import com.emc.moodmingle.utils.text.toColorFilter
 import com.emc.moodmingle.utils.text.toFontFamily
 import com.emc.moodmingle.utils.text.toTextAlign
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @Composable
@@ -116,7 +129,7 @@ fun DailyMoodThirdPage(
             }
 
             "text" -> {
-                DailyMoodTextDialog(
+                DailyMoodEditText(
                     dailyMood,
                     onTextEdited = onDailyMoodEdited,
                     onDismiss = { selectedAction = "" }
@@ -136,6 +149,10 @@ fun DailyMoodThirdPage(
 
             "edit_image" -> {
                 DailyMoodEditImage(dailyMood, onDailyMoodEdited) { selectedAction = "" }
+            }
+
+            "location" -> {
+                DailyMoodLocation(dailyMood, onDailyMoodEdited) { selectedAction = "" }
             }
         }
     }
@@ -166,10 +183,7 @@ private fun Footer(currentUser: UserEntityFirebase?) {
                         contentColor = Color.White
                     )
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = null
-                    )
+                    Icon(imageVector = Icons.Default.Settings, contentDescription = null)
                 }
 
                 TextButton(
@@ -179,9 +193,7 @@ private fun Footer(currentUser: UserEntityFirebase?) {
                         containerColor = SecondaryDark
                     )
                 ) {
-                    Text(
-                        text = "Share with"
-                    )
+                    Text(text = "Share with")
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         painter = painterResource(R.drawable.public_world),
@@ -330,7 +342,7 @@ private fun MoodSection(dailyMood: DailyMoodEntity) {
 }
 
 @Composable
-private fun ImageSection(
+private fun BoxScope.ImageSection(
     dailyMood: DailyMoodEntity,
     boxSize: IntSize,
     onTextPositionChanged: (DailyMoodText) -> Unit,
@@ -343,6 +355,15 @@ private fun ImageSection(
     var offsetY by remember { mutableFloatStateOf(0f) }
 
     var isPositionInitialized by remember { mutableStateOf(false) }
+
+    val snapThresholdPx = with(LocalDensity.current) { 8.dp.toPx() }
+
+    val centerX = (boxSize.width - imageSize.width) / 2f
+    val centerY = (boxSize.height - imageSize.height) / 2f
+
+    var showVerticalGuide by remember { mutableStateOf(false) }
+    var showHorizontalGuide by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(offsetX, offsetY) {
         onTextPositionChanged(dailyMood.text.copy(offsetX = offsetX, offsetY = offsetY))
@@ -370,14 +391,39 @@ private fun ImageSection(
             .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
             .clickable { onActionSelected("edit_image") }
             .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->
+                detectDragGestures(
+                    onDragEnd = {
+                        // SNAP WHEN RELEASED
+                        if (abs(offsetX - centerX) <= snapThresholdPx) {
+                            offsetX = centerX
+                        }
+                        if (abs(offsetY - centerY) <= snapThresholdPx) {
+                            offsetY = centerY
+                        }
+
+                        showVerticalGuide = false
+                        showHorizontalGuide = false
+                    }
+                ) { change, dragAmount ->
                     change.consume()
 
-                    val newX = offsetX + dragAmount.x
-                    val newY = offsetY + dragAmount.y
+                    var newX = offsetX + dragAmount.x
+                    var newY = offsetY + dragAmount.y
 
                     val maxX = (boxSize.width - imageSize.width).coerceAtLeast(0)
                     val maxY = (boxSize.height - imageSize.height).coerceAtLeast(0)
+
+                    // CENTER DETECTION
+                    showVerticalGuide = abs(newX - centerX) <= snapThresholdPx
+                    showHorizontalGuide = abs(newY - centerY) <= snapThresholdPx
+
+                    // MAGNET EFFECT (SOFT SNAP WHILE DRAGGING)
+                    if (showVerticalGuide) {
+                        newX = centerX
+                    }
+                    if (showHorizontalGuide) {
+                        newY = centerY
+                    }
 
                     offsetX = newX.coerceIn(0f, maxX.toFloat())
                     offsetY = newY.coerceIn(0f, maxY.toFloat())
@@ -385,10 +431,32 @@ private fun ImageSection(
             },
         colorFilter = if (imageFilterName != ImageFilterType.NORMAL.name) imageFilterName.toColorFilter() else null
     )
+
+    if (showVerticalGuide) {
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .fillMaxHeight()
+                .align(Alignment.Center)
+                .background(Color.White.copy(alpha = 0.8f))
+                .animateContentSize()
+        )
+    }
+
+    if (showHorizontalGuide) {
+        Box(
+            modifier = Modifier
+                .height(1.dp)
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .background(Color.White.copy(alpha = 0.8f))
+                .animateContentSize()
+        )
+    }
 }
 
 @Composable
-private fun DescriptionSection(
+private fun BoxScope.DescriptionSection(
     dailyMood: DailyMoodEntity,
     boxSize: IntSize,
     onTextPositionChanged: (DailyMoodText) -> Unit,
@@ -396,53 +464,126 @@ private fun DescriptionSection(
 ) {
     val dailyMoodText = dailyMood.text
 
-    var columnSize by remember { mutableStateOf(IntSize.Zero) }
+    val descriptionColor =
+        if (dailyMoodText.color.toColor().luminance() < 0.5f) Color.White else Color.Black
+
+    var size by remember { mutableStateOf(IntSize.Zero) }
 
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
 
     var isPositionInitialized by remember { mutableStateOf(false) }
 
+    val snapThresholdPx = with(LocalDensity.current) { 8.dp.toPx() }
+
+    val centerX = (boxSize.width - size.width) / 2f
+    val centerY = (boxSize.height - size.height) / 2f
+
+    var showVerticalGuide by remember { mutableStateOf(false) }
+    var showHorizontalGuide by remember { mutableStateOf(false) }
+
     LaunchedEffect(offsetX, offsetY) {
         onTextPositionChanged(dailyMoodText.copy(offsetX = offsetX, offsetY = offsetY))
     }
 
+
     Box(
         modifier = Modifier
             .onGloballyPositioned { coords ->
-                columnSize = coords.size
+                size = coords.size
 
                 if (!isPositionInitialized && boxSize != IntSize.Zero) {
-                    offsetX = (boxSize.width - columnSize.width) / 2f
-                    offsetY = (boxSize.height - columnSize.height) / 2f
+                    offsetX = (boxSize.width - size.width) / 2f
+                    offsetY = (boxSize.height - size.height) / 2f
                     isPositionInitialized = true
                 }
             }
             .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
             .clickable { onActionSelected("text") }
             .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->
+                detectDragGestures(
+                    onDragEnd = {
+                        // SNAP WHEN RELEASED
+                        if (abs(offsetX - centerX) <= snapThresholdPx) {
+                            offsetX = centerX
+                        }
+                        if (abs(offsetY - centerY) <= snapThresholdPx) {
+                            offsetY = centerY
+                        }
+
+                        showVerticalGuide = false
+                        showHorizontalGuide = false
+                    }
+                ) { change, dragAmount ->
                     change.consume()
 
-                    val newX = offsetX + dragAmount.x
-                    val newY = offsetY + dragAmount.y
+                    var newX = offsetX + dragAmount.x
+                    var newY = offsetY + dragAmount.y
 
-                    val maxX = (boxSize.width - columnSize.width).coerceAtLeast(0)
-                    val maxY = (boxSize.height - columnSize.height).coerceAtLeast(0)
+                    val maxX = (boxSize.width - size.width).coerceAtLeast(0)
+                    val maxY = (boxSize.height - size.height).coerceAtLeast(0)
+
+                    // CENTER DETECTION
+                    showVerticalGuide = abs(newX - centerX) <= snapThresholdPx
+                    showHorizontalGuide = abs(newY - centerY) <= snapThresholdPx
+
+                    // MAGNET EFFECT (SOFT SNAP WHILE DRAGGING)
+                    if (showVerticalGuide) {
+                        newX = centerX
+                    }
+                    if (showHorizontalGuide) {
+                        newY = centerY
+                    }
 
                     offsetX = newX.coerceIn(0f, maxX.toFloat())
                     offsetY = newY.coerceIn(0f, maxY.toFloat())
                 }
             }
     ) {
-        Row(modifier = Modifier.widthIn(max = 232.dp)) {
+        Row(
+            modifier = Modifier
+                .widthIn(max = 232.dp)
+                .background(
+                    when (dailyMoodText.style) {
+                        TextStyle.NORMAL -> Color.Transparent
+                        TextStyle.WITH_BACKGROUND -> dailyMoodText.color.toColor()
+                        TextStyle.WITHOUT_BACKGROUND -> dailyMoodText.color.toColor()
+                            .copy(alpha = 0.3f)
+                    }
+                )
+                .padding(8.dp)
+        ) {
+//            Text(text = "“", fontSize = 32.sp, color = Color.White)
             Text(
-                text = "“${dailyMoodText.description}”",
-                color = dailyMoodText.color.toColor(),
+                text = dailyMoodText.description,
+                color = when (dailyMoodText.style) {
+                    TextStyle.NORMAL -> dailyMoodText.color.toColor()
+                    TextStyle.WITH_BACKGROUND -> descriptionColor
+                    TextStyle.WITHOUT_BACKGROUND -> Color.White
+                },
                 fontFamily = dailyMoodText.font.toFontFamily(),
                 textAlign = dailyMoodText.align.toTextAlign()
             )
+//            Text(text = "”", fontSize = 32.sp, color = Color.White)
         }
+    }
+
+    AnimatedVisibility(
+        visible = showVerticalGuide,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = Modifier.align(Alignment.Center)
+    ) {
+        VerticalDivider(color = Color.White.copy(alpha = 0.8f))
+    }
+
+    AnimatedVisibility(
+        visible = showHorizontalGuide,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = Modifier.align(Alignment.Center)
+    ) {
+        HorizontalDivider(color = Color.White.copy(alpha = 0.8f))
     }
 }
 

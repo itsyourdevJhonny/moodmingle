@@ -1,6 +1,7 @@
 package com.emc.moodmingle.ui.dailymood.dialog
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonDefaults.ContentPadding
@@ -24,7 +27,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -42,6 +47,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodText
+import com.emc.moodmingle.data.firebase.model.post.dailymood.TextStyle
 import com.emc.moodmingle.ui.create.post.dialogs.CreatePostHashtagDialog
 import com.emc.moodmingle.ui.create.post.dialogs.CreatePostMentionDialog
 import com.emc.moodmingle.ui.create.post.pickers.CreatePostAlignPicker
@@ -71,7 +78,7 @@ import com.emc.moodmingle.utils.text.toTextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DailyMoodTextDialog(
+fun DailyMoodEditText(
     dailyMood: DailyMoodEntity,
     onTextEdited: (DailyMoodEntity) -> Unit,
     onDismiss: () -> Unit
@@ -221,28 +228,117 @@ private fun FloatingActions(
     onActionSelected: (String) -> Unit,
     onTextEdited: (DailyMoodEntity) -> Unit
 ) {
-    when (selectedAction) {
-        "Font" -> {
-            CreatePostFontPicker(selectedFont = dailyMood.text.font.toFontFamily()) {
-                if (dailyMood.text.font == it.toFontName()) onActionSelected("")
-                onTextEdited(dailyMood.copy(text = dailyMood.text.copy(font = it.toFontName())))
+    val dailyMoodText = dailyMood.text
+    val labelColor =
+        if (dailyMoodText.color.toColor().luminance() < 0.5f) Color.White else Color.Black
+
+    var isTextAnimate by remember { mutableStateOf(false) }
+    var isTextEffect by remember { mutableStateOf(false) }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        when (selectedAction) {
+            "Font" -> {
+                CreatePostFontPicker(selectedFont = dailyMood.text.font.toFontFamily()) {
+                    if (dailyMood.text.font == it.toFontName()) onActionSelected("")
+                    onTextEdited(dailyMood.copy(text = dailyMood.text.copy(font = it.toFontName())))
+                }
+            }
+
+            "Color" -> {
+                CreatePostColorPicker(selectedColor = dailyMood.text.color.toColor()) {
+                    onTextEdited(dailyMood.copy(text = dailyMood.text.copy(color = it.toHex())))
+                }
+            }
+
+            "Align" -> {
+                CreatePostAlignPicker(selectedAlign = dailyMood.text.align.toTextAlign()) {
+                    if (dailyMood.text.align == it.toString()) onActionSelected("")
+                    onTextEdited(dailyMood.copy(text = dailyMood.text.copy(align = it.toString())))
+                }
             }
         }
 
-        "Color" -> {
-            CreatePostColorPicker(selectedColor = dailyMood.text.color.toColor()) {
-                onTextEdited(dailyMood.copy(text = dailyMood.text.copy(color = it.toHex())))
-            }
-        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            AssistChip(
+                onClick = {
+                    onTextEdited(
+                        dailyMood.copy(
+                            text = dailyMoodText.copy(
+                                style = when (dailyMoodText.style) {
+                                    TextStyle.NORMAL -> TextStyle.WITH_BACKGROUND
+                                    TextStyle.WITH_BACKGROUND -> TextStyle.WITHOUT_BACKGROUND
+                                    TextStyle.WITHOUT_BACKGROUND -> TextStyle.NORMAL
+                                }
+                            )
+                        )
+                    )
+                },
+                label = { Text(text = "A", fontSize = 24.sp) },
+                leadingIcon = {},
+                border = if (dailyMoodText.style == TextStyle.NORMAL) BorderStroke(
+                    width = 1.dp,
+                    color = dailyMoodText.color.toColor()
+                ) else null,
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = when (dailyMoodText.style) {
+                        TextStyle.NORMAL -> Color.Transparent
+                        TextStyle.WITH_BACKGROUND -> dailyMoodText.color.toColor()
+                        TextStyle.WITHOUT_BACKGROUND -> dailyMoodText.color.toColor()
+                            .copy(alpha = 0.3f)
+                    },
+                    labelColor = when (dailyMoodText.style) {
+                        TextStyle.NORMAL -> Color.White
+                        TextStyle.WITH_BACKGROUND -> labelColor
+                        TextStyle.WITHOUT_BACKGROUND -> Color.White
+                    }
+                )
+            )
 
-        "Align" -> {
-            CreatePostAlignPicker(selectedAlign = dailyMood.text.align.toTextAlign()) {
-                if (dailyMood.text.align == it.toString()) onActionSelected("")
-                onTextEdited(dailyMood.copy(text = dailyMood.text.copy(align = it.toString())))
-            }
+            ToggleOutlinedIconButton(
+                iconRes = R.drawable.text_animate,
+                isActive = isTextAnimate,
+                onClick = {
+                    isTextEffect = false
+                    isTextAnimate = !isTextAnimate
+                }
+            )
+
+            ToggleOutlinedIconButton(
+                iconRes = R.drawable.text_effect,
+                isActive = isTextEffect,
+                onClick = {
+                    isTextAnimate = false
+                    isTextEffect = !isTextEffect
+                }
+            )
         }
     }
 }
+
+@Composable
+private fun ToggleOutlinedIconButton(iconRes: Int, isActive: Boolean, onClick: () -> Unit) {
+    OutlinedIconButton(
+        onClick = onClick,
+        colors = IconButtonDefaults.outlinedIconButtonColors(
+            containerColor = if (isActive) SecondaryDark else Color.Transparent,
+            contentColor = Color.White
+        ),
+        border = BorderStroke(1.dp, if (isActive) SecondaryDark else Color.White)
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
 
 @Composable
 private fun DescriptionSection(
@@ -252,32 +348,44 @@ private fun DescriptionSection(
     onFocused: (Boolean) -> Unit,
     onTextChange: (String) -> Unit
 ) {
+    val labelColor =
+        if (dailyMoodText.color.toColor().luminance() < 0.5f) Color.White else Color.Black
+
     BasicTextField(
         value = dailyMoodText.description,
         onValueChange = { onTextChange(it) },
-        cursorBrush = SolidColor(Color.White),
+        cursorBrush = SolidColor(labelColor),
         textStyle = LocalTextStyle.current.copy(
-            color = dailyMoodText.color.toColor(),
+            color = when (dailyMoodText.style) {
+                TextStyle.NORMAL -> dailyMoodText.color.toColor()
+                TextStyle.WITH_BACKGROUND -> labelColor
+                TextStyle.WITHOUT_BACKGROUND -> Color.White
+            },
             fontSize = 20.sp,
             textAlign = if (dailyMoodText.align.toTextAlign() == TextAlign.Unspecified && dailyMoodText.description.isEmpty()) TextAlign.Center else dailyMoodText.align.toTextAlign(),
-            fontFamily = dailyMoodText.font.toFontFamily()
+            fontFamily = dailyMoodText.font.toFontFamily(),
         ),
         decorationBox = { innerTextField ->
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(contentAlignment = Alignment.Center) {
                 if (dailyMoodText.description.isEmpty() && !isFocused) {
                     Text(text = "Tap to enter text...", fontSize = 16.sp, color = GrayTextColor)
                 }
 
-                innerTextField()
+                Box(modifier = Modifier.padding(8.dp)) {
+                    innerTextField()
+                }
             }
         },
         modifier = Modifier
-            .fillMaxWidth()
             .focusRequester(focusRequester)
             .onFocusChanged { onFocused(it.isFocused) }
+            .background(
+                when (dailyMoodText.style) {
+                    TextStyle.NORMAL -> Color.Transparent
+                    TextStyle.WITH_BACKGROUND -> dailyMoodText.color.toColor()
+                    TextStyle.WITHOUT_BACKGROUND -> dailyMoodText.color.toColor().copy(alpha = 0.3f)
+                }
+            )
 
     )
 }

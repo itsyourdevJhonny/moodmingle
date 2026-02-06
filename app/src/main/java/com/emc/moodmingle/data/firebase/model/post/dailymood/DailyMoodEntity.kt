@@ -30,11 +30,18 @@ data class DailyMoodText(
     val font: String = FontFamily.Default.toFontName(),
     val color: String = Color.White.toHex(),
     val align: String = TextAlign.Unspecified.toString(),
+    val style: TextStyle = TextStyle.NORMAL,
     val hashtag: String = "",
     val mentions: List<String> = emptyList(),
     val offsetX: Float = 0f,
     val offsetY: Float = 0f
 ) : Parcelable
+
+enum class TextStyle {
+    NORMAL,
+    WITH_BACKGROUND,
+    WITHOUT_BACKGROUND
+}
 
 @Parcelize
 data class DailyMoodMedia(

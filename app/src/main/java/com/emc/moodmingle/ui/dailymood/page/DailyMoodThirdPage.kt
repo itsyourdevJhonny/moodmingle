@@ -331,7 +331,7 @@ private fun Content(
                     painter = painterResource(R.drawable.location),
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
 
                 Text(

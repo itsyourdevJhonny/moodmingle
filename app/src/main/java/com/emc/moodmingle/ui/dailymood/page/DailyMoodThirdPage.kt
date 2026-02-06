@@ -1,22 +1,13 @@
 package com.emc.moodmingle.ui.dailymood.page
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOut
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -39,8 +30,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
@@ -85,6 +74,7 @@ import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodText
 import com.emc.moodmingle.data.firebase.model.post.dailymood.TextStyle
 import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.create.AllMediaGallery
+import com.emc.moodmingle.ui.dailymood.action.DailyMoodFloatingActions
 import com.emc.moodmingle.ui.dailymood.text.DailyMoodEditText
 import com.emc.moodmingle.ui.dailymood.image.DailyMoodEditImage
 import com.emc.moodmingle.ui.dailymood.location.DailyMoodLocation
@@ -131,41 +121,7 @@ fun DailyMoodThirdPage(
             },
             bottomBar = { Footer(currentUser) },
             floatingActionButton = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    AnimatedVisibility(
-                        visible = selectedAction != "hide",
-                        enter = slideInVertically(initialOffsetY = { maxHeight -> maxHeight / 100 }),
-                        exit = slideOutVertically(targetOffsetY = { maxHeight -> maxHeight / 100 })
-                    ) {
-                        Actions(dailyMood) { selectedAction = it }
-                    }
-
-                    val rotation by animateFloatAsState(
-                        targetValue = if (selectedAction == "hide") 270f else 0f,
-                        label = "icon_rotation"
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
-                            .clickable {
-                                selectedAction = if (selectedAction == "hide") "" else "hide"
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = "Action",
-                            tint = Color.White,
-                            modifier = Modifier
-                                .size(38.dp)
-                                .rotate(rotation)
-                        )
-                    }
-                }
+                DailyMoodFloatingActions(dailyMood, selectedAction) { selectedAction = it }
             }
         ) { paddingValues ->
             Content(paddingValues, dailyMood, onTextPositionChanged) { selectedAction = it }
@@ -209,6 +165,7 @@ fun DailyMoodThirdPage(
         }
     }
 }
+
 
 @Composable
 private fun Footer(currentUser: UserEntityFirebase?) {
@@ -272,49 +229,6 @@ private fun Footer(currentUser: UserEntityFirebase?) {
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(text = "Post", fontWeight = FontWeight.Black)
-            }
-        }
-    }
-}
-
-@Composable
-private fun Actions(dailyMood: DailyMoodEntity, onActionSelected: (String) -> Unit) {
-    val actions = getActions()
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        actions.forEach { (label, icon) ->
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(Color.Black.copy(alpha = 0.3f), CircleShape)
-                    .clickable { onActionSelected(label) },
-                contentAlignment = Alignment.Center
-            ) {
-                when {
-                    label == "mood" && dailyMood.mood.description.isNotBlank() -> {
-                        Text(text = dailyMood.mood.emoji, fontSize = 28.sp, color = Color.White)
-                    }
-
-                    label == "music" && dailyMood.musicTrack != null -> {
-                        AsyncImage(
-                            model = dailyMood.musicTrack.streamUrl,
-                            contentDescription = "Music",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                        )
-                    }
-
-                    else -> {
-                        Icon(
-                            painter = painterResource(icon),
-                            contentDescription = "Action",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
             }
         }
     }
@@ -661,15 +575,4 @@ private fun BoxScope.DescriptionSection(
     ) {
         HorizontalDivider(color = Color.White.copy(alpha = 0.8f))
     }
-}
-
-private fun getActions(): List<Pair<String, Int>> {
-    return listOf(
-        "mood" to R.drawable.mood,
-        "text" to R.drawable.text_style,
-        "media" to R.drawable.image_video,
-        "music" to R.drawable.music_note,
-        "location" to R.drawable.location,
-//        "hide" to R.drawable.close
-    )
 }

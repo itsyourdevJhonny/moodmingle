@@ -1,4 +1,4 @@
-package com.emc.moodmingle.ui.dailymood.dialog
+package com.emc.moodmingle.ui.dailymood.text
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke

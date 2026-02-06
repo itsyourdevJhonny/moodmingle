@@ -69,7 +69,7 @@ import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodText
 import com.emc.moodmingle.data.firebase.model.post.dailymood.TextStyle
 import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.create.AllMediaGallery
-import com.emc.moodmingle.ui.dailymood.dialog.DailyMoodEditText
+import com.emc.moodmingle.ui.dailymood.text.DailyMoodEditText
 import com.emc.moodmingle.ui.dailymood.image.DailyMoodEditImage
 import com.emc.moodmingle.ui.dailymood.location.DailyMoodLocation
 import com.emc.moodmingle.ui.remix.MoodPickerDialog

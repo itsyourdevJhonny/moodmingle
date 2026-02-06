@@ -70,26 +70,7 @@ fun Content(
             .padding(top = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        OutlinedTextField(
-            value = locationViewModel.query,
-            onValueChange = {
-                locationViewModel.onQueryChange(it)
-                isLoading = true
-            },
-            placeholder = { Text(text = "Search Location...") },
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedTextColor = Color.White,
-                unfocusedPlaceholderColor = Color.Gray,
-                unfocusedBorderColor = Color.White,
-                focusedBorderColor = Color.White,
-                focusedTextColor = Color.White,
-                cursorColor = Color.White
-            ),
-            shape = CircleShape,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        )
+        LocationSearchField(locationViewModel) { isLoading = true }
 
         if (isLoading && locationViewModel.query.isNotBlank()) {
             CircularProgressIndicator(
@@ -113,6 +94,33 @@ fun Content(
             }
         }
     }
+}
+
+@Composable
+private fun LocationSearchField(
+    locationViewModel: LocationViewModel,
+    onLoadingChanged: (Boolean) -> Unit
+) {
+    OutlinedTextField(
+        value = locationViewModel.query,
+        onValueChange = {
+            locationViewModel.onQueryChange(it)
+            onLoadingChanged(true)
+        },
+        placeholder = { Text(text = "Search Location...") },
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedTextColor = Color.White,
+            unfocusedPlaceholderColor = Color.Gray,
+            unfocusedBorderColor = Color.White,
+            focusedBorderColor = Color.White,
+            focusedTextColor = Color.White,
+            cursorColor = Color.White
+        ),
+        shape = CircleShape,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    )
 }
 
 @Composable

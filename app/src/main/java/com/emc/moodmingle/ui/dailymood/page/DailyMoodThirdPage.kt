@@ -1,10 +1,12 @@
 package com.emc.moodmingle.ui.dailymood.page
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
@@ -14,6 +16,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOut
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -60,6 +63,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
@@ -138,6 +142,11 @@ fun DailyMoodThirdPage(
                         Actions(dailyMood) { selectedAction = it }
                     }
 
+                    val rotation by animateFloatAsState(
+                        targetValue = if (selectedAction == "hide") 270f else 0f,
+                        label = "icon_rotation"
+                    )
+
                     Box(
                         modifier = Modifier
                             .size(48.dp)
@@ -148,10 +157,12 @@ fun DailyMoodThirdPage(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = if (selectedAction == "hide") Icons.AutoMirrored.Filled.KeyboardArrowLeft else Icons.Default.KeyboardArrowUp,
+                            imageVector = Icons.Default.KeyboardArrowUp,
                             contentDescription = "Action",
                             tint = Color.White,
-                            modifier = Modifier.size(38.dp)
+                            modifier = Modifier
+                                .size(38.dp)
+                                .rotate(rotation)
                         )
                     }
                 }

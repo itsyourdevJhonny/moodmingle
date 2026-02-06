@@ -46,47 +46,55 @@ private fun PrimaryActions(
     selectedAction: String,
     onActionSelected: (String) -> Unit
 ) {
-    val actions = getActions()
-
     AnimatedVisibility(
         visible = selectedAction != "hide",
         enter = slideInVertically(initialOffsetY = { maxHeight -> maxHeight / 100 }),
         exit = slideOutVertically(targetOffsetY = { maxHeight -> maxHeight / 100 })
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            actions.forEach { (label, icon) ->
-                IconButton(
-                    onClick = { onActionSelected(label) },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.Black.copy(alpha = 0.3f),
-                        contentColor = Color.White
-                    )
-                ) {
-                    when {
-                        label == "mood" && dailyMood.mood.description.isNotBlank() -> {
-                            Text(text = dailyMood.mood.emoji, fontSize = 28.sp)
-                        }
+            getActions().forEach { (label, icon) ->
+                ActionIcon(dailyMood, label, icon, onActionSelected)
+            }
+        }
+    }
+}
 
-                        label == "music" && dailyMood.musicTrack != null -> {
-                            AsyncImage(
-                                model = dailyMood.musicTrack.streamUrl,
-                                contentDescription = "Music",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .clip(CircleShape)
-                            )
-                        }
+@Composable
+private fun ActionIcon(
+    dailyMood: DailyMoodEntity,
+    label: String,
+    icon: Int,
+    onActionSelected: (String) -> Unit,
+) {
+    IconButton(
+        onClick = { onActionSelected(label) },
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = Color.Black.copy(alpha = 0.3f),
+            contentColor = Color.White
+        )
+    ) {
+        when {
+            label == "mood" && dailyMood.mood.description.isNotBlank() -> {
+                Text(text = dailyMood.mood.emoji, fontSize = 28.sp)
+            }
 
-                        else -> {
-                            Icon(
-                                painter = painterResource(icon),
-                                contentDescription = "Action",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-                }
+            label == "music" && dailyMood.musicTrack != null -> {
+                AsyncImage(
+                    model = dailyMood.musicTrack.streamUrl,
+                    contentDescription = "Music",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                )
+            }
+
+            else -> {
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = "Action",
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }

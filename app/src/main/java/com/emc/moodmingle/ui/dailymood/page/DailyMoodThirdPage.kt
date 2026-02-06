@@ -3,11 +3,8 @@ package com.emc.moodmingle.ui.dailymood.page
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -30,7 +27,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ButtonDefaults
@@ -52,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
@@ -75,9 +70,9 @@ import com.emc.moodmingle.data.firebase.model.post.dailymood.TextStyle
 import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.create.AllMediaGallery
 import com.emc.moodmingle.ui.dailymood.action.DailyMoodFloatingActions
-import com.emc.moodmingle.ui.dailymood.text.DailyMoodEditText
 import com.emc.moodmingle.ui.dailymood.image.DailyMoodEditImage
 import com.emc.moodmingle.ui.dailymood.location.DailyMoodLocation
+import com.emc.moodmingle.ui.dailymood.text.DailyMoodEditText
 import com.emc.moodmingle.ui.remix.MoodPickerDialog
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
@@ -136,13 +131,7 @@ fun DailyMoodThirdPage(
                 )
             }
 
-            "text" -> {
-                DailyMoodEditText(
-                    dailyMood,
-                    onTextEdited = onDailyMoodEdited,
-                    onDismiss = { selectedAction = "" }
-                )
-            }
+            "text" -> DailyMoodEditText(dailyMood, onDailyMoodEdited) { selectedAction = "" }
 
             "media" -> {
                 AllMediaGallery(
@@ -155,13 +144,9 @@ fun DailyMoodThirdPage(
                 )
             }
 
-            "edit_image" -> {
-                DailyMoodEditImage(dailyMood, onDailyMoodEdited) { selectedAction = "" }
-            }
+            "edit_image" -> DailyMoodEditImage(dailyMood, onDailyMoodEdited) { selectedAction = "" }
 
-            "location" -> {
-                DailyMoodLocation(dailyMood, onDailyMoodEdited) { selectedAction = "" }
-            }
+            "location" -> DailyMoodLocation(dailyMood, onDailyMoodEdited) { selectedAction = "" }
         }
     }
 }

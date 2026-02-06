@@ -80,7 +80,7 @@ import com.emc.moodmingle.utils.text.toTextAlign
 @Composable
 fun DailyMoodEditText(
     dailyMood: DailyMoodEntity,
-    onTextEdited: (DailyMoodEntity) -> Unit,
+    onDailyMoodEdited: (DailyMoodEntity) -> Unit,
     onDismiss: () -> Unit
 ) {
     var hashtag by remember { mutableStateOf(TextFieldValue("#", selection = TextRange(1))) }
@@ -94,7 +94,7 @@ fun DailyMoodEditText(
 
     Scaffold(
         containerColor = Color.Black,
-        topBar = { TextDialogHeader(onDismiss, onTextEdited, dailyMood) },
+        topBar = { TextDialogHeader(onDismiss, onDailyMoodEdited, dailyMood) },
         bottomBar = { TextDialogFooter(selectedAction) { selectedAction = it } },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
@@ -102,7 +102,7 @@ fun DailyMoodEditText(
                 selectedAction,
                 dailyMood,
                 onActionSelected = { selectedAction = it },
-                onTextEdited
+                onDailyMoodEdited
             )
         }
     ) { paddingValues ->
@@ -112,7 +112,7 @@ fun DailyMoodEditText(
             isFocused,
             focusRequester,
             onFocused = { isFocused = it },
-            onTextChange = { onTextEdited(dailyMood.copy(text = dailyMood.text.copy(description = it))) }
+            onTextChange = { onDailyMoodEdited(dailyMood.copy(text = dailyMood.text.copy(description = it))) }
         )
     }
 
@@ -122,14 +122,14 @@ fun DailyMoodEditText(
             hashtag = hashtag,
             onHashtagChange = {
                 hashtag = it
-                onTextEdited(dailyMood.copy(text = dailyMood.text.copy(hashtag = it.text)))
+                onDailyMoodEdited(dailyMood.copy(text = dailyMood.text.copy(hashtag = it.text)))
             },
             onDismiss = { selectedAction = "" }
         )
 
         "Mention" -> CreatePostMentionDialog(
             mentionUserIds = dailyMood.text.mentions,
-            onMentionedUsers = { onTextEdited(dailyMood.copy(text = dailyMood.text.copy(mentions = it))) },
+            onMentionedUsers = { onDailyMoodEdited(dailyMood.copy(text = dailyMood.text.copy(mentions = it))) },
             onDismiss = { selectedAction = "" }
         )
     }

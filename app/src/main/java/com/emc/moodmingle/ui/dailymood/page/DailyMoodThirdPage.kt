@@ -316,6 +316,23 @@ private fun Content(
                 MoodSection(dailyMood)
             }
         }
+
+        if (dailyMood.location != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.location),
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp)
+                )
+
+                Text(
+                    text = dailyMood.location.displayName
+                )
+            }
+        }
     }
 }
 

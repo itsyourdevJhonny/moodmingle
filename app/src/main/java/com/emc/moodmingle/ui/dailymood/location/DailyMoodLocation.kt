@@ -86,7 +86,7 @@ fun Content(
             LazyColumn {
                 items(locationViewModel.searchResults) { place ->
                     LocationItem(place) {
-                        onDailyMoodEdited(dailyMood.copy(location = place.displayName))
+                        onDailyMoodEdited(dailyMood.copy(location = place))
                         locationViewModel.onQueryChange("")
                         onBack()
                     }

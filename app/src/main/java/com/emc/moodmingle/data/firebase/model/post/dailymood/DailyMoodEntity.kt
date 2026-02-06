@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import com.emc.moodmingle.api.nominatim.NominatimPlace
 import com.emc.moodmingle.data.firebase.model.post.normal.PostDescription
 import com.emc.moodmingle.data.firebase.model.remix.Mood
 import com.emc.moodmingle.utils.color.toHex
@@ -18,7 +19,7 @@ data class DailyMoodEntity(
     val description: PostDescription? = null,
     val media: DailyMoodMedia = DailyMoodMedia(),
     val musicTrack: MusicTrack? = null,
-    val location: String = "",
+    val location: NominatimPlace? = null,
     val text: DailyMoodText = DailyMoodText(),
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = 0

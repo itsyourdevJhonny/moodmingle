@@ -3,7 +3,7 @@ package com.emc.moodmingle.api.soundcloud.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emc.moodmingle.api.soundcloud.SoundCloudApi
-import com.emc.moodmingle.api.soundcloud.model.TrackResponse
+import com.emc.moodmingle.api.soundcloud.TrackResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

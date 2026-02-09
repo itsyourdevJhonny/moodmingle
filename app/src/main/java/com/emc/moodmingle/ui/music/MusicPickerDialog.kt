@@ -59,7 +59,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import coil.compose.rememberAsyncImagePainter
 import com.emc.moodmingle.R
-import com.emc.moodmingle.api.soundcloud.model.TrackResponse
+import com.emc.moodmingle.api.soundcloud.TrackResponse
 import com.emc.moodmingle.api.soundcloud.viewmodel.SearchViewModel
 import com.emc.moodmingle.ui.create.formatDuration
 import com.emc.moodmingle.ui.create.post.CreatePostDialogHeader

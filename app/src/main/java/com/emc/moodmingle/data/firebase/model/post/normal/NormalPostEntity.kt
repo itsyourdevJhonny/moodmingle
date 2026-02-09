@@ -4,7 +4,7 @@ import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import com.emc.moodmingle.api.soundcloud.model.TrackResponse
+import com.emc.moodmingle.api.soundcloud.TrackResponse
 import com.emc.moodmingle.data.firebase.model.post.settings.PostSettings
 import com.emc.moodmingle.data.firebase.model.remix.Mood
 import com.emc.moodmingle.ui.create.post.dialogs.LinkMetadata

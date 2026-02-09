@@ -3,13 +3,8 @@ package com.emc.moodmingle.ui.create
 import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
-import android.media.ThumbnailUtils
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
-import android.util.Size
-import androidx.annotation.RequiresApi
-import java.io.File
 
 fun getMimeType(context: Context, uri: Uri): String? {
     return context.contentResolver.getType(uri)
@@ -31,17 +26,6 @@ fun countMediaTypes(context: Context, uris: List<Uri>): Triple<Int, Int, Int> {
     }
 
     return Triple(imageCount, videoCount, audioCount)
-}
-
-fun extractThumbnail(context: Context, uri: Uri): Bitmap? {
-    return try {
-        ThumbnailUtils.createVideoThumbnail(
-            getRealPath(context, uri),
-            MediaStore.Images.Thumbnails.MINI_KIND
-        )
-    } catch (e: Exception) {
-        null
-    }
 }
 
 fun getRealPath(context: Context, uri: Uri): String {

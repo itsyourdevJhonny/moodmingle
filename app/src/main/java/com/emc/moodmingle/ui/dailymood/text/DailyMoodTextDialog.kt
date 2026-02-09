@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -64,7 +66,6 @@ import com.emc.moodmingle.ui.create.post.dialogs.CreatePostMentionDialog
 import com.emc.moodmingle.ui.create.post.pickers.CreatePostAlignPicker
 import com.emc.moodmingle.ui.create.post.pickers.CreatePostColorPicker
 import com.emc.moodmingle.ui.create.post.pickers.CreatePostFontPicker
-import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
@@ -79,8 +80,8 @@ import com.emc.moodmingle.utils.text.toTextAlign
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DailyMoodEditText(
-    dailyMood: DailyMoodEntity,
-    onDailyMoodEdited: (DailyMoodEntity) -> Unit,
+    mood: DailyMoodEntity,
+    onEdited: (DailyMoodEntity) -> Unit,
     onDismiss: () -> Unit
 ) {
     var hashtag by remember { mutableStateOf(TextFieldValue("#", selection = TextRange(1))) }
@@ -94,25 +95,25 @@ fun DailyMoodEditText(
 
     Scaffold(
         containerColor = Color.Black,
-        topBar = { TextDialogHeader(onDismiss, onDailyMoodEdited, dailyMood) },
-        bottomBar = { TextDialogFooter(selectedAction) { selectedAction = it } },
+        topBar = { Header(onDismiss, onEdited, mood) },
+        bottomBar = { Footer(selectedAction) { selectedAction = it } },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
             FloatingActions(
                 selectedAction,
-                dailyMood,
+                mood,
                 onActionSelected = { selectedAction = it },
-                onDailyMoodEdited
+                onEdited
             )
         }
     ) { paddingValues ->
         TextDialogContent(
             paddingValues,
-            dailyMood,
+            mood,
             isFocused,
             focusRequester,
             onFocused = { isFocused = it },
-            onTextChange = { onDailyMoodEdited(dailyMood.copy(text = dailyMood.text.copy(description = it))) }
+            onTextChange = { onEdited(mood.copy(text = mood.text.copy(description = it))) }
         )
     }
 
@@ -122,14 +123,22 @@ fun DailyMoodEditText(
             hashtag = hashtag,
             onHashtagChange = {
                 hashtag = it
-                onDailyMoodEdited(dailyMood.copy(text = dailyMood.text.copy(hashtag = it.text)))
+                onEdited(mood.copy(text = mood.text.copy(hashtag = it.text)))
             },
             onDismiss = { selectedAction = "" }
         )
 
         "Mention" -> CreatePostMentionDialog(
-            mentionUserIds = dailyMood.text.mentions,
-            onMentionedUsers = { onDailyMoodEdited(dailyMood.copy(text = dailyMood.text.copy(mentions = it))) },
+            mentionUserIds = mood.text.mentions,
+            onMentionedUsers = {
+                onEdited(
+                    mood.copy(
+                        text = mood.text.copy(
+                            mentions = it
+                        )
+                    )
+                )
+            },
             onDismiss = { selectedAction = "" }
         )
     }
@@ -137,10 +146,10 @@ fun DailyMoodEditText(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun TextDialogHeader(
+private fun Header(
     onDismiss: () -> Unit,
-    onTextEdited: (DailyMoodEntity) -> Unit,
-    dailyMood: DailyMoodEntity
+    onEdited: (DailyMoodEntity) -> Unit,
+    mood: DailyMoodEntity
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -156,7 +165,7 @@ private fun TextDialogHeader(
         },
         actions = {
             TextButton(
-                onClick = { onTextEdited(dailyMood); onDismiss() },
+                onClick = { onEdited(mood); onDismiss() },
                 colors = ButtonDefaults.textButtonColors(
                     containerColor = SecondaryDark,
                     contentColor = Color.White
@@ -167,7 +176,7 @@ private fun TextDialogHeader(
                     end = 16.dp,
                     bottom = ContentPadding.calculateBottomPadding()
                 ),
-                enabled = dailyMood.text.description.isNotBlank() || dailyMood.text.hashtag.isNotBlank() || dailyMood.text.mentions.isNotEmpty()
+                enabled = mood.text.description.isNotBlank() || mood.text.hashtag.isNotBlank() || mood.text.mentions.isNotEmpty()
             ) {
                 Text(text = "Done", fontWeight = FontWeight.Bold)
             }
@@ -176,7 +185,7 @@ private fun TextDialogHeader(
 }
 
 @Composable
-private fun TextDialogFooter(selectedAction: String, onActionSelected: (String) -> Unit) {
+private fun Footer(selectedAction: String, onActionSelected: (String) -> Unit) {
     BottomAppBar(containerColor = PrimaryDark) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -224,13 +233,12 @@ private fun TextDialogFooter(selectedAction: String, onActionSelected: (String) 
 @Composable
 private fun FloatingActions(
     selectedAction: String,
-    dailyMood: DailyMoodEntity,
+    mood: DailyMoodEntity,
     onActionSelected: (String) -> Unit,
-    onTextEdited: (DailyMoodEntity) -> Unit
+    onEdited: (DailyMoodEntity) -> Unit
 ) {
-    val dailyMoodText = dailyMood.text
-    val labelColor =
-        if (dailyMoodText.color.toColor().luminance() < 0.5f) Color.White else Color.Black
+    val text = mood.text
+    val labelColor = if (text.color.toColor().luminance() < 0.5f) Color.White else Color.Black
 
     var isTextAnimate by remember { mutableStateOf(false) }
     var isTextEffect by remember { mutableStateOf(false) }
@@ -241,22 +249,22 @@ private fun FloatingActions(
     ) {
         when (selectedAction) {
             "Font" -> {
-                CreatePostFontPicker(selectedFont = dailyMood.text.font.toFontFamily()) {
-                    if (dailyMood.text.font == it.toFontName()) onActionSelected("")
-                    onTextEdited(dailyMood.copy(text = dailyMood.text.copy(font = it.toFontName())))
+                CreatePostFontPicker(selectedFont = mood.text.font.toFontFamily()) {
+                    if (mood.text.font == it.toFontName()) onActionSelected("")
+                    onEdited(mood.copy(text = mood.text.copy(font = it.toFontName())))
                 }
             }
 
             "Color" -> {
-                CreatePostColorPicker(selectedColor = dailyMood.text.color.toColor()) {
-                    onTextEdited(dailyMood.copy(text = dailyMood.text.copy(color = it.toHex())))
+                CreatePostColorPicker(selectedColor = mood.text.color.toColor()) {
+                    onEdited(mood.copy(text = mood.text.copy(color = it.toHex())))
                 }
             }
 
             "Align" -> {
-                CreatePostAlignPicker(selectedAlign = dailyMood.text.align.toTextAlign()) {
-                    if (dailyMood.text.align == it.toString()) onActionSelected("")
-                    onTextEdited(dailyMood.copy(text = dailyMood.text.copy(align = it.toString())))
+                CreatePostAlignPicker(selectedAlign = mood.text.align.toTextAlign()) {
+                    if (mood.text.align == it.toString()) onActionSelected("")
+                    onEdited(mood.copy(text = mood.text.copy(align = it.toString())))
                 }
             }
         }
@@ -267,10 +275,10 @@ private fun FloatingActions(
         ) {
             AssistChip(
                 onClick = {
-                    onTextEdited(
-                        dailyMood.copy(
-                            text = dailyMoodText.copy(
-                                style = when (dailyMoodText.style) {
+                    onEdited(
+                        mood.copy(
+                            text = text.copy(
+                                style = when (text.style) {
                                     TextStyle.NORMAL -> TextStyle.WITH_BACKGROUND
                                     TextStyle.WITH_BACKGROUND -> TextStyle.WITHOUT_BACKGROUND
                                     TextStyle.WITHOUT_BACKGROUND -> TextStyle.NORMAL
@@ -281,18 +289,18 @@ private fun FloatingActions(
                 },
                 label = { Text(text = "A", fontSize = 24.sp) },
                 leadingIcon = {},
-                border = if (dailyMoodText.style == TextStyle.NORMAL) BorderStroke(
+                border = if (text.style == TextStyle.NORMAL) BorderStroke(
                     width = 1.dp,
-                    color = dailyMoodText.color.toColor()
+                    color = text.color.toColor()
                 ) else null,
                 colors = AssistChipDefaults.assistChipColors(
-                    containerColor = when (dailyMoodText.style) {
+                    containerColor = when (text.style) {
                         TextStyle.NORMAL -> Color.Transparent
-                        TextStyle.WITH_BACKGROUND -> dailyMoodText.color.toColor()
-                        TextStyle.WITHOUT_BACKGROUND -> dailyMoodText.color.toColor()
+                        TextStyle.WITH_BACKGROUND -> text.color.toColor()
+                        TextStyle.WITHOUT_BACKGROUND -> text.color.toColor()
                             .copy(alpha = 0.3f)
                     },
-                    labelColor = when (dailyMoodText.style) {
+                    labelColor = when (text.style) {
                         TextStyle.NORMAL -> Color.White
                         TextStyle.WITH_BACKGROUND -> labelColor
                         TextStyle.WITHOUT_BACKGROUND -> Color.White
@@ -303,19 +311,13 @@ private fun FloatingActions(
             ToggleOutlinedIconButton(
                 iconRes = R.drawable.text_animate,
                 isActive = isTextAnimate,
-                onClick = {
-                    isTextEffect = false
-                    isTextAnimate = !isTextAnimate
-                }
+                onClick = { isTextEffect = false; isTextAnimate = !isTextAnimate }
             )
 
             ToggleOutlinedIconButton(
                 iconRes = R.drawable.text_effect,
                 isActive = isTextEffect,
-                onClick = {
-                    isTextAnimate = false
-                    isTextEffect = !isTextEffect
-                }
+                onClick = { isTextAnimate = false; isTextEffect = !isTextEffect }
             )
         }
     }
@@ -339,52 +341,60 @@ private fun ToggleOutlinedIconButton(iconRes: Int, isActive: Boolean, onClick: (
     }
 }
 
-
 @Composable
-private fun DescriptionSection(
-    dailyMoodText: DailyMoodText,
+private fun ColumnScope.DescriptionSection(
+    text: DailyMoodText,
     isFocused: Boolean,
     focusRequester: FocusRequester,
     onFocused: (Boolean) -> Unit,
     onTextChange: (String) -> Unit
 ) {
-    val labelColor =
-        if (dailyMoodText.color.toColor().luminance() < 0.5f) Color.White else Color.Black
+    val color = if (text.color.toColor().luminance() < 0.5f) Color.White else Color.Black
 
     BasicTextField(
-        value = dailyMoodText.description,
+        value = text.description,
         onValueChange = { onTextChange(it) },
-        cursorBrush = SolidColor(labelColor),
+        cursorBrush = SolidColor(
+            if (text.color.toColor() == Color.White) {
+                if (text.style == TextStyle.NORMAL) Color.White else Color.Black
+            } else {
+                if (text.style == TextStyle.NORMAL) text.color.toColor() else color
+            }
+        ),
         textStyle = LocalTextStyle.current.copy(
-            color = when (dailyMoodText.style) {
-                TextStyle.NORMAL -> dailyMoodText.color.toColor()
-                TextStyle.WITH_BACKGROUND -> labelColor
+            color = when (text.style) {
+                TextStyle.NORMAL -> text.color.toColor()
+                TextStyle.WITH_BACKGROUND -> color
                 TextStyle.WITHOUT_BACKGROUND -> Color.White
             },
             fontSize = 20.sp,
-            textAlign = if (dailyMoodText.align.toTextAlign() == TextAlign.Unspecified && dailyMoodText.description.isEmpty()) TextAlign.Center else dailyMoodText.align.toTextAlign(),
-            fontFamily = dailyMoodText.font.toFontFamily(),
+            textAlign = if (text.align.toTextAlign() == TextAlign.Unspecified && text.description.isEmpty()) TextAlign.Center else text.align.toTextAlign(),
+            fontFamily = text.font.toFontFamily(),
         ),
         decorationBox = { innerTextField ->
             Box(contentAlignment = Alignment.Center) {
-                if (dailyMoodText.description.isEmpty() && !isFocused) {
-                    Text(text = "Tap to enter text...", fontSize = 16.sp, color = GrayTextColor)
+                if (text.description.isEmpty() && !isFocused) {
+                    Text(
+                        text = "Tap to enter text...",
+                        fontSize = 16.sp,
+                        color = if (text.style == TextStyle.NORMAL) Color.White else color
+                    )
                 }
 
-                Box(modifier = Modifier.padding(8.dp)) {
-                    innerTextField()
-                }
+                Box(modifier = Modifier.padding(8.dp)) { innerTextField() }
             }
         },
         modifier = Modifier
             .focusRequester(focusRequester)
             .onFocusChanged { onFocused(it.isFocused) }
+            .align(Alignment.CenterHorizontally)
             .background(
-                when (dailyMoodText.style) {
+                color = when (text.style) {
                     TextStyle.NORMAL -> Color.Transparent
-                    TextStyle.WITH_BACKGROUND -> dailyMoodText.color.toColor()
-                    TextStyle.WITHOUT_BACKGROUND -> dailyMoodText.color.toColor().copy(alpha = 0.3f)
-                }
+                    TextStyle.WITH_BACKGROUND -> text.color.toColor()
+                    TextStyle.WITHOUT_BACKGROUND -> text.color.toColor().copy(alpha = 0.3f)
+                },
+                shape = RoundedCornerShape(8.dp)
             )
 
     )
@@ -393,7 +403,7 @@ private fun DescriptionSection(
 @Composable
 private fun TextDialogContent(
     paddingValues: PaddingValues,
-    dailyMood: DailyMoodEntity,
+    mood: DailyMoodEntity,
     isFocused: Boolean,
     focusRequester: FocusRequester,
     onFocused: (Boolean) -> Unit,
@@ -410,10 +420,10 @@ private fun TextDialogContent(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            AnnotatedMention(mentions = dailyMood.text.mentions)
-            AnnotatedHashtag(hashtag = dailyMood.text.hashtag)
+            AnnotatedMention(mentions = mood.text.mentions)
+            AnnotatedHashtag(hashtag = mood.text.hashtag)
             DescriptionSection(
-                dailyMoodText = dailyMood.text,
+                text = mood.text,
                 isFocused,
                 focusRequester,
                 onFocused,

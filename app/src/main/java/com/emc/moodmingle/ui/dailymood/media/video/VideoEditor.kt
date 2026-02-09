@@ -78,7 +78,7 @@ fun VideoEditor(videoUri: Uri) {
             override fun onPositionDiscontinuity(
                 oldPosition: Player.PositionInfo,
                 newPosition: Player.PositionInfo,
-                reason: Int
+                reason: Int,
             ) {
                 if (newPosition.positionMs > state.endMs) {
                     player.seekTo(state.startMs)
@@ -145,7 +145,7 @@ fun FacebookTrimBar(
     durationMs: Long,
     startMs: Long,
     endMs: Long,
-    onTrimChanged: (Long, Long) -> Unit
+    onTrimChanged: (Long, Long) -> Unit,
 ) {
     var widthPx by remember { mutableFloatStateOf(1f) }
 
@@ -174,10 +174,9 @@ fun FacebookTrimBar(
         TrimHandle(
             xPx = startFraction * widthPx,
             onDrag = { dx ->
-                val newStart =
-                    ((startFraction + dx / widthPx)
-                        .coerceIn(0f, endFraction - minGap)
-                            * durationMs).toLong()
+                val newStart = ((startFraction + dx / widthPx)
+                    .coerceIn(0f, endFraction - minGap) * durationMs)
+                    .toLong()
 
                 onTrimChanged(newStart, endMs)
             }
@@ -201,7 +200,7 @@ fun FacebookTrimBar(
 @Composable
 fun TrimHandle(
     xPx: Float,
-    onDrag: (dxPx: Float) -> Unit
+    onDrag: (dxPx: Float) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -221,5 +220,5 @@ data class EditorState(
     val startMs: Long = 0L,
     val endMs: Long = 0L,
     val durationMs: Long = 0L,
-    val speed: Float = 1f
+    val speed: Float = 1f,
 )

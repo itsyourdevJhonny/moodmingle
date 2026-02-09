@@ -210,7 +210,7 @@ fun AllMediaGallery(
 }
 
 @Composable
-private fun ImageThumbnail(uri: Uri) {
+fun ImageThumbnail(uri: Uri) {
     Image(
         painter = rememberAsyncImagePainter(uri),
         contentDescription = "Selected image",
@@ -291,10 +291,10 @@ private fun Tabs(mediaTypes: List<String>, type: String, onSelectedType: (String
 }
 
 @Composable
-private fun BoxScope.RemoveSingleIcon(
+fun BoxScope.RemoveSingleIcon(
     itemVisibility: SnapshotStateMap<Uri, Boolean>,
     uri: Uri,
-    mediaUris: List<Uri>,
+    uris: List<Uri>,
     onUrisSelected: (List<Uri>) -> Unit
 ) {
     IconButton(
@@ -303,7 +303,7 @@ private fun BoxScope.RemoveSingleIcon(
             itemVisibility[uri] = false
             CoroutineScope(Dispatchers.IO).launch {
                 delay(300)
-                onUrisSelected(mediaUris - uri)
+                onUrisSelected(uris - uri)
                 itemVisibility.remove(uri)
             }
         },
@@ -316,15 +316,15 @@ private fun BoxScope.RemoveSingleIcon(
 }
 
 @Composable
-private fun RemoveAllIcon(
-    mediaUris: List<Uri>,
+fun RemoveAllIcon(
+    uris: List<Uri>,
     itemVisibility: SnapshotStateMap<Uri, Boolean>,
     onUrisSelected: (List<Uri>) -> Unit
 ) {
     IconButton(
         onClick = {
             // fade out all items
-            mediaUris.forEach { uri -> itemVisibility[uri] = false }
+            uris.forEach { uri -> itemVisibility[uri] = false }
 
             // remove items after animation
             CoroutineScope(Dispatchers.IO).launch {
@@ -387,8 +387,8 @@ private fun DisplayGallery(
     onUrisSelected: (List<Uri>) -> Unit
 ) {
     when (type) {
-        "Image" -> ImageGallery(selectedImages = mediaUris, onSelectedImage = onUrisSelected)
-        "Video" -> VideoGallery(selectedVideos = mediaUris, onSelectedVideo = onUrisSelected)
+        "Image" -> ImageGallery(uris = mediaUris, onUrisSelected = onUrisSelected)
+        "Video" -> VideoGallery(uris = mediaUris, onUrisSelected = onUrisSelected)
         "Audio" -> AudioGallery(selectedAudios = mediaUris, onSelectedAudio = onUrisSelected)
     }
 }

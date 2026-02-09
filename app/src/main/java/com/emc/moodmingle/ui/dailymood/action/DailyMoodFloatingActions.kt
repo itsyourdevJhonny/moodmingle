@@ -30,19 +30,19 @@ import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 
 @Composable
 fun DailyMoodFloatingActions(
-    dailyMood: DailyMoodEntity,
+    mood: DailyMoodEntity,
     selectedAction: String,
     onActionSelected: (String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        PrimaryActions(dailyMood, selectedAction, onActionSelected)
+        PrimaryActions(mood, selectedAction, onActionSelected)
         HideIcon(selectedAction, onActionSelected)
     }
 }
 
 @Composable
 private fun PrimaryActions(
-    dailyMood: DailyMoodEntity,
+    mood: DailyMoodEntity,
     selectedAction: String,
     onActionSelected: (String) -> Unit
 ) {
@@ -53,7 +53,7 @@ private fun PrimaryActions(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             getActions().forEach { (label, icon) ->
-                ActionIcon(dailyMood, label, icon, onActionSelected)
+                ActionIcon(mood, label, icon, onActionSelected)
             }
         }
     }
@@ -130,6 +130,7 @@ private fun getActions(): List<Pair<String, Int>> {
         "mood" to R.drawable.mood,
         "text" to R.drawable.text_style,
         "media" to R.drawable.image_video,
+        "gif" to R.drawable.gif,
         "music" to R.drawable.music_note,
         "location" to R.drawable.location,
     )

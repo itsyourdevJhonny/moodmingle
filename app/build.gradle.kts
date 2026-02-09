@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.vectordrawable.animated)
     implementation(libs.androidx.compose.ui.geometry)
     implementation(libs.androidx.hilt.common)
+    implementation(libs.androidx.palette.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -146,7 +147,10 @@ dependencies {
     implementation(libs.jsoup)
 
     // emoji
-    implementation("com.vanniktech:emoji-google:0.23.0")
+    implementation(libs.emoji.google.v0230)
     implementation(libs.androidx.emoji2)
     implementation(libs.emoji.core)
+
+    // Giphy
+    implementation(libs.coil.gif.v260)
 }

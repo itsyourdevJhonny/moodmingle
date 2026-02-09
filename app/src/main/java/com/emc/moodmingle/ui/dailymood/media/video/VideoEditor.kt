@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.Effect
@@ -32,10 +31,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.effect.ScaleAndRotateTransformation
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.transformer.Transformer
 import androidx.media3.ui.PlayerView
 import com.emc.moodmingle.viewmodel.ui.VideoEditorViewModel
-import java.io.File
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -123,31 +120,6 @@ fun EditorControls(
             }) { Text("Flip") }
         }
     }
-}
-
-@OptIn(UnstableApi::class)
-fun exportVideo(
-    context: Context,
-    uri: Uri,
-    state: VideoEditorState,
-    onDone: (Uri) -> Unit,
-) {
-    val output = File(context.cacheDir, "export_${System.currentTimeMillis()}.mp4")
-
-    val item = MediaItem.Builder()
-        .setUri(uri)
-        .setClippingConfiguration(
-            MediaItem.ClippingConfiguration.Builder()
-                .setStartPositionMs(state.trimStartMs)
-                .setEndPositionMs(state.trimEndMs)
-                .build()
-        )
-        .build()
-
-    Transformer.Builder(context).build()
-        .start(item, output.absolutePath)
-
-    onDone(output.toUri())
 }
 
 @Composable

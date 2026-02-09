@@ -627,8 +627,6 @@ private fun BoxScope.GifSection(
     boxSize: IntSize,
     onGifPositionChanged: (Gif) -> Unit,
 ) {
-    println("URL UPDATED" + mood.gif.url)
-
     var size by remember { mutableStateOf(IntSize.Zero) }
 
     var offsetX by remember { mutableFloatStateOf(0f) }

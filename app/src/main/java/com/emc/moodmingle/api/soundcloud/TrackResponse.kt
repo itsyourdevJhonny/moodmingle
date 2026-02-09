@@ -1,4 +1,4 @@
-package com.emc.moodmingle.api.soundcloud.model
+package com.emc.moodmingle.api.soundcloud
 
 import android.os.Parcelable
 import com.squareup.moshi.Json

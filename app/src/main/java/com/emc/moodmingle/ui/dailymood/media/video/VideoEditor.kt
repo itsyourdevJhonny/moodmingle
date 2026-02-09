@@ -220,12 +220,6 @@ fun TrimHandle(
     )
 }
 
-data class TrimState(
-    val startMs: Long,
-    val endMs: Long,
-    val durationMs: Long
-)
-
 data class EditorState(
     val startMs: Long = 0L,
     val endMs: Long = 0L,

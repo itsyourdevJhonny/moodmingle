@@ -226,9 +226,3 @@ data class EditorState(
     val durationMs: Long = 0L,
     val speed: Float = 1f
 )
-
-data class SimpleVideoEditState(
-    val speed: Float = 1f,
-    val trimStartMs: Long = 0L,
-    val trimEndMs: Long = C.TIME_END_OF_SOURCE,
-)

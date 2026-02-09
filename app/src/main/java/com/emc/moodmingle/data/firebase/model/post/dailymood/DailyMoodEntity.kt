@@ -18,12 +18,25 @@ data class DailyMoodEntity(
     val mood: Mood = Mood(),
     val description: PostDescription? = null,
     val media: DailyMoodMedia = DailyMoodMedia(),
+    val gif: Gif = Gif(),
     val musicTrack: MusicTrack? = null,
     val location: NominatimPlace? = null,
     val text: DailyMoodText = DailyMoodText(),
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = 0
 )
+
+data class Gif(
+    val url: String = "",
+    val type: GifType = GifType.IMAGE,
+    val offsetX: Float = 0f,
+    val offsetY: Float = 0f
+)
+
+enum class GifType {
+    IMAGE,
+    VIDEO
+}
 
 @Parcelize
 data class DailyMoodText(
@@ -46,11 +59,45 @@ enum class TextStyle {
 
 @Parcelize
 data class DailyMoodMedia(
+    val type: DailyMoodMediaType = DailyMoodMediaType.SINGLE,
     val urls: List<String> = emptyList(),
-    val imageFilterName: String = ImageFilterType.NORMAL.name,
+    val image: DailyMoodImage = DailyMoodImage(),
+) : Parcelable
+
+enum class DailyMoodMediaType {
+    SINGLE,
+    COLLAGE,
+    LAYOUT
+}
+
+@Parcelize
+data class DailyMoodImage(
+    val filterName: String = ImageFilterType.NORMAL.name,
+    val shapeType: ShapeType = ShapeType.NORMAL,
     val offsetX: Float = 0f,
     val offsetY: Float = 0f
 ) : Parcelable
+
+enum class ShapeType {
+    NORMAL,
+    CIRCLE,
+    ROUNDED,
+    CUT,
+    OVAL_HORIZONTAL,
+    OVAL_VERTICAL,
+    TRIANGLE,
+    DIAMOND,
+    HEXAGON,
+    PENTAGON,
+    OCTAGON,
+    STAR,
+    HEART,
+    BLOB,
+    PARALLELOGRAM,
+    TRAPEZOID,
+    CHEVRON,
+    MESSAGE_BUBBLE
+}
 
 @Parcelize
 data class MusicTrack(

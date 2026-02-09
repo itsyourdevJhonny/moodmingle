@@ -36,8 +36,8 @@ import com.emc.moodmingle.viewmodel.LocationViewModel
 
 @Composable
 fun DailyMoodLocation(
-    dailyMood: DailyMoodEntity,
-    onDailyMoodEdited: (DailyMoodEntity) -> Unit,
+    mood: DailyMoodEntity,
+    onEdited: (DailyMoodEntity) -> Unit,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -50,15 +50,15 @@ fun DailyMoodLocation(
             )
         }
     ) { paddingValues ->
-        Content(paddingValues, dailyMood, onDailyMoodEdited, onBack)
+        Content(paddingValues, mood, onEdited, onBack)
     }
 }
 
 @Composable
-fun Content(
+private fun Content(
     paddingValues: PaddingValues,
-    dailyMood: DailyMoodEntity,
-    onDailyMoodEdited: (DailyMoodEntity) -> Unit,
+    mood: DailyMoodEntity,
+    onEdited: (DailyMoodEntity) -> Unit,
     onBack: () -> Unit
 ) {
     val locationViewModel = hiltViewModel<LocationViewModel>()
@@ -86,7 +86,7 @@ fun Content(
             LazyColumn {
                 items(locationViewModel.searchResults) { place ->
                     LocationItem(place) {
-                        onDailyMoodEdited(dailyMood.copy(location = place))
+                        onEdited(mood.copy(location = place))
                         locationViewModel.onQueryChange("")
                         onBack()
                     }

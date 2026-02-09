@@ -32,8 +32,12 @@ fun DailyMoodScreen(onBack: () -> Unit) {
         3 -> {
             DailyMoodThirdPage(
                 dailyMood,
-                onDailyMoodEdited = { dailyMood = it },
+                onEdited = { dailyMood = it },
                 onTextPositionChanged = { dailyMood = dailyMood.copy(text = it) },
+                onImagePositionChanged = {
+                    dailyMood = dailyMood.copy(media = dailyMood.media.copy(image = it))
+                },
+                onGifPositionChanged = { dailyMood = dailyMood.copy(gif = it) },
                 onBack = { currentPage-- }
             )
         }

@@ -97,6 +97,7 @@ import com.emc.moodmingle.ui.dailymood.location.DailyMoodLocation
 import com.emc.moodmingle.ui.dailymood.media.image.DailyMoodEditImage
 import com.emc.moodmingle.ui.dailymood.media.image.DailyMoodSelectMedia
 import com.emc.moodmingle.ui.dailymood.media.image.animatedShape
+import com.emc.moodmingle.ui.dailymood.media.video.VideoEditor
 import com.emc.moodmingle.ui.dailymood.text.DailyMoodEditText
 import com.emc.moodmingle.ui.remix.MoodPickerDialog
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
@@ -182,7 +183,9 @@ fun DailyMoodThirdPage(
 
             "edit_single_image" -> DailyMoodEditImage(mood, onEdited) { selectedAction = "" }
 
-            "edit_single_video" -> {}
+            "edit_single_video" -> {
+                VideoEditor(mood.media.urls.first().toUri())
+            }
 
             "gif" -> GifPicker(mood, onEdited) { selectedAction = "" }
 

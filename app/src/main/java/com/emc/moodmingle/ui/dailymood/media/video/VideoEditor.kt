@@ -3,11 +3,19 @@ package com.emc.moodmingle.ui.dailymood.media.video
 import android.content.Context
 import android.net.Uri
 import androidx.annotation.OptIn
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -15,12 +23,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
@@ -41,36 +54,51 @@ import java.io.File
 
 @Composable
 fun VideoEditor(
-    videoUri: Uri,
-    modifier: Modifier = Modifier,
-    onExported: (Uri) -> Unit = {},
+    videoUri: Uri
 ) {
     val context = LocalContext.current
-
-    var state by remember { mutableStateOf(SimpleVideoEditState()) }
-    var durationMs by remember { mutableLongStateOf(0L) }
+    var state by remember { mutableStateOf(EditorState()) }
 
     val player = remember(videoUri) {
         ExoPlayer.Builder(context).build().apply {
-            val mediaItem = MediaItem.fromUri(videoUri)
-            setMediaItem(mediaItem)
+            setMediaItem(MediaItem.fromUri(videoUri))
             prepare()
             playWhenReady = true
         }
     }
 
-    // apply speed in real time
-    LaunchedEffect(state.speed) {
-        player.setPlaybackSpeed(state.speed)
-    }
-
-    // get duration once
+    // listen for duration
     LaunchedEffect(Unit) {
         player.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_READY) {
-                    durationMs = player.duration
-                    state = state.copy(trimEndMs = durationMs)
+                    val d = player.duration
+                    state = state.copy(
+                        durationMs = d,
+                        startMs = 0L,
+                        endMs = d
+                    )
+                }
+            }
+        })
+    }
+
+    // enforce trim bounds + speed
+    LaunchedEffect(state.startMs, state.endMs, state.speed) {
+        player.setPlaybackSpeed(state.speed)
+
+        if (player.currentPosition < state.startMs) {
+            player.seekTo(state.startMs)
+        }
+
+        player.addListener(object : Player.Listener {
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int
+            ) {
+                if (newPosition.positionMs > state.endMs) {
+                    player.seekTo(state.startMs)
                 }
             }
         })
@@ -80,13 +108,13 @@ fun VideoEditor(
         onDispose { player.release() }
     }
 
-    Column(modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize()) {
 
-        // VIDEO PREVIEW (YES ANDROIDVIEW IS REQUIRED)
+        // VIDEO PREVIEW
         AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp),
+                .height(280.dp),
             factory = {
                 PlayerView(it).apply {
                     this.player = player
@@ -95,10 +123,10 @@ fun VideoEditor(
             }
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
-        // SPEED CONTROL
-        Text("Playback Speed: ${"%.2f".format(state.speed)}x")
+        // SPEED SLIDER (REAL-TIME)
+        Text("Speed: ${"%.2f".format(state.speed)}x")
         Slider(
             value = state.speed,
             valueRange = 0.25f..2f,
@@ -107,99 +135,117 @@ fun VideoEditor(
             }
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
-        // TRIM START
-        Text("Trim Start: ${state.trimStartMs / 1000}s")
-        Slider(
-            value = state.trimStartMs.toFloat(),
-            valueRange = 0f..state.trimEndMs.toFloat(),
-            onValueChange = {
-                state = state.copy(trimStartMs = it.toLong())
-                player.seekTo(it.toLong())
-            }
-        )
-
-        // TRIM END
-        Text("Trim End: ${state.trimEndMs / 1000}s")
-        Slider(
-            value = state.trimEndMs.toFloat(),
-            valueRange = state.trimStartMs.toFloat()..durationMs.toFloat(),
-            onValueChange = {
-                state = state.copy(trimEndMs = it.toLong())
-            }
-        )
-
-        Spacer(Modifier.height(24.dp))
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                exportTrimmedVideo(
-                    context = context,
-                    videoUri = videoUri,
-                    state = state,
-                    onExported = onExported
-                )
-            }
-        ) {
-            Text("Export Video")
+        // FACEBOOK-STYLE TRIM
+        if (state.durationMs > 0) {
+            FacebookTrimBar(
+                durationMs = state.durationMs,
+                startMs = state.startMs,
+                endMs = state.endMs,
+                onTrimChanged = { start, end ->
+                    state = state.copy(startMs = start, endMs = end)
+                    player.seekTo(start)
+                }
+            )
         }
+
+        Text(
+            "Start: ${state.startMs / 1000}s  |  End: ${state.endMs / 1000}s",
+            modifier = Modifier.padding(8.dp)
+        )
     }
 }
 
-@OptIn(UnstableApi::class)
-fun exportTrimmedVideo(
-    context: Context,
-    videoUri: Uri,
-    state: SimpleVideoEditState,
-    onExported: (Uri) -> Unit,
+@Composable
+fun FacebookTrimBar(
+    durationMs: Long,
+    startMs: Long,
+    endMs: Long,
+    onTrimChanged: (Long, Long) -> Unit
 ) {
-    val outputFile = File(
-        context.cacheDir,
-        "edited_${System.currentTimeMillis()}.mp4"
-    )
+    var widthPx by remember { mutableFloatStateOf(1f) }
 
-    val mediaItem = MediaItem.Builder()
-        .setUri(videoUri)
-        .setClippingConfiguration(
-            MediaItem.ClippingConfiguration.Builder()
-                .setStartPositionMs(state.trimStartMs)
-                .setEndPositionMs(state.trimEndMs)
-                .build()
+    val startFraction = startMs / durationMs.toFloat()
+    val endFraction = endMs / durationMs.toFloat()
+    val minGap = 0.05f // 5%
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .onSizeChanged { widthPx = it.width.toFloat() }
+            .background(Color.DarkGray, RoundedCornerShape(8.dp))
+    ) {
+
+        // SELECTED RANGE
+        Box(
+            modifier = Modifier
+                .offset { IntOffset((startFraction * widthPx).toInt(), 0) }
+                .width(((endFraction - startFraction) * widthPx).dp)
+                .fillMaxHeight()
+                .background(Color.White.copy(alpha = 0.3f))
         )
-        .build()
 
-    val editedItem = EditedMediaItem.Builder(mediaItem)
-        .setEffects(
-            Effects(
-                emptyList(),
-                listOf(SpeedChangeEffect(state.speed))
-            )
+        // START HANDLE
+        TrimHandle(
+            xPx = startFraction * widthPx,
+            onDrag = { dx ->
+                val newStart =
+                    ((startFraction + dx / widthPx)
+                        .coerceIn(0f, endFraction - minGap)
+                            * durationMs).toLong()
+
+                onTrimChanged(newStart, endMs)
+            }
         )
-        .build()
 
-    val transformer = Transformer.Builder(context).build()
+        // END HANDLE
+        TrimHandle(
+            xPx = endFraction * widthPx,
+            onDrag = { dx ->
+                val newEnd =
+                    ((endFraction + dx / widthPx)
+                        .coerceIn(startFraction + minGap, 1f)
+                            * durationMs).toLong()
 
-    transformer.start(editedItem, outputFile.absolutePath)
-
-    transformer.addListener(object : Transformer.Listener {
-        override fun onCompleted(
-            composition: Composition,
-            exportResult: ExportResult,
-        ) {
-            onExported(outputFile.toUri())
-        }
-
-        override fun onError(
-            composition: Composition,
-            exportResult: ExportResult,
-            exception: ExportException,
-        ) {
-            exception.printStackTrace()
-        }
-    })
+                onTrimChanged(startMs, newEnd)
+            }
+        )
+    }
 }
+
+@Composable
+fun TrimHandle(
+    xPx: Float,
+    onDrag: (dxPx: Float) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .offset { IntOffset(xPx.toInt() - 16, 0) }
+            .width(32.dp)
+            .fillMaxHeight()
+            .background(Color.White, RoundedCornerShape(6.dp))
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { _, dragAmount ->
+                    onDrag(dragAmount)
+                }
+            }
+    )
+}
+
+data class TrimState(
+    val startMs: Long,
+    val endMs: Long,
+    val durationMs: Long
+)
+
+data class EditorState(
+    val startMs: Long = 0L,
+    val endMs: Long = 0L,
+    val durationMs: Long = 0L,
+    val speed: Float = 1f
+)
 
 data class SimpleVideoEditState(
     val speed: Float = 1f,

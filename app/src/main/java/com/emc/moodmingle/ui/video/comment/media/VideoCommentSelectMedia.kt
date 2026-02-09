@@ -93,13 +93,13 @@ fun VideoCommentSelectMedia(
 
             when (selectedMediaType) {
                 "Image" -> ImageGallery(
-                    selectedImages = mediaUris,
-                    onSelectedImage = onSelectedUris
+                    uris = mediaUris,
+                    onUrisSelected = onSelectedUris
                 )
 
                 "Video" -> VideoGallery(
-                    selectedVideos = mediaUris,
-                    onSelectedVideo = onSelectedUris
+                    uris = mediaUris,
+                    onUrisSelected = onSelectedUris
                 )
 
                 "Audio" -> AudioGallery(

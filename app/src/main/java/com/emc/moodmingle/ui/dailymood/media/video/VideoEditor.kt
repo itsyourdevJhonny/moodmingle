@@ -38,9 +38,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 
 @Composable
-fun VideoEditor(
-    videoUri: Uri
-) {
+fun VideoEditor(videoUri: Uri) {
     val context = LocalContext.current
     var state by remember { mutableStateOf(EditorState()) }
 

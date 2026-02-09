@@ -1,4 +1,4 @@
-package com.emc.moodmingle.ui.dailymood.image
+package com.emc.moodmingle.ui.dailymood.media.image
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
+import com.emc.moodmingle.data.firebase.model.post.dailymood.ShapeType
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
@@ -49,11 +51,11 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun DailyMoodEditImage(
-    dailyMood: DailyMoodEntity,
-    onDailyMoodEdited: (DailyMoodEntity) -> Unit,
-    onDismiss: () -> Unit
+    mood: DailyMoodEntity,
+    onEdited: (DailyMoodEntity) -> Unit,
+    onDismiss: () -> Unit,
 ) {
-    var selectedType by remember { mutableStateOf(ImageFilterType.valueOf(dailyMood.media.imageFilterName)) }
+    var selectedType by remember { mutableStateOf(ImageFilterType.valueOf(mood.media.image.filterName)) }
     var isSelected by remember { mutableStateOf(false) }
 
     LaunchedEffect(selectedType) {
@@ -69,25 +71,29 @@ fun DailyMoodEditImage(
         topBar = {
             ScaffoldHeader(
                 title = "Edit Image",
-                enabled = selectedType != ImageFilterType.NORMAL,
+                enabled = selectedType != ImageFilterType.NORMAL || mood.media.image.shapeType != ShapeType.NORMAL,
                 onDone = {
-                    onDailyMoodEdited(dailyMood.copy(media = dailyMood.media.copy(imageFilterName = selectedType.name)))
+                    onEdited(
+                        mood.copy(media = mood.media.copy(image = mood.media.image.copy(filterName = selectedType.name)))
+                    )
                     onDismiss()
                 },
                 onBack = onDismiss
             )
         },
-        bottomBar = { Footer(dailyMood, selectedType) { selectedType = it } }
+        floatingActionButtonPosition = FabPosition.Center,
+        floatingActionButton = { DailyMoodEditImageShape(mood, onEdited) },
+        bottomBar = { Footer(mood, selectedType) { selectedType = it } }
     ) { paddingValues ->
-        Content(paddingValues, dailyMood, selectedType, isSelected)
+        Content(paddingValues, mood, selectedType, isSelected)
     }
 }
 
 @Composable
 private fun Footer(
-    dailyMood: DailyMoodEntity,
+    mood: DailyMoodEntity,
     selectedType: ImageFilterType,
-    onTypeSelected: (ImageFilterType) -> Unit
+    onTypeSelected: (ImageFilterType) -> Unit,
 ) {
     BottomAppBar(
         containerColor = PrimaryDark,
@@ -116,7 +122,7 @@ private fun Footer(
                         ),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    FilterOutput(dailyMood, type, onTypeSelected)
+                    FilterOutput(mood, type, onTypeSelected)
                     FilterName(type)
                 }
             }
@@ -126,12 +132,12 @@ private fun Footer(
 
 @Composable
 private fun FilterOutput(
-    dailyMood: DailyMoodEntity,
+    mood: DailyMoodEntity,
     type: ImageFilterType,
-    onTypeSelected: (ImageFilterType) -> Unit
+    onTypeSelected: (ImageFilterType) -> Unit,
 ) {
     AsyncImage(
-        model = dailyMood.media.urls[0],
+        model = mood.media.urls[0],
         contentDescription = null,
         contentScale = ContentScale.Crop,
         colorFilter = type.name.toColorFilter(),
@@ -154,10 +160,12 @@ private fun FilterName(type: ImageFilterType) {
 @Composable
 private fun Content(
     paddingValues: PaddingValues,
-    dailyMood: DailyMoodEntity,
+    mood: DailyMoodEntity,
     selectedType: ImageFilterType,
-    isSelected: Boolean
+    isSelected: Boolean,
 ) {
+    val isShapeNormal = mood.media.image.shapeType == ShapeType.NORMAL
+
     Box(
         modifier = Modifier
             .padding(paddingValues)
@@ -165,9 +173,13 @@ private fun Content(
         contentAlignment = Alignment.Center
     ) {
         AsyncImage(
-            model = dailyMood.media.urls[0],
+            model = mood.media.urls[0],
             contentDescription = null,
-            colorFilter = ColorFilter.colorMatrix(ImageFilters.matrix(selectedType))
+            contentScale = if (isShapeNormal) ContentScale.Fit else ContentScale.Crop,
+            colorFilter = ColorFilter.colorMatrix(ImageFilters.matrix(selectedType)),
+            modifier = Modifier
+                .size(if (isShapeNormal) Dp.Unspecified else 260.dp)
+                .clip(animatedShape(mood.media.image.shapeType))
         )
 
         AnimatedVisibility(visible = isSelected, enter = fadeIn(), exit = fadeOut()) {

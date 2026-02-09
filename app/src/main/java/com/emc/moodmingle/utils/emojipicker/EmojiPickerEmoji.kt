@@ -53,7 +53,7 @@ fun EmojiPickerEmoji(
                 .padding(padding)
         ) {
             Text(
-                text = /*emojiCharacter*/EmojiCompat.get().process(emojiCharacter).toString(),
+                text = EmojiCompat.get().process(emojiCharacter).toString(),
                 style = TextStyle(
                     fontSize = fontSize,
                     platformStyle = PlatformTextStyle(emojiSupportMatch = EmojiSupportMatch.None),

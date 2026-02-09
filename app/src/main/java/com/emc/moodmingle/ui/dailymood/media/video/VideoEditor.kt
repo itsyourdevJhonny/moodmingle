@@ -112,7 +112,7 @@ fun VideoEditor(videoUri: Uri) {
         Text("Speed: ${"%.2f".format(state.speed)}x")
         Slider(
             value = state.speed,
-            valueRange = 0.25f..2f,
+            valueRange = 0.25f..7f,
             onValueChange = {
                 state = state.copy(speed = it)
             }

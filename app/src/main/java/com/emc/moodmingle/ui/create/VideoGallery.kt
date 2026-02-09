@@ -3,6 +3,7 @@ package com.emc.moodmingle.ui.create
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.util.LruCache
 import android.util.Size
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
@@ -20,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
@@ -29,9 +32,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,34 +44,39 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.common.util.UnstableApi
-import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.core.graphics.scale
+import androidx.media3.common.util.UnstableApi
+import com.emc.moodmingle.ui.theme.PrimaryDark
+import com.emc.moodmingle.utils.modifier.drawGradient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoGallery(
-    selectedVideos: List<Uri>,
-    onSelectedVideo: (List<Uri>) -> Unit
+    uris: List<Uri>,
+    selectMultiple: Boolean = true,
+    minSize: Dp = 120.dp,
+    onUrisSelected: (List<Uri>) -> Unit
 ) {
     val context = LocalContext.current
-    var allVideos by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    var displayedVideos by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    val pageSize = 10
+    var allVideoUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
-    val thumbnailCache = remember { androidx.collection.LruCache<Uri, Bitmap>(50) }
+    val gridState = rememberLazyGridState()
+    var isLoadingMore by remember { mutableStateOf(true) }
+    var pageSize by remember { mutableIntStateOf(35) }
+
+    val thumbnailCache = remember { LruCache<Uri, Bitmap>(50) }
 
     val permissionLauncher = rememberMediaPermissionLauncher(
         onGranted = {},
-        onDenied = { isLoading = false }
+        onDenied = { isLoadingMore = false }
     )
 
-    // Load all videos
     LaunchedEffect(Unit) {
         handlePermissionAndLoad(
             context = context,
@@ -76,40 +86,43 @@ fun VideoGallery(
             permissionLauncher = permissionLauncher,
             loader = { loadDeviceVideos(context) },
             onLoaded = { videos ->
-                allVideos = videos
-                displayedVideos = videos.take(pageSize)
-                isLoading = false
+                allVideoUris = videos
+                isLoadingMore = false
             },
-            onLoadingState = { isLoading = it }
+            onLoadingState = { isLoadingMore = it }
         )
     }
 
-    if (isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(modifier = Modifier.size(48.dp), strokeWidth = 4.dp)
-        }
-        return
+    LaunchedEffect(gridState, allVideoUris, pageSize) {
+        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .collect { lastVisibleIndex ->
+                if (lastVisibleIndex != null &&
+                    lastVisibleIndex >= pageSize - 3 &&
+                    !isLoadingMore &&
+                    pageSize < allVideoUris.size
+                ) {
+                    isLoadingMore = true
+                    delay(300)
+                    pageSize += 35
+                    isLoadingMore = false
+                }
+            }
     }
 
+    val pagedImageUris = allVideoUris.take(pageSize)
+
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 120.dp),
+        state = gridState,
+        columns = GridCells.Adaptive(minSize = minSize),
         modifier = Modifier
             .fillMaxSize()
-            .background(BrushPrimaryGradient, alpha = 0.7f)
-            .padding(top = 2.dp, start = 2.dp, end = 2.dp),
+            .background(PrimaryDark),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        items(displayedVideos.size) { index ->
-            val uri = displayedVideos[index]
-            val isSelected = selectedVideos.contains(uri)
+        items(pagedImageUris, key = { it.toString() }) { uri ->
+            val isSelected = uris.contains(uri)
 
-            // HD Thumbnail State
             var thumbnail by remember { mutableStateOf(thumbnailCache[uri]) }
 
             // Load thumbnail in background if not cached
@@ -122,7 +135,9 @@ fun VideoGallery(
                             } else {
                                 retrieveVideoFrame(context, uri)?.scale(1280, 720)
                             }
-                        } catch (_: Exception) { null }
+                        } catch (_: Exception) {
+                            null
+                        }
                     }
                     if (bmp != null) {
                         thumbnailCache.put(uri, bmp)
@@ -141,20 +156,24 @@ fun VideoGallery(
                         val durationMs = retriever.extractMetadata(
                             android.media.MediaMetadataRetriever.METADATA_KEY_DURATION
                         )?.toLongOrNull() ?: 0L
-                        durationText = "%02d:%02d".format(durationMs / 1000 / 60, (durationMs / 1000) % 60)
+                        durationText =
+                            "%02d:%02d".format(durationMs / 1000 / 60, (durationMs / 1000) % 60)
                         retriever.release()
-                    } catch (_: Exception) {}
+                    } catch (_: Exception) {
+                    }
                 }
             }
 
             Box(
                 modifier = Modifier
-                    .background(Color.Black, RoundedCornerShape(8.dp))
-                    .height(200.dp)
+                    .height(minSize)
                     .clickable {
-                        val newSelection =
-                            if (isSelected) selectedVideos - uri else selectedVideos + uri
-                        onSelectedVideo(newSelection)
+                        if (selectMultiple) {
+                            val newSelection = if (isSelected) uris - uri else uris + uri
+                            onUrisSelected(newSelection)
+                        } else {
+                            onUrisSelected(if (isSelected) emptyList() else listOf(uri))
+                        }
                     }
             ) {
                 if (thumbnail != null) {
@@ -171,7 +190,12 @@ fun VideoGallery(
                             .background(Color.Gray),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .drawGradient(),
+                            strokeWidth = 2.dp
+                        )
                     }
                 }
 
@@ -207,13 +231,16 @@ fun VideoGallery(
                     }
                 }
             }
-
-            // Pagination: load next page when near end
-            if (index >= displayedVideos.size - 1 && displayedVideos.size < allVideos.size) {
-                val nextPage = allVideos.drop(displayedVideos.size).take(pageSize)
-                displayedVideos = displayedVideos + nextPage
-            }
         }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(modifier = Modifier.size(48.dp), strokeWidth = 4.dp)
     }
 }
 
@@ -228,7 +255,6 @@ fun retrieveVideoFrame(context: android.content.Context, uri: Uri): Bitmap? {
         null
     }
 }
-
 
 
 // Format remaining duration

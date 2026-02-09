@@ -9,3 +9,7 @@ annotation class SoundCloudRetrofit
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class LocationRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class GiphyRetrofit

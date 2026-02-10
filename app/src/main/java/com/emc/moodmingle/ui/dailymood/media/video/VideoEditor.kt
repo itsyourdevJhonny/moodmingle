@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -30,13 +31,14 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import com.emc.moodmingle.utils.components.ScaffoldHeader
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlin.math.roundToLong
 
 @OptIn(UnstableApi::class)
 @Composable
-fun VideoEditor(videoUri: Uri) {
+fun VideoEditor(videoUri: Uri, onDismiss: () -> Unit) {
     val context = LocalContext.current
 
     var state by remember(videoUri) { mutableStateOf(EditorState()) }
@@ -95,60 +97,71 @@ fun VideoEditor(videoUri: Uri) {
         exoPlayer.playbackParameters = PlaybackParameters(state.speed)
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
+    Scaffold(
+        containerColor = Color.Black,
+        topBar = {
+            ScaffoldHeader(title = "Edit Video") { onDismiss() }
+        },
+    ) { paddingValues ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(280.dp)
-                .background(Color.Black, RoundedCornerShape(12.dp)),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AndroidView(
-                factory = {
-                    PlayerView(it).apply {
-                        player = exoPlayer
-                        useController = true
-                        controllerShowTimeoutMs = 1500
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        Text("Speed: ${"%.2f".format(state.speed)}x")
-        Slider(
-            value = state.speed,
-            valueRange = 0.5f..2.0f,
-            onValueChange = { newSpeed ->
-                state = state.copy(speed = newSpeed)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(280.dp)
+                    .background(Color.Black, RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                AndroidView(
+                    factory = {
+                        PlayerView(it).apply {
+                            player = exoPlayer
+                            useController = true
+                            controllerShowTimeoutMs = 1500
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
             }
-        )
 
-        Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
-        if (state.durationMs > 0) {
-            FacebookTrimBar(
-                durationMs = state.durationMs,
-                startMs = state.startMs,
-                endMs = state.endMs,
-                onTrimChanged = { newStart, newEnd ->
-                    state = state.copy(startMs = newStart, endMs = newEnd)
-                    if (exoPlayer.currentPosition < newStart || exoPlayer.currentPosition > newEnd) {
-                        exoPlayer.seekTo(newStart)
-                    }
+            Text("Speed: ${"%.2f".format(state.speed)}x")
+
+            Slider(
+                value = state.speed,
+                valueRange = 0.5f..10.0f,
+                onValueChange = { newSpeed ->
+                    state = state.copy(speed = newSpeed)
                 }
             )
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(24.dp))
 
-            Text(
-                "Trim Range: %.1fs - %.1fs".format(state.startMs / 1000f, state.endMs / 1000f)
-            )
+            if (state.durationMs > 0) {
+                FacebookTrimBar(
+                    durationMs = state.durationMs,
+                    startMs = state.startMs,
+                    endMs = state.endMs,
+                    onTrimChanged = { newStart, newEnd ->
+                        state = state.copy(startMs = newStart, endMs = newEnd)
+                        if (exoPlayer.currentPosition < newStart || exoPlayer.currentPosition > newEnd) {
+                            exoPlayer.seekTo(newStart)
+                        }
+                    }
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    "Trim Range: %.1fs - %.1fs".format(state.startMs / 1000f, state.endMs / 1000f)
+                )
+            }
         }
     }
 }
@@ -197,7 +210,12 @@ private fun FacebookTrimBar(
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .offset { IntOffset(x = startOffset.toInt() + (handleWidthPx / 2).toInt(), y = 0) }
+                    .offset {
+                        IntOffset(
+                            x = startOffset.toInt() + (handleWidthPx / 2).toInt(),
+                            y = 0
+                        )
+                    }
                     .width(with(LocalDensity.current) { (endOffset - startOffset).toDp() })
                     .fillMaxHeight()
                     .background(Color.White.copy(alpha = 0.3f), shape = RoundedCornerShape(4.dp))
@@ -210,7 +228,10 @@ private fun FacebookTrimBar(
                     .offset { IntOffset(startOffset.toInt(), 0) }
                     .pointerInput(Unit) {
                         detectHorizontalDragGestures { _, dragAmount ->
-                            val newStartOffset = (startOffset + dragAmount).coerceIn(0f, endOffset - (msToPx(minTimeRangeMs)))
+                            val newStartOffset = (startOffset + dragAmount).coerceIn(
+                                0f,
+                                endOffset - (msToPx(minTimeRangeMs))
+                            )
                             startOffset = newStartOffset
                             onTrimChanged(pxToMs(newStartOffset), pxToMs(endOffset))
                         }
@@ -224,7 +245,9 @@ private fun FacebookTrimBar(
                     .offset { IntOffset(endOffset.toInt(), 0) }
                     .pointerInput(Unit) {
                         detectHorizontalDragGestures { _, dragAmount ->
-                            val newEndOffset = (endOffset + dragAmount).coerceIn(startOffset + (msToPx(minTimeRangeMs)), draggableWidth)
+                            val newEndOffset = (endOffset + dragAmount).coerceIn(
+                                startOffset + (msToPx(minTimeRangeMs)), draggableWidth
+                            )
                             endOffset = newEndOffset
                             onTrimChanged(pxToMs(startOffset), pxToMs(newEndOffset))
                         }

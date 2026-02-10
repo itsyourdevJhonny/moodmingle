@@ -4,28 +4,12 @@ import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -176,14 +160,30 @@ private fun FacebookTrimBar(
     endMs: Long,
     onTrimChanged: (Long, Long) -> Unit,
 ) {
-    val onTrimChangedState by rememberUpdatedState(onTrimChanged)
     var barWidthPx by remember { mutableFloatStateOf(0f) }
-
-    // Convert handle width in dp to px for accurate calculations
     val handleWidthPx = with(LocalDensity.current) { 32.dp.toPx() }
-
-    // Minimum time range between handles
     val minTimeRangeMs = (durationMs * 0.05f).roundToLong()
+
+    val draggableWidth = remember(barWidthPx) { barWidthPx - handleWidthPx }
+
+    fun msToPx(ms: Long): Float {
+        if (durationMs == 0L || draggableWidth <= 0) return 0f
+        return (ms.toFloat() / durationMs) * draggableWidth
+    }
+
+    fun pxToMs(px: Float): Long {
+        if (draggableWidth <= 0) return 0L
+        return (px / draggableWidth * durationMs).toLong()
+    }
+
+    var startOffset by remember { mutableFloatStateOf(msToPx(startMs)) }
+    var endOffset by remember { mutableFloatStateOf(msToPx(endMs)) }
+
+    // Update offsets if the external state changes
+    LaunchedEffect(startMs, endMs, barWidthPx) {
+        startOffset = msToPx(startMs)
+        endOffset = msToPx(endMs)
+    }
 
     Box(
         modifier = Modifier
@@ -193,64 +193,53 @@ private fun FacebookTrimBar(
             .background(Color.Gray.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
     ) {
         if (barWidthPx > 0) {
-            val startFraction = startMs / durationMs.toFloat()
-            val endFraction = endMs / durationMs.toFloat()
-
             // Highlighted selected range
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(horizontal = (handleWidthPx / 2).dp) // Indent the bar to align with handles
-                    .offset { IntOffset((startFraction * (barWidthPx - handleWidthPx)).toInt(), 0) }
-                    .width(((endFraction - startFraction) * (barWidthPx - handleWidthPx)).dp)
+                    .offset { IntOffset(x = startOffset.toInt() + (handleWidthPx / 2).toInt(), y = 0) }
+                    .width(with(LocalDensity.current) { (endOffset - startOffset).toDp() })
                     .fillMaxHeight()
                     .background(Color.White.copy(alpha = 0.3f), shape = RoundedCornerShape(4.dp))
             )
 
-            // Start handle
+            // Start Handle
             TrimHandle(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .offset { IntOffset((startFraction * (barWidthPx - handleWidthPx)).toInt(), 0) },
-                onDrag = { dx ->
-                    val newStartMs = (startMs + (dx / (barWidthPx - handleWidthPx)) * durationMs)
-                        .roundToLong()
-                        .coerceIn(0L, endMs - minTimeRangeMs)
-                    onTrimChangedState(newStartMs, endMs)
-                }
+                    .offset { IntOffset(startOffset.toInt(), 0) }
+                    .pointerInput(Unit) {
+                        detectHorizontalDragGestures { _, dragAmount ->
+                            val newStartOffset = (startOffset + dragAmount).coerceIn(0f, endOffset - (msToPx(minTimeRangeMs)))
+                            startOffset = newStartOffset
+                            onTrimChanged(pxToMs(newStartOffset), pxToMs(endOffset))
+                        }
+                    }
             )
 
-            // End handle
+            // End Handle
             TrimHandle(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .offset { IntOffset(((endFraction * (barWidthPx - handleWidthPx)) + handleWidthPx).toInt(), 0) },
-                onDrag = { dx ->
-                    val newEndMs = (endMs + (dx / (barWidthPx - handleWidthPx)) * durationMs)
-                        .roundToLong()
-                        .coerceIn(startMs + minTimeRangeMs, durationMs)
-                    onTrimChangedState(startMs, newEndMs)
-                }
+                    .offset { IntOffset(endOffset.toInt(), 0) }
+                    .pointerInput(Unit) {
+                        detectHorizontalDragGestures { _, dragAmount ->
+                            val newEndOffset = (endOffset + dragAmount).coerceIn(startOffset + (msToPx(minTimeRangeMs)), draggableWidth)
+                            endOffset = newEndOffset
+                            onTrimChanged(pxToMs(startOffset), pxToMs(newEndOffset))
+                        }
+                    }
             )
         }
     }
 }
 
 @Composable
-private fun TrimHandle(
-    modifier: Modifier = Modifier,
-    onDrag: (dx: Float) -> Unit,
-) {
+private fun TrimHandle(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .offset(x = (-16).dp) // Center the handle visually
             .width(32.dp)
             .fillMaxHeight()
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures { _, dragAmount ->
-                    onDrag(dragAmount)
-                }
-            }
             .background(Color.White, RoundedCornerShape(6.dp))
     ) {
         Box(
@@ -262,6 +251,7 @@ private fun TrimHandle(
         )
     }
 }
+
 
 private data class EditorState(
     val startMs: Long = 0L,

@@ -52,6 +52,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,6 +74,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -184,7 +188,7 @@ fun DailyMoodThirdPage(
             "edit_single_image" -> DailyMoodEditImage(mood, onEdited) { selectedAction = "" }
 
             "edit_single_video" -> {
-                VideoEditor(mood.media.urls.first().toUri())
+                VideoEditor(videoUri = mood.media.urls.first().toUri()) { selectedAction = "" }
             }
 
             "gif" -> GifPicker(mood, onEdited) { selectedAction = "" }
@@ -590,13 +594,38 @@ private fun BoxScope.SingleVideoSection(
 ) {
     val urls = mood.media.urls
 
-    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
+    /*val exoPlayer = remember { ExoPlayer.Builder(context).build() }
     exoPlayer.setMediaItem(MediaItem.fromUri(urls.first()))
     exoPlayer.prepare()
     exoPlayer.playWhenReady = true
     exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
 
-    DisposableEffect(Unit) { onDispose { exoPlayer.release() } }
+    DisposableEffect(Unit) { onDispose { exoPlayer.release() } }*/
+
+    val exoPlayer = remember(urls.first()) {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(urls.first()))
+            prepare()
+        }
+    }
+
+    val lifecycleOwner = rememberUpdatedState(LocalLifecycleOwner.current)
+    DisposableEffect(exoPlayer) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> exoPlayer.pause()
+                Lifecycle.Event.ON_RESUME -> exoPlayer.play()
+                else -> {}
+            }
+        }
+        val lifecycle = lifecycleOwner.value.lifecycle
+        lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycle.removeObserver(observer)
+            exoPlayer.release()
+        }
+    }
 
     AndroidView(
         factory = { ctx ->

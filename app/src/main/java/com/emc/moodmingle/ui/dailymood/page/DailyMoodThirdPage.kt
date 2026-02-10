@@ -52,7 +52,6 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,9 +73,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -136,6 +132,8 @@ fun DailyMoodThirdPage(
 
     var selectedAction by remember { mutableStateOf("") }
 
+    val isContentPaused = selectedAction == "edit_single_video"
+
     BackHandler { onBack() }
 
     Box {
@@ -159,7 +157,8 @@ fun DailyMoodThirdPage(
                 onTextPositionChanged,
                 onImagePositionChanged,
                 onGifPositionChanged,
-                onActionSelected = { selectedAction = it }
+                onActionSelected = { selectedAction = it },
+                isPaused = isContentPaused
             )
         }
 
@@ -273,6 +272,7 @@ private fun Content(
     onImagePositionChanged: (DailyMoodImage) -> Unit,
     onGifPositionChanged: (Gif) -> Unit,
     onActionSelected: (String) -> Unit,
+    isPaused: Boolean
 ) {
     val context = LocalContext.current
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
@@ -313,7 +313,7 @@ private fun Content(
                         }
 
                         mimeType.startsWith("video") -> {
-                            SingleVideoSection(context, mood, onActionSelected)
+                            SingleVideoSection(context, mood, onActionSelected, isPaused)
                         }
                     }
                 }
@@ -588,41 +588,32 @@ private fun BoxScope.SingleImageSection(
 
 @Composable
 private fun BoxScope.SingleVideoSection(
-    context: Context,
-    mood: DailyMoodEntity,
+    context: Context,mood: DailyMoodEntity,
     onActionSelected: (String) -> Unit,
+    isPaused: Boolean
 ) {
     val urls = mood.media.urls
-
-    /*val exoPlayer = remember { ExoPlayer.Builder(context).build() }
-    exoPlayer.setMediaItem(MediaItem.fromUri(urls.first()))
-    exoPlayer.prepare()
-    exoPlayer.playWhenReady = true
-    exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
-
-    DisposableEffect(Unit) { onDispose { exoPlayer.release() } }*/
 
     val exoPlayer = remember(urls.first()) {
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(MediaItem.fromUri(urls.first()))
             prepare()
+            repeatMode = Player.REPEAT_MODE_ONE
         }
     }
 
-    val lifecycleOwner = rememberUpdatedState(LocalLifecycleOwner.current)
-    DisposableEffect(exoPlayer) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_PAUSE -> exoPlayer.pause()
-                Lifecycle.Event.ON_RESUME -> exoPlayer.play()
-                else -> {}
-            }
+    // Control the player based on the isPaused state.
+    // When isPaused is true, pause the player. When false, play it.
+    LaunchedEffect(isPaused) {
+        if (isPaused) {
+            exoPlayer.pause()
+        } else {
+            exoPlayer.play()
         }
-        val lifecycle = lifecycleOwner.value.lifecycle
-        lifecycle.addObserver(observer)
+    }
 
+    DisposableEffect(Unit) {
         onDispose {
-            lifecycle.removeObserver(observer)
             exoPlayer.release()
         }
     }
@@ -639,6 +630,36 @@ private fun BoxScope.SingleVideoSection(
             .clickable { onActionSelected("edit_single_video") }
     )
 }
+
+
+/*@Composable
+private fun BoxScope.SingleVideoSection(
+    context: Context,
+    mood: DailyMoodEntity,
+    onActionSelected: (String) -> Unit,
+) {
+    val urls = mood.media.urls
+
+    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
+    exoPlayer.setMediaItem(MediaItem.fromUri(urls.first()))
+    exoPlayer.prepare()
+    exoPlayer.playWhenReady = true
+    exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+
+    DisposableEffect(Unit) { onDispose { exoPlayer.release() } }
+
+    AndroidView(
+        factory = { ctx ->
+            PlayerView(ctx).apply {
+                player = exoPlayer
+                useController = false
+            }
+        },
+        modifier = Modifier
+            .align(Alignment.Center)
+            .clickable { onActionSelected("edit_single_video") }
+    )
+}*/
 
 @Composable
 private fun rememberMediaPalette(uri: Uri, isVideo: Boolean): State<Pair<Color, Color>> {

@@ -22,6 +22,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -46,14 +48,13 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlin.math.roundToLong
 
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoEditor(videoUri: Uri) {
     val context = LocalContext.current
 
-    // State holder for all editor properties.
-    // By keying it to videoUri, it ensures a full reset if a new video is passed in.
     var state by remember(videoUri) { mutableStateOf(EditorState()) }
 
     val exoPlayer = remember(videoUri) {
@@ -63,7 +64,6 @@ fun VideoEditor(videoUri: Uri) {
         }
     }
 
-    // Lifecycle management for the player. [5]
     val lifecycleOwner = rememberUpdatedState(LocalLifecycleOwner.current)
     DisposableEffect(exoPlayer) {
         val observer = LifecycleEventObserver { _, event ->
@@ -82,7 +82,6 @@ fun VideoEditor(videoUri: Uri) {
         }
     }
 
-    // This effect listens to the player and updates the initial duration in our state.
     LaunchedEffect(exoPlayer) {
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -99,17 +98,15 @@ fun VideoEditor(videoUri: Uri) {
         })
     }
 
-    // This effect is responsible for looping the video within the trimmed range.
     LaunchedEffect(state.startMs, state.endMs) {
         while (coroutineContext.isActive) {
-            delay(100) // Check every 100ms
+            delay(100)
             if (exoPlayer.currentPosition >= state.endMs) {
                 exoPlayer.seekTo(state.startMs)
             }
         }
     }
 
-    // Apply playback speed when it changes. [4]
     LaunchedEffect(state.speed) {
         exoPlayer.playbackParameters = PlaybackParameters(state.speed)
     }
@@ -118,7 +115,6 @@ fun VideoEditor(videoUri: Uri) {
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Video Preview using AndroidView to host the ExoPlayer PlayerView
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -140,7 +136,6 @@ fun VideoEditor(videoUri: Uri) {
 
         Spacer(Modifier.height(24.dp))
 
-        // Speed Control Slider
         Text("Speed: ${"%.2f".format(state.speed)}x")
         Slider(
             value = state.speed,
@@ -152,7 +147,6 @@ fun VideoEditor(videoUri: Uri) {
 
         Spacer(Modifier.height(24.dp))
 
-        // Video Trimming UI
         if (state.durationMs > 0) {
             FacebookTrimBar(
                 durationMs = state.durationMs,
@@ -160,8 +154,7 @@ fun VideoEditor(videoUri: Uri) {
                 endMs = state.endMs,
                 onTrimChanged = { newStart, newEnd ->
                     state = state.copy(startMs = newStart, endMs = newEnd)
-                    // Seek immediately to the new start position when trimming
-                    if (exoPlayer.currentPosition < newStart) {
+                    if (exoPlayer.currentPosition < newStart || exoPlayer.currentPosition > newEnd) {
                         exoPlayer.seekTo(newStart)
                     }
                 }
@@ -183,13 +176,14 @@ private fun FacebookTrimBar(
     endMs: Long,
     onTrimChanged: (Long, Long) -> Unit,
 ) {
-    // Ensure the latest lambda is always used in the gesture detector.
     val onTrimChangedState by rememberUpdatedState(onTrimChanged)
     var barWidthPx by remember { mutableFloatStateOf(0f) }
 
-    val startFraction = startMs / durationMs.toFloat()
-    val endFraction = endMs / durationMs.toFloat()
-    val minRangeFraction = 0.05f // Minimum 5% of video length
+    // Convert handle width in dp to px for accurate calculations
+    val handleWidthPx = with(LocalDensity.current) { 32.dp.toPx() }
+
+    // Minimum time range between handles
+    val minTimeRangeMs = (durationMs * 0.05f).roundToLong()
 
     Box(
         modifier = Modifier
@@ -198,53 +192,58 @@ private fun FacebookTrimBar(
             .onSizeChanged { barWidthPx = it.width.toFloat() }
             .background(Color.Gray.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
     ) {
-        // Highlighted selected range
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .offset { IntOffset((startFraction * barWidthPx).toInt(), 0) }
-                .width(((endFraction - startFraction) * barWidthPx).dp)
-                .fillMaxHeight()
-                .background(Color.White.copy(alpha = 0.3f))
-        )
+        if (barWidthPx > 0) {
+            val startFraction = startMs / durationMs.toFloat()
+            val endFraction = endMs / durationMs.toFloat()
 
-        // Start handle
-        TrimHandle(
-            isStartHandle = true,
-            modifier = Modifier.offset { IntOffset((startFraction * barWidthPx).toInt(), 0) },
-            onDrag = { dx ->
-                if (barWidthPx > 0) {
-                    val newStartFraction = (startFraction + dx / barWidthPx).coerceIn(0f, endFraction - minRangeFraction)
-                    val newStartMs = (newStartFraction * durationMs).toLong()
+            // Highlighted selected range
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(horizontal = (handleWidthPx / 2).dp) // Indent the bar to align with handles
+                    .offset { IntOffset((startFraction * (barWidthPx - handleWidthPx)).toInt(), 0) }
+                    .width(((endFraction - startFraction) * (barWidthPx - handleWidthPx)).dp)
+                    .fillMaxHeight()
+                    .background(Color.White.copy(alpha = 0.3f), shape = RoundedCornerShape(4.dp))
+            )
+
+            // Start handle
+            TrimHandle(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .offset { IntOffset((startFraction * (barWidthPx - handleWidthPx)).toInt(), 0) },
+                onDrag = { dx ->
+                    val newStartMs = (startMs + (dx / (barWidthPx - handleWidthPx)) * durationMs)
+                        .roundToLong()
+                        .coerceIn(0L, endMs - minTimeRangeMs)
                     onTrimChangedState(newStartMs, endMs)
                 }
-            }
-        )
+            )
 
-        // End handle
-        TrimHandle(
-            isStartHandle = false,
-            modifier = Modifier.offset { IntOffset((endFraction * barWidthPx).toInt(), 0) },
-            onDrag = { dx ->
-                if (barWidthPx > 0) {
-                    val newEndFraction = (endFraction + dx / barWidthPx).coerceIn(startFraction + minRangeFraction, 1f)
-                    val newEndMs = (newEndFraction * durationMs).toLong()
+            // End handle
+            TrimHandle(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .offset { IntOffset(((endFraction * (barWidthPx - handleWidthPx)) + handleWidthPx).toInt(), 0) },
+                onDrag = { dx ->
+                    val newEndMs = (endMs + (dx / (barWidthPx - handleWidthPx)) * durationMs)
+                        .roundToLong()
+                        .coerceIn(startMs + minTimeRangeMs, durationMs)
                     onTrimChangedState(startMs, newEndMs)
                 }
-            }
-        )
+            )
+        }
     }
 }
 
 @Composable
 private fun TrimHandle(
-    isStartHandle: Boolean,
     modifier: Modifier = Modifier,
     onDrag: (dx: Float) -> Unit,
 ) {
     Box(
         modifier = modifier
-            .offset(x = if (isStartHandle) (-8).dp else (-24).dp) // Center handle over the line
+            .offset(x = (-16).dp) // Center the handle visually
             .width(32.dp)
             .fillMaxHeight()
             .pointerInput(Unit) {
@@ -254,7 +253,13 @@ private fun TrimHandle(
             }
             .background(Color.White, RoundedCornerShape(6.dp))
     ) {
-        // You can add an indicator inside the handle if you want, e.g., vertical lines
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .width(2.dp)
+                .height(20.dp)
+                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(1.dp))
+        )
     }
 }
 

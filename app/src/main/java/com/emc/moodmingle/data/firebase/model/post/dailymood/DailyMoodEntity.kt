@@ -9,6 +9,7 @@ import com.emc.moodmingle.data.firebase.model.post.normal.PostDescription
 import com.emc.moodmingle.data.firebase.model.remix.Mood
 import com.emc.moodmingle.utils.color.toHex
 import com.emc.moodmingle.utils.media.image.ImageFilterType
+import com.emc.moodmingle.utils.media.video.editor.VideoEditorState
 import com.emc.moodmingle.utils.text.toFontName
 import com.squareup.moshi.Json
 import kotlinx.parcelize.Parcelize
@@ -62,6 +63,7 @@ data class DailyMoodMedia(
     val type: DailyMoodMediaType = DailyMoodMediaType.SINGLE,
     val urls: List<String> = emptyList(),
     val image: DailyMoodImage = DailyMoodImage(),
+    val video: VideoEditorState = VideoEditorState()
 ) : Parcelable
 
 enum class DailyMoodMediaType {

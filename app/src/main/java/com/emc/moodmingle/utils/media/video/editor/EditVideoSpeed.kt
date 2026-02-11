@@ -37,10 +37,7 @@ import com.emc.moodmingle.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditVideoSpeed(state: VideoEditorState, onStateChanged: (VideoEditorState) -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         SpeedPreview(state)
         ResetButton(state, onStateChanged)
         SpeedSlider(state, onStateChanged)
@@ -57,7 +54,7 @@ private fun SpeedPreview(state: VideoEditorState) {
             .padding(vertical = 6.dp, horizontal = 12.dp)
             .animateContentSize()
     ) {
-        Text(text = "Speed:", color = Color.White)
+        Text(text = "Speed:")
 
         Text(
             text = "${"%.2f".format(state.speed)}x",
@@ -82,7 +79,8 @@ private fun ColumnScope.ResetButton(
         ) {
             Icon(
                 painter = painterResource(R.drawable.media3_icon_rewind),
-                contentDescription = null
+                contentDescription = null,
+                tint = Color.Red
             )
             Text(text = " Reset", style = Typography.bodyMedium)
         }

@@ -3,6 +3,7 @@ package com.emc.moodmingle.utils.media.video.editor
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -98,7 +99,7 @@ private fun SpeedSlider(state: VideoEditorState, onStateChanged: (VideoEditorSta
             inactiveTrackColor = Color.Gray.copy(alpha = 0.8f),
             thumbColor = Color.White
         ),
-        track = { sliderState -> SliderTrack(sliderState) },
+        track = { sliderState -> SliderTrack(state, sliderState, onStateChanged) },
         thumb = { SliderThumb() },
         modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)
     )
@@ -106,7 +107,11 @@ private fun SpeedSlider(state: VideoEditorState, onStateChanged: (VideoEditorSta
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun SliderTrack(sliderState: SliderState) {
+private fun SliderTrack(
+    state: VideoEditorState,
+    sliderState: SliderState,
+    onStateChanged: (VideoEditorState) -> Unit,
+) {
     Box {
         SliderDefaults.Track(
             sliderState = sliderState,
@@ -127,6 +132,7 @@ private fun SliderTrack(sliderState: SliderState) {
             listOf(1, 5, 10).forEach { speed ->
                 Box(
                     modifier = Modifier
+                        .clickable { onStateChanged(state.copy(speed = speed.toFloat())) }
                         .background(Color.Black.copy(alpha = 0.3f), CircleShape)
                         .padding(horizontal = 4.dp)
                 ) {

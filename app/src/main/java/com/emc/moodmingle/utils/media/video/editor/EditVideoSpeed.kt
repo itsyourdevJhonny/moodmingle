@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.session.R
 import com.emc.moodmingle.ui.theme.SecondaryDark
@@ -51,6 +53,7 @@ private fun SpeedPreview(state: VideoEditorState) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
+            .padding(bottom = if (state.speed == 1f) 24.dp else Dp.Unspecified)
             .background(Color.Black.copy(alpha = 0.3f), CircleShape)
             .padding(vertical = 6.dp, horizontal = 12.dp)
             .animateContentSize()
@@ -70,7 +73,7 @@ private fun ColumnScope.ResetButton(
     state: VideoEditorState,
     onStateChanged: (VideoEditorState) -> Unit,
 ) {
-    AnimatedVisibility(visible = state.speed != 1f) {
+    AnimatedVisibility(visible = state.speed != 1f, modifier = Modifier.padding(bottom = 16.dp)) {
         TextButton(
             onClick = { onStateChanged(state.copy(speed = 1f)) },
             colors = ButtonDefaults.textButtonColors(
@@ -82,7 +85,7 @@ private fun ColumnScope.ResetButton(
                 painter = painterResource(R.drawable.media3_icon_rewind),
                 contentDescription = null
             )
-            Text(text = " Reset")
+            Text(text = " Reset", style = Typography.bodyMedium)
         }
     }
 }
@@ -126,7 +129,7 @@ private fun SliderTrack(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
-                .offset(y = (-22).dp),
+                .offset(y = (-32).dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             listOf(1, 5, 10).forEach { speed ->

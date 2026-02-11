@@ -56,7 +56,6 @@ fun EditVideoSpeed(state: VideoEditorState, onStateChanged: (VideoEditorState) -
         }
 
         ResetButton(state, onStateChanged)
-
         SpeedSlider(state, onStateChanged)
     }
 }
@@ -68,7 +67,7 @@ private fun ColumnScope.ResetButton(
 ) {
     AnimatedVisibility(visible = state.speed != 1f) {
         TextButton(
-            onClick = { onStateChanged(VideoEditorState(speed = 1f)) },
+            onClick = { onStateChanged(state.copy(speed = 1f)) },
             colors = ButtonDefaults.textButtonColors(
                 containerColor = Color.Black.copy(alpha = 0.3f),
                 contentColor = Color.White

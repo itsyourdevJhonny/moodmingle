@@ -187,7 +187,8 @@ fun DailyMoodThirdPage(
             "edit_single_image" -> DailyMoodEditImage(mood, onEdited) { selectedAction = "" }
 
             "edit_single_video" -> {
-                VideoEditor(videoUri = mood.media.urls.first().toUri()) { selectedAction = "" }
+                val videoUri = mood.media.urls.first().toUri()
+                VideoEditor(mood, videoUri) { selectedAction = "" }
             }
 
             "gif" -> GifPicker(mood, onEdited) { selectedAction = "" }

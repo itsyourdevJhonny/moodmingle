@@ -31,15 +31,16 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import androidx.core.graphics.scale
 import androidx.media3.exoplayer.DefaultRenderersFactory
+import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 
 @OptIn(UnstableApi::class)
 @Composable
-fun VideoEditor(videoUri: Uri, onDismiss: () -> Unit) {
+fun VideoEditor(mood: DailyMoodEntity, videoUri: Uri, onDismiss: () -> Unit) {
     val context = LocalContext.current
 
     var selectedAction by remember { mutableStateOf("") }
 
-    var state by remember(videoUri) { mutableStateOf(VideoEditorState()) }
+    var state by remember(videoUri) { mutableStateOf(/*VideoEditorState()*/mood.media.video) }
     var videoFrames by remember { mutableStateOf<List<Bitmap>>(emptyList()) }
 
     val exoPlayer = remember(videoUri) {

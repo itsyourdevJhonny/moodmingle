@@ -272,7 +272,7 @@ private fun Content(
     onImagePositionChanged: (DailyMoodImage) -> Unit,
     onGifPositionChanged: (Gif) -> Unit,
     onActionSelected: (String) -> Unit,
-    isPaused: Boolean
+    isPaused: Boolean,
 ) {
     val context = LocalContext.current
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
@@ -313,7 +313,7 @@ private fun Content(
                         }
 
                         mimeType.startsWith("video") -> {
-                            SingleVideoSection(context, mood, onActionSelected, isPaused)
+                            SingleVideoSection(context, mood, isPaused, onActionSelected)
                         }
                     }
                 }
@@ -588,54 +588,9 @@ private fun BoxScope.SingleImageSection(
 
 @Composable
 private fun BoxScope.SingleVideoSection(
-    context: Context,mood: DailyMoodEntity,
-    onActionSelected: (String) -> Unit,
-    isPaused: Boolean
-) {
-    val urls = mood.media.urls
-
-    val exoPlayer = remember(urls.first()) {
-        ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(urls.first()))
-            prepare()
-            repeatMode = Player.REPEAT_MODE_ONE
-        }
-    }
-
-    // Control the player based on the isPaused state.
-    // When isPaused is true, pause the player. When false, play it.
-    LaunchedEffect(isPaused) {
-        if (isPaused) {
-            exoPlayer.pause()
-        } else {
-            exoPlayer.play()
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            exoPlayer.release()
-        }
-    }
-
-    AndroidView(
-        factory = { ctx ->
-            PlayerView(ctx).apply {
-                player = exoPlayer
-                useController = false
-            }
-        },
-        modifier = Modifier
-            .align(Alignment.Center)
-            .clickable { onActionSelected("edit_single_video") }
-    )
-}
-
-
-/*@Composable
-private fun BoxScope.SingleVideoSection(
     context: Context,
     mood: DailyMoodEntity,
+    isPaused: Boolean,
     onActionSelected: (String) -> Unit,
 ) {
     val urls = mood.media.urls
@@ -645,6 +600,9 @@ private fun BoxScope.SingleVideoSection(
     exoPlayer.prepare()
     exoPlayer.playWhenReady = true
     exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+
+    // When isPaused is true, pause the player. When false, play it.
+    LaunchedEffect(isPaused) { if (isPaused) exoPlayer.pause() else exoPlayer.play() }
 
     DisposableEffect(Unit) { onDispose { exoPlayer.release() } }
 
@@ -659,7 +617,7 @@ private fun BoxScope.SingleVideoSection(
             .align(Alignment.Center)
             .clickable { onActionSelected("edit_single_video") }
     )
-}*/
+}
 
 @Composable
 private fun rememberMediaPalette(uri: Uri, isVideo: Boolean): State<Pair<Color, Color>> {

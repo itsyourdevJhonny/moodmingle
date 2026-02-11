@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -54,23 +55,31 @@ fun EditVideoSpeed(state: VideoEditorState, onStateChanged: (VideoEditorState) -
             )
         }
 
-        AnimatedVisibility(visible = state.speed != 1f) {
-            TextButton(
-                onClick = { onStateChanged(state.copy(speed = 1f)) },
-                colors = ButtonDefaults.textButtonColors(
-                    containerColor = Color.Black.copy(alpha = 0.3f),
-                    contentColor = Color.White
-                )
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.media3_icon_rewind),
-                    contentDescription = null
-                )
-                Text(text = " Reset")
-            }
-        }
+        ResetButton(state, onStateChanged)
 
         SpeedSlider(state, onStateChanged)
+    }
+}
+
+@Composable
+private fun ColumnScope.ResetButton(
+    state: VideoEditorState,
+    onStateChanged: (VideoEditorState) -> Unit,
+) {
+    AnimatedVisibility(visible = state.speed != 1f) {
+        TextButton(
+            onClick = { onStateChanged(VideoEditorState(speed = 1f)) },
+            colors = ButtonDefaults.textButtonColors(
+                containerColor = Color.Black.copy(alpha = 0.3f),
+                contentColor = Color.White
+            )
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.media3_icon_rewind),
+                contentDescription = null
+            )
+            Text(text = " Reset")
+        }
     }
 }
 

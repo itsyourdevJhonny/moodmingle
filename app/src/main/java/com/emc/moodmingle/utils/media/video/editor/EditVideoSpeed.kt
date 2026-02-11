@@ -39,24 +39,28 @@ fun EditVideoSpeed(state: VideoEditorState, onStateChanged: (VideoEditorState) -
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .background(Color.Black.copy(alpha = 0.3f), CircleShape)
-                .padding(vertical = 6.dp, horizontal = 12.dp)
-                .animateContentSize()
-        ) {
-            Text(text = "Speed:", color = Color.White)
-
-            Text(
-                text = "${"%.2f".format(state.speed)}x",
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
+        SpeedPreview(state)
         ResetButton(state, onStateChanged)
         SpeedSlider(state, onStateChanged)
+    }
+}
+
+@Composable
+private fun SpeedPreview(state: VideoEditorState) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+            .padding(vertical = 6.dp, horizontal = 12.dp)
+            .animateContentSize()
+    ) {
+        Text(text = "Speed:", color = Color.White)
+
+        Text(
+            text = "${"%.2f".format(state.speed)}x",
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 

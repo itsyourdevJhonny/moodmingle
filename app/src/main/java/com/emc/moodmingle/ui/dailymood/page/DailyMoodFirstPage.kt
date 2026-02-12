@@ -56,7 +56,7 @@ fun DailyMoodFirstPage(onShowMoodDialog: (Boolean) -> Unit, onBack: () -> Unit) 
                     )
                 }
 
-                Text(text = "Choose Mood", color = Color.White, fontWeight = FontWeight.Bold)
+                Text(text = "Select Mood", color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
     }

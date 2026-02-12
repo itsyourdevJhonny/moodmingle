@@ -1,6 +1,5 @@
 package com.emc.moodmingle.ui.dailymood.visibility
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,10 +19,8 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +28,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.post.dailymood.AudienceType
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
+import com.emc.moodmingle.ui.post.action.toastMessage
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.PurplePrimary
@@ -52,11 +51,42 @@ fun DailyMoodAudience(
     onEdited: (DailyMoodEntity) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    Scaffold(
-        containerColor = Color.Black,
-        topBar = { ScaffoldHeader(title = "Audience") { onDismiss() } }
-    ) { paddingValues ->
-        Content(paddingValues, mood, onEdited, onDismiss)
+    val context = LocalContext.current
+    var showCustomDialog by remember { mutableStateOf(false) }
+
+    val originalMood = remember(Unit) { mood }
+
+    Box {
+        Scaffold(
+            containerColor = Color.Black,
+            topBar = {
+                ScaffoldHeader(title = "Audience") {
+                    if (originalMood != mood) toastMessage(context, "Audience Saved")
+                    onDismiss()
+                }
+            }
+        ) { paddingValues ->
+            Content(paddingValues, mood, onEdited, onDialogOpen = { showCustomDialog = true })
+        }
+
+        if (showCustomDialog) {
+            UserSelectorDialog(
+                headerLabel = "Select Users",
+                userIds = mood.audience.selectedUsers,
+                onUsersSelected = { result ->
+                    val userIds = (result as SnapshotStateList<*>).map { it.toString() }
+                    onEdited(
+                        mood.copy(
+                            audience = mood.audience.copy(
+                                selectedUsers = userIds,
+                                type = AudienceType.CUSTOM
+                            )
+                        )
+                    )
+                },
+                onDismiss = { showCustomDialog = false }
+            )
+        }
     }
 }
 
@@ -65,43 +95,17 @@ private fun Content(
     paddingValues: PaddingValues,
     mood: DailyMoodEntity,
     onEdited: (DailyMoodEntity) -> Unit,
-    onDismiss: () -> Unit,
+    onDialogOpen: () -> Unit,
 ) {
-    val selectedUsers = remember { mutableStateListOf<String>() }
-//    selectedUsers.addAll(mood.audience.selectedUsers)
-
-    LaunchedEffect(selectedUsers) {
-        Log.d("Audience", "Selected Users: ${selectedUsers.size}")
-    }
-
-    var showCustomDialog by remember { mutableStateOf(false) }
-
     Column(modifier = Modifier.padding(paddingValues)) {
         getAudienceTypes().forEach { (type, description, icon) ->
             val isChecked = mood.audience.type == type
 
             AudienceItem(mood, type, description, icon, isChecked) {
-                if (type == AudienceType.CUSTOM) {
-                    showCustomDialog = true
-                } else {
-                    onEdited(mood.copy(audience = mood.audience.copy(type = type)))
-                }
+                if (type == AudienceType.CUSTOM) onDialogOpen()
+                else onEdited(mood.copy(audience = mood.audience.copy(type = type)))
             }
         }
-    }
-
-    if (showCustomDialog) {
-        Log.d("Audience", "Selected Users: ${selectedUsers.size}")
-
-        UserSelectorDialog(
-            headerLabel = "Select Users",
-            userIds = mood.audience.selectedUsers,
-            onUsersSelected = { result ->
-                val userIds = (result as SnapshotStateList<*>).map { it.toString() }
-                onEdited(mood.copy(audience = mood.audience.copy(selectedUsers = userIds)))
-            },
-            onDismiss = { showCustomDialog = false }
-        )
     }
 }
 

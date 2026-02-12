@@ -31,16 +31,19 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import androidx.core.graphics.scale
 import androidx.media3.exoplayer.DefaultRenderersFactory
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 
 @OptIn(UnstableApi::class)
 @Composable
-fun VideoEditor(mood: DailyMoodEntity, videoUri: Uri, onDismiss: () -> Unit) {
+fun VideoEditor(
+    videoUri: Uri,
+    onStateChanged: (VideoEditorState) -> Unit,
+    onDismiss: () -> Unit,
+) {
     val context = LocalContext.current
 
     var selectedAction by remember { mutableStateOf("") }
 
-    var state by remember(videoUri) { mutableStateOf(/*VideoEditorState()*/mood.media.video) }
+    var videoState by remember(videoUri) { mutableStateOf(VideoEditorState()) }
     var videoFrames by remember { mutableStateOf<List<Bitmap>>(emptyList()) }
 
     val exoPlayer = remember(videoUri) {
@@ -77,35 +80,35 @@ fun VideoEditor(mood: DailyMoodEntity, videoUri: Uri, onDismiss: () -> Unit) {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_READY) {
                     val duration = exoPlayer.duration
-                    if (duration > 0 && state.durationMs != duration) {
-                        state = state.copy(durationMs = duration, endMs = duration)
+                    if (duration > 0 && videoState.durationMs != duration) {
+                        videoState = videoState.copy(durationMs = duration, endMs = duration)
                     }
                 }
             }
         })
     }
 
-    LaunchedEffect(state.startMs, state.endMs) {
+    LaunchedEffect(videoState.startMs, videoState.endMs) {
         while (coroutineContext.isActive) {
             delay(100)
-            if (exoPlayer.currentPosition >= state.endMs) {
-                exoPlayer.seekTo(state.startMs)
+            if (exoPlayer.currentPosition >= videoState.endMs) {
+                exoPlayer.seekTo(videoState.startMs)
             }
         }
     }
 
-    LaunchedEffect(state.speed) {
-        exoPlayer.playbackParameters = PlaybackParameters(state.speed)
+    LaunchedEffect(videoState.speed) {
+        exoPlayer.playbackParameters = PlaybackParameters(videoState.speed)
     }
 
-    LaunchedEffect(state.volume) {
-        exoPlayer.volume = state.volume
+    LaunchedEffect(videoState.volume) {
+        exoPlayer.volume = videoState.volume
     }
 
     // This effect will run once and extract the video frames as bitmaps
-    LaunchedEffect(videoUri, state.durationMs) {
+    LaunchedEffect(videoUri, videoState.durationMs) {
         // We only extract frames once the duration is known and we haven't done it yet
-        if (state.durationMs > 0 && videoFrames.isEmpty()) {
+        if (videoState.durationMs > 0 && videoFrames.isEmpty()) {
             // Launch a coroutine on a background thread for this intensive work
             withContext(Dispatchers.IO) {
                 val retriever = MediaMetadataRetriever()
@@ -114,7 +117,7 @@ fun VideoEditor(mood: DailyMoodEntity, videoUri: Uri, onDismiss: () -> Unit) {
                     val frames = mutableListOf<Bitmap>()
                     // Extract a frame every 2 seconds (2000 ms). Adjust as needed.
                     val intervalMs = 2000L
-                    for (timeMs in 0L..state.durationMs step intervalMs) {
+                    for (timeMs in 0L..videoState.durationMs step intervalMs) {
                         // Get a frame, scaled down for performance.
                         // The height (e.g., 50px) should match your TrimBar's height.
                         retriever.getFrameAtTime(
@@ -138,19 +141,27 @@ fun VideoEditor(mood: DailyMoodEntity, videoUri: Uri, onDismiss: () -> Unit) {
 
     Scaffold(
         containerColor = Color.Black,
-        topBar = { ScaffoldHeader(title = "Edit Video") { onDismiss() } },
+        topBar = {
+            ScaffoldHeader(
+                title = "Edit Video",
+                doneLabel = "Save",
+                enabled = true,
+                onDone = { onStateChanged(videoState) },
+                onBack = onDismiss
+            )
+        },
         bottomBar = { VideoEditorFooter(selectedAction) { selectedAction = it } },
         floatingActionButton = {
             VideoEditorFloatingAction(
                 selectedAction,
-                state,
+                videoState,
                 exoPlayer,
                 videoFrames,
-                onStateChanged = { state = it }
+                onStateChanged = { videoState = it }
             )
         },
         floatingActionButtonPosition = FabPosition.Center
     ) { paddingValues ->
-        VideoEditorContent(paddingValues, exoPlayer, state)
+        VideoEditorContent(paddingValues, exoPlayer)
     }
 }

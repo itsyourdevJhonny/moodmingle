@@ -1,5 +1,6 @@
 package com.emc.moodmingle.ui.dailymood.location
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,8 @@ fun DailyMoodLocation(
     onEdited: (DailyMoodEntity) -> Unit,
     onBack: () -> Unit
 ) {
+    BackHandler { onBack() }
+
     Scaffold(
         containerColor = Color.Black,
         topBar = {

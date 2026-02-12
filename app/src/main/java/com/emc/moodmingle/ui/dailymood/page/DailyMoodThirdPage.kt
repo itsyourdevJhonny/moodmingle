@@ -96,19 +96,19 @@ import com.emc.moodmingle.ui.create.detectLongPress
 import com.emc.moodmingle.ui.create.getMimeType
 import com.emc.moodmingle.ui.dailymood.action.DailyMoodContentBottomSheet
 import com.emc.moodmingle.ui.dailymood.action.DailyMoodFloatingActions
+import com.emc.moodmingle.ui.dailymood.hashtag.DailyMoodHashtagSection
 import com.emc.moodmingle.ui.dailymood.location.DailyMoodLocation
 import com.emc.moodmingle.ui.dailymood.media.image.DailyMoodEditImage
 import com.emc.moodmingle.ui.dailymood.media.image.DailyMoodSelectMedia
 import com.emc.moodmingle.ui.dailymood.media.image.animatedShape
+import com.emc.moodmingle.ui.dailymood.mention.DailyMoodMentionSection
+import com.emc.moodmingle.ui.dailymood.mood.DailyMoodMoodSection
 import com.emc.moodmingle.ui.dailymood.text.DailyMoodEditText
 import com.emc.moodmingle.ui.dailymood.visibility.DailyMoodAudience
 import com.emc.moodmingle.ui.remix.MoodPickerDialog
-import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.components.AnnotatedHashtag
-import com.emc.moodmingle.utils.components.AnnotatedMention
 import com.emc.moodmingle.utils.components.GifPicker
 import com.emc.moodmingle.utils.components.ScaffoldHeader
 import com.emc.moodmingle.utils.media.MediaPaletteExtractor
@@ -162,6 +162,7 @@ fun DailyMoodThirdPage(
                 onImagePositionChanged,
                 onGifPositionChanged,
                 onActionSelected = { selectedAction = it },
+                onMentionDeleted = { onEdited(mood.copy(text = mood.text.copy(mentions = mood.text.mentions - it))) },
                 isPaused = isContentPaused
             )
         }
@@ -327,6 +328,7 @@ private fun Content(
     onImagePositionChanged: (DailyMoodImage) -> Unit,
     onGifPositionChanged: (Gif) -> Unit,
     onActionSelected: (String) -> Unit,
+    onMentionDeleted: (String) -> Unit,
     isPaused: Boolean,
 ) {
     val context = LocalContext.current
@@ -387,19 +389,23 @@ private fun Content(
                 .padding(12.dp)
                 .animateContentSize()
         ) {
-            MoodSection(mood)
-
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                MentionSection(mood)
-                HashtagSection(mood)
-            }
+            DailyMoodMoodSection(mood)
         }
 
         GifSection(mood, boxSize, onActionSelected, onGifPositionChanged)
 
         DescriptionSection(mood, boxSize, onTextPositionChanged, onActionSelected)
 
-        LocationSection(mood)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(bottom = 8.dp)
+        ) {
+            DailyMoodMentionSection(mood, onMentionDeleted)
+            DailyMoodHashtagSection(mood)
+            LocationSection(mood)
+        }
     }
 }
 
@@ -827,60 +833,11 @@ private fun BoxScope.GifSection(
 }
 
 @Composable
-private fun MoodSection(mood: DailyMoodEntity) {
-    AnimatedVisibility(
-        visible = mood.mood.description.isNotBlank(),
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Box(
-            modifier = Modifier
-                .background(BrushPrimaryGradient, RoundedCornerShape(8.dp))
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-                .animateContentSize()
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = mood.mood.emoji, color = Color.White)
-
-                Text(
-                    text = mood.mood.description,
-                    style = Typography.bodySmall.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun MentionSection(mood: DailyMoodEntity) {
-    AnimatedVisibility(
-        visible = mood.text.mentions.isNotEmpty(),
-        enter = fadeIn(),
-        exit = fadeOut(),
-        content = { AnnotatedMention(mentions = mood.text.mentions) }
-    )
-}
-
-@Composable
-private fun HashtagSection(mood: DailyMoodEntity) {
-    AnimatedVisibility(
-        visible = mood.text.hashtag.isNotBlank() && mood.text.hashtag != "#",
-        enter = fadeIn(),
-        exit = fadeOut(),
-        content = { AnnotatedHashtag(hashtag = mood.text.hashtag) }
-    )
-}
-
-@Composable
-private fun BoxScope.LocationSection(mood: DailyMoodEntity) {
+private fun LocationSection(mood: DailyMoodEntity) {
     AnimatedVisibility(
         visible = mood.location != null,
         enter = fadeIn(),
-        exit = fadeOut(),
-        modifier = Modifier.align(Alignment.BottomStart)
+        exit = fadeOut()
     ) {
         mood.location?.let { location ->
             Row(

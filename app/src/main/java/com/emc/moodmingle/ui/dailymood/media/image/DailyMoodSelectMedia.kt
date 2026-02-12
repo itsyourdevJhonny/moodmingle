@@ -2,6 +2,7 @@ package com.emc.moodmingle.ui.dailymood.media.image
 
 import android.content.Context
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -73,6 +74,8 @@ fun DailyMoodSelectMedia(
     onDismiss: () -> Unit
 ) {
     var selectedUris by remember { mutableStateOf(uris) }
+
+    BackHandler { onDismiss() }
 
     Scaffold(
         containerColor = Color.Black,

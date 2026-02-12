@@ -381,6 +381,10 @@ private fun Content(
             }
         }
 
+        GifSection(mood, boxSize, onActionSelected, onGifPositionChanged)
+
+        DescriptionSection(mood, boxSize, onTextPositionChanged, onActionSelected)
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -391,10 +395,6 @@ private fun Content(
         ) {
             DailyMoodMoodSection(mood)
         }
-
-        GifSection(mood, boxSize, onActionSelected, onGifPositionChanged)
-
-        DescriptionSection(mood, boxSize, onTextPositionChanged, onActionSelected)
 
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -580,10 +580,12 @@ private fun BoxScope.SingleImageSection(
                 }
             }
             .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-            .detectLongPress(
-                onLongPress = { onActionSelected("single_image_sheet") },
-                onTap = { onActionSelected("edit_single_image") }
-            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onActionSelected("edit_single_image") },
+                    onLongPress = { onActionSelected("single_image_sheet") }
+                )
+            }
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragEnd = {
@@ -737,7 +739,7 @@ private fun BoxScope.GifSection(
                     }
                 }
                 .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-                .pointerInput(Unit) { detectTapGestures(onPress = { onActionSelected("gif_sheet") }) }
+                .pointerInput(Unit) { detectTapGestures(onLongPress = { onActionSelected("gif_sheet") }) }
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragEnd = {

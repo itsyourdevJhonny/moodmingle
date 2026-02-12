@@ -23,15 +23,16 @@ data class DailyMoodEntity(
     val musicTrack: MusicTrack? = null,
     val location: NominatimPlace? = null,
     val text: DailyMoodText = DailyMoodText(),
+    val audience: DailyMoodAudience = DailyMoodAudience(),
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = 0
+    val updatedAt: Long = 0,
 )
 
 data class Gif(
     val url: String = "",
     val type: GifType = GifType.IMAGE,
     val offsetX: Float = 0f,
-    val offsetY: Float = 0f
+    val offsetY: Float = 0f,
 )
 
 enum class GifType {
@@ -49,7 +50,7 @@ data class DailyMoodText(
     val hashtag: String = "",
     val mentions: List<String> = emptyList(),
     val offsetX: Float = 0f,
-    val offsetY: Float = 0f
+    val offsetY: Float = 0f,
 ) : Parcelable
 
 enum class TextStyle {
@@ -63,7 +64,7 @@ data class DailyMoodMedia(
     val type: DailyMoodMediaType = DailyMoodMediaType.SINGLE,
     val urls: List<String> = emptyList(),
     val image: DailyMoodImage = DailyMoodImage(),
-    val video: VideoEditorState = VideoEditorState()
+    val video: VideoEditorState = VideoEditorState(),
 ) : Parcelable
 
 enum class DailyMoodMediaType {
@@ -77,7 +78,7 @@ data class DailyMoodImage(
     val filterName: String = ImageFilterType.NORMAL.name,
     val shapeType: ShapeType = ShapeType.NORMAL,
     val offsetX: Float = 0f,
-    val offsetY: Float = 0f
+    val offsetY: Float = 0f,
 ) : Parcelable
 
 enum class ShapeType {
@@ -108,5 +109,19 @@ data class MusicTrack(
     val artist: String,
     @Json(name = "artworkUrl") val artworkUrl: String?,
     @Json(name = "streamUrl") val streamUrl: String?,
-    val duration: Long
+    val duration: Long,
 ) : Parcelable
+
+@Parcelize
+data class DailyMoodAudience(
+    val type: AudienceType = AudienceType.PUBLIC,
+    val selectedUsers: List<String> = emptyList(),
+) : Parcelable
+
+enum class AudienceType {
+    PUBLIC,
+    PRIVATE,
+    FOLLOWERS,
+    SUPPORTERS,
+    CUSTOM
+}

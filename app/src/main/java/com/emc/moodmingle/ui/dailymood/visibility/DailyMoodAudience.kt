@@ -130,35 +130,16 @@ fun AudienceItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .background(PrimaryDark, CircleShape)
-                    .padding(12.dp)
-            ) {
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            TypeAndDescription(mood, type, description)
+            ItemIcon(icon)
+            ItemTypeAndDescription(mood, type, description)
         }
 
-        RadioButton(
-            selected = isChecked,
-            onClick = null,
-            colors = RadioButtonDefaults.colors(
-                unselectedColor = Color.White,
-                selectedColor = PurplePrimary
-            )
-        )
+        ItemRadioButton(isChecked)
     }
 }
 
 @Composable
-private fun TypeAndDescription(mood: DailyMoodEntity, type: AudienceType, description: String) {
+private fun ItemTypeAndDescription(mood: DailyMoodEntity, type: AudienceType, description: String) {
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
 
     Column {
@@ -197,6 +178,34 @@ private fun TypeAndDescription(mood: DailyMoodEntity, type: AudienceType, descri
             )
         }
     }
+}
+
+@Composable
+private fun ItemIcon(icon: Int) {
+    Box(
+        modifier = Modifier
+            .background(PrimaryDark, CircleShape)
+            .padding(12.dp)
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
+@Composable
+private fun ItemRadioButton(isChecked: Boolean) {
+    RadioButton(
+        selected = isChecked,
+        onClick = null,
+        colors = RadioButtonDefaults.colors(
+            unselectedColor = Color.White,
+            selectedColor = PurplePrimary
+        )
+    )
 }
 
 data class Audience(

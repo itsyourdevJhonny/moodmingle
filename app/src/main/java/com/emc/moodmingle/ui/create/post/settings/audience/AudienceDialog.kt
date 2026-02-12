@@ -44,7 +44,7 @@ import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 @Composable
 fun AudienceDialog(audience: Any, onAudienceSelected: (Any) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val visibilityTypes = getVisibilityTypes()
+    val visibilityTypes = getAudienceTypes()
     val localCopy = remember(Unit) { audience }
 
     var showCustomDialog by remember { mutableStateOf(false) }
@@ -111,7 +111,7 @@ fun AudienceDialog(audience: Any, onAudienceSelected: (Any) -> Unit, onDismiss: 
 }
 
 @Composable
-private fun LabelAndDescription(visibilityType: Visibility, audience: Any) {
+private fun LabelAndDescription(visibilityType: Audience, audience: Any) {
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
 
     Column {
@@ -166,17 +166,17 @@ private fun IndicatorIcon(icon: Int, label: String) {
     }
 }
 
-private fun getVisibilityTypes(): List<Visibility> {
+private fun getAudienceTypes(): List<Audience> {
     return listOf(
-        Visibility("Public", "Visible to everyone", R.drawable.public_world),
-        Visibility("Private", "Visible only to you", R.drawable.private_user),
-        Visibility("Followers", "Visible to your followers", R.drawable.followers),
-        Visibility("Supporters", "Visible to your supporters", R.drawable.supporter),
-        Visibility("Custom", "Choose who can view your post", R.drawable.custom)
+        Audience("Public", "Visible to everyone", R.drawable.public_world),
+        Audience("Private", "Visible only to you", R.drawable.private_user),
+        Audience("Followers", "Visible to your followers", R.drawable.followers),
+        Audience("Supporters", "Visible to your supporters", R.drawable.supporter),
+        Audience("Custom", "Choose who can view your post", R.drawable.custom)
     )
 }
 
-data class Visibility(
+private data class Audience(
     val label: String,
     val description: String,
     @DrawableRes val iconRes: Int

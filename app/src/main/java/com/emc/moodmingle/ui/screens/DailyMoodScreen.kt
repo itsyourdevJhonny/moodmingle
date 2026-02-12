@@ -14,30 +14,41 @@ import com.emc.moodmingle.ui.remix.MoodPickerDialog
 
 @Composable
 fun DailyMoodScreen(onBack: () -> Unit) {
-    var currentPage by remember { mutableIntStateOf(3) }
+    var currentPage by remember { mutableIntStateOf(1) }
     var showMoodDialog by remember { mutableStateOf(false) }
-    var dailyMood by remember { mutableStateOf(DailyMoodEntity()) }
+    var mood by remember { mutableStateOf(DailyMoodEntity()) }
 
     when (currentPage) {
         1 -> DailyMoodFirstPage(onShowMoodDialog = { showMoodDialog = it }, onBack)
 
         2 -> {
             DailyMoodSecondPage(
+                mood,
                 onNextPage = { currentPage++ },
                 onShowMoodDialog = { showMoodDialog = it },
+                onMoodSelected = { emoji, description ->
+                    mood = mood.copy(
+                        mood = mood.mood.copy(
+                            emoji = emoji,
+                            description = getEmojiByEmotion().entries.firstOrNull { it.value == emoji }?.key.orEmpty()
+                        )
+                    )
+
+                    mood = mood.copy(text = mood.text.copy(description = description))
+
+                    currentPage++
+                },
                 onBack = { currentPage-- }
             )
         }
 
         3 -> {
             DailyMoodThirdPage(
-                dailyMood,
-                onEdited = { dailyMood = it },
-                onTextPositionChanged = { dailyMood = dailyMood.copy(text = it) },
-                onImagePositionChanged = {
-                    dailyMood = dailyMood.copy(media = dailyMood.media.copy(image = it))
-                },
-                onGifPositionChanged = { dailyMood = dailyMood.copy(gif = it) },
+                mood,
+                onEdited = { mood = it },
+                onTextPositionChanged = { mood = mood.copy(text = it) },
+                onImagePositionChanged = { mood = mood.copy(media = mood.media.copy(image = it)) },
+                onGifPositionChanged = { mood = mood.copy(gif = it) },
                 onBack = { currentPage-- }
             )
         }
@@ -45,9 +56,9 @@ fun DailyMoodScreen(onBack: () -> Unit) {
 
     if (showMoodDialog) {
         MoodPickerDialog(
-            selectedMood = dailyMood.mood,
+            selectedMood = mood.mood,
             onSelectedMood = {
-                dailyMood = dailyMood.copy(mood = it)
+                mood = mood.copy(mood = it)
                 if (currentPage != 2) currentPage++
             },
             onDismiss = { showMoodDialog = false }

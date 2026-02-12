@@ -6,13 +6,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,35 +68,41 @@ private fun Content(
 ) {
     val moodQuotes = getMoodQuotes().filter { it.first == mood.mood.emoji }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .padding(paddingValues)
-            .fillMaxSize()
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(16.dp)
     ) {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(16.dp)
-        ) {
-            items(items = moodQuotes, key = { it.second }) { (emoji, quote) ->
-                Row(
-                    modifier = Modifier
-                        .clickable { onMoodSelected(emoji, quote) }
-                        .fillMaxWidth()
-                        .border(
-                            width = 1.dp,
-                            color = GrayTextColor,
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .padding(vertical = 8.dp, horizontal = 12.dp)
-                        .animateItem(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(text = emoji, fontSize = 20.sp, color = Color.White)
-                    Text(text = quote, style = Typography.labelLarge, color = Color.White)
-                }
-            }
+        items(items = moodQuotes, key = { it.second }) { (emoji, quote) ->
+            MoodQuoteItem(emoji, quote, onMoodSelected)
         }
+    }
+}
+
+@Composable
+private fun LazyItemScope.MoodQuoteItem(
+    emoji: String,
+    quote: String,
+    onMoodSelected: (String, String) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .clickable { onMoodSelected(emoji, quote) }
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = GrayTextColor,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(vertical = 8.dp, horizontal = 12.dp)
+            .animateItem(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(text = emoji, fontSize = 20.sp, color = Color.White)
+        Text(text = quote, style = Typography.labelLarge, color = Color.White)
     }
 }
 

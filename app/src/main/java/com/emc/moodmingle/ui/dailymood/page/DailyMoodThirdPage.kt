@@ -2,6 +2,7 @@ package com.emc.moodmingle.ui.dailymood.page
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
@@ -11,8 +12,8 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -31,7 +32,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ButtonDefaults
@@ -91,14 +91,16 @@ import com.emc.moodmingle.data.firebase.model.post.dailymood.GifType
 import com.emc.moodmingle.data.firebase.model.post.dailymood.ShapeType
 import com.emc.moodmingle.data.firebase.model.post.dailymood.TextStyle
 import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.ui.create.detectLongPress
 import com.emc.moodmingle.ui.create.getMimeType
+import com.emc.moodmingle.ui.dailymood.action.DailyMoodContentBottomSheet
 import com.emc.moodmingle.ui.dailymood.action.DailyMoodFloatingActions
 import com.emc.moodmingle.ui.dailymood.location.DailyMoodLocation
 import com.emc.moodmingle.ui.dailymood.media.image.DailyMoodEditImage
 import com.emc.moodmingle.ui.dailymood.media.image.DailyMoodSelectMedia
 import com.emc.moodmingle.ui.dailymood.media.image.animatedShape
-import com.emc.moodmingle.utils.media.video.editor.VideoEditor
 import com.emc.moodmingle.ui.dailymood.text.DailyMoodEditText
+import com.emc.moodmingle.ui.dailymood.visibility.DailyMoodAudience
 import com.emc.moodmingle.ui.remix.MoodPickerDialog
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
@@ -110,6 +112,7 @@ import com.emc.moodmingle.utils.components.GifPicker
 import com.emc.moodmingle.utils.components.ScaffoldHeader
 import com.emc.moodmingle.utils.media.MediaPaletteExtractor
 import com.emc.moodmingle.utils.media.image.ImageFilterType
+import com.emc.moodmingle.utils.media.video.editor.VideoEditor
 import com.emc.moodmingle.utils.text.toColor
 import com.emc.moodmingle.utils.text.toColorFilter
 import com.emc.moodmingle.utils.text.toFontFamily
@@ -146,7 +149,7 @@ fun DailyMoodThirdPage(
                     onBack = onBack
                 )
             },
-            bottomBar = { Footer(currentUser) },
+            bottomBar = { Footer(currentUser) { selectedAction = it } },
             floatingActionButton = {
                 DailyMoodFloatingActions(mood, selectedAction) { selectedAction = it }
             }
@@ -162,6 +165,7 @@ fun DailyMoodThirdPage(
             )
         }
 
+        // Content
         when (selectedAction) {
             "mood" -> {
                 MoodPickerDialog(
@@ -187,19 +191,42 @@ fun DailyMoodThirdPage(
             "edit_single_image" -> DailyMoodEditImage(mood, onEdited) { selectedAction = "" }
 
             "edit_single_video" -> {
-                val videoUri = mood.media.urls.first().toUri()
-                VideoEditor(mood, videoUri) { selectedAction = "" }
+                VideoEditor(
+                    videoUri = mood.media.urls.first().toUri(),
+                    onStateChanged = { onEdited(mood.copy(media = mood.media.copy(video = it))) },
+                    onDismiss = { selectedAction = "" }
+                )
             }
 
             "gif" -> GifPicker(mood, onEdited) { selectedAction = "" }
 
             "location" -> DailyMoodLocation(mood, onEdited) { selectedAction = "" }
         }
+
+        // Footer
+        when (selectedAction) {
+            "audience" -> DailyMoodAudience(mood, onEdited) { selectedAction = "" }
+            "settings" -> {}
+            "upload" -> {}
+        }
+    }
+
+    // Sheet
+    when (selectedAction) {
+        "text_sheet", "single_image_sheet", "single_video_sheet" -> {
+            DailyMoodContentBottomSheet(
+                selectedAction,
+                mood,
+                onEdited,
+                onActionSelected = { selectedAction = it },
+                onDismiss = { selectedAction = "" }
+            )
+        }
     }
 }
 
 @Composable
-private fun Footer(currentUser: UserEntityFirebase?) {
+private fun Footer(currentUser: UserEntityFirebase?, onActionSelected: (String) -> Unit) {
     BottomAppBar(
         contentPadding = PaddingValues(),
         containerColor = PrimaryDark,
@@ -217,7 +244,7 @@ private fun Footer(currentUser: UserEntityFirebase?) {
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 IconButton(
-                    onClick = {},
+                    onClick = { onActionSelected("settings") },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = SecondaryDark,
                         contentColor = Color.White
@@ -227,7 +254,7 @@ private fun Footer(currentUser: UserEntityFirebase?) {
                 }
 
                 TextButton(
-                    onClick = {},
+                    onClick = { onActionSelected("audience") },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = Color.White,
                         containerColor = SecondaryDark
@@ -244,7 +271,7 @@ private fun Footer(currentUser: UserEntityFirebase?) {
             }
 
             TextButton(
-                onClick = {},
+                onClick = { onActionSelected("upload") },
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = Color.White,
                     containerColor = SecondaryDark
@@ -286,6 +313,8 @@ private fun Content(
 
         val (topColor, bottomColor) = rememberMediaPalette(uri, isVideo).value
         paletteColors = listOf(topColor, bottomColor)
+    } else {
+        paletteColors = listOf(Color.Black, Color.Black)
     }
 
     Box(
@@ -299,7 +328,6 @@ private fun Content(
             val urls = mood.media.urls
 
             when (mood.media.type) {
-
                 DailyMoodMediaType.SINGLE -> {
                     val mimeType = getMimeType(context, urls.first().toUri()) ?: ""
 
@@ -340,7 +368,7 @@ private fun Content(
             }
         }
 
-        GifSection(mood, boxSize, onGifPositionChanged)
+        GifSection(mood, boxSize, onActionSelected, onGifPositionChanged)
 
         DescriptionSection(mood, boxSize, onTextPositionChanged, onActionSelected)
 
@@ -393,7 +421,10 @@ private fun BoxScope.DescriptionSection(
                 }
             }
             .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-            .clickable { onActionSelected("text") }
+            .detectLongPress(
+                onLongPress = { onActionSelected("text_sheet") },
+                onTap = { onActionSelected("text") }
+            )
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragEnd = {
@@ -434,42 +465,27 @@ private fun BoxScope.DescriptionSection(
                 }
             }
     ) {
-        Box {
-            Text(
-                text = text.description,
-                color = when (text.style) {
-                    TextStyle.NORMAL -> text.color.toColor()
-                    TextStyle.WITH_BACKGROUND -> color
-                    TextStyle.WITHOUT_BACKGROUND -> Color.White
-                },
-                fontFamily = text.font.toFontFamily(),
-                textAlign = text.align.toTextAlign(),
-                modifier = Modifier
-                    .widthIn(max = (boxSize.width - 390).dp)
-                    .background(
-                        color = when (text.style) {
-                            TextStyle.NORMAL -> Color.Transparent
-                            TextStyle.WITH_BACKGROUND -> text.color.toColor()
-                            TextStyle.WITHOUT_BACKGROUND -> text.color.toColor().copy(alpha = 0.3f)
-                        },
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(8.dp)
-            )
-
-            IconButton(
-                onClick = {},
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 16.dp, y = (-16).dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = null,
-                    tint = Color.Red
+        Text(
+            text = text.description,
+            color = when (text.style) {
+                TextStyle.NORMAL -> text.color.toColor()
+                TextStyle.WITH_BACKGROUND -> color
+                TextStyle.WITHOUT_BACKGROUND -> Color.White
+            },
+            fontFamily = text.font.toFontFamily(),
+            textAlign = text.align.toTextAlign(),
+            modifier = Modifier
+                .widthIn(max = (boxSize.width - 390).dp)
+                .background(
+                    color = when (text.style) {
+                        TextStyle.NORMAL -> Color.Transparent
+                        TextStyle.WITH_BACKGROUND -> text.color.toColor()
+                        TextStyle.WITHOUT_BACKGROUND -> text.color.toColor().copy(alpha = 0.3f)
+                    },
+                    shape = RoundedCornerShape(8.dp)
                 )
-            }
-        }
+                .padding(8.dp)
+        )
     }
 
     AnimatedDivider(visible = showVerticalGuide) {
@@ -531,7 +547,10 @@ private fun BoxScope.SingleImageSection(
                 }
             }
             .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-            .clickable { onActionSelected("edit_single_image") }
+            .detectLongPress(
+                onLongPress = { onActionSelected("single_image_sheet") },
+                onTap = { onActionSelected("edit_single_image") }
+            )
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragEnd = {
@@ -607,6 +626,8 @@ private fun BoxScope.SingleVideoSection(
 
     DisposableEffect(Unit) { onDispose { exoPlayer.release() } }
 
+    Log.d("TAG", "Composed")
+
     AndroidView(
         factory = { ctx ->
             PlayerView(ctx).apply {
@@ -616,7 +637,10 @@ private fun BoxScope.SingleVideoSection(
         },
         modifier = Modifier
             .align(Alignment.Center)
-            .clickable { onActionSelected("edit_single_video") }
+            .detectLongPress(
+                onLongPress = { onActionSelected("single_video_sheet") },
+                onTap = { onActionSelected("edit_single_video") }
+            )
     )
 }
 
@@ -637,6 +661,7 @@ private fun rememberMediaPalette(uri: Uri, isVideo: Boolean): State<Pair<Color, 
 private fun BoxScope.GifSection(
     mood: DailyMoodEntity,
     boxSize: IntSize,
+    onActionSelected: (String) -> Unit,
     onGifPositionChanged: (Gif) -> Unit,
 ) {
     var size by remember { mutableStateOf(IntSize.Zero) }
@@ -679,6 +704,7 @@ private fun BoxScope.GifSection(
                     }
                 }
                 .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+                .pointerInput(Unit) { detectTapGestures(onPress = { onActionSelected("gif_sheet") }) }
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragEnd = {

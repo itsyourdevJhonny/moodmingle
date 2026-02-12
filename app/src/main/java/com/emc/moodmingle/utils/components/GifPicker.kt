@@ -1,6 +1,7 @@
 package com.emc.moodmingle.utils.components
 
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,6 +52,8 @@ import com.emc.moodmingle.data.firebase.model.post.dailymood.GifType
 
 @Composable
 fun GifPicker(mood: DailyMoodEntity, onEdited: (DailyMoodEntity) -> Unit, onDismiss: () -> Unit) {
+    BackHandler { onDismiss() }
+
     Scaffold(
         containerColor = Color.Black,
         topBar = { ScaffoldHeader(title = "Select GIF", onBack = onDismiss) }

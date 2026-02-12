@@ -214,7 +214,7 @@ fun DailyMoodThirdPage(
 
     // Sheet
     when (selectedAction) {
-        "text_sheet", "single_image_sheet", "single_video_sheet" -> {
+        "text_sheet", "single_image_sheet", "single_video_sheet", "gif_sheet" -> {
             DailyMoodContentBottomSheet(
                 selectedAction,
                 mood,
@@ -248,60 +248,74 @@ private fun Footer(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                IconButton(
-                    onClick = { onActionSelected("settings") },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = SecondaryDark,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Icon(imageVector = Icons.Default.Settings, contentDescription = null)
-                }
-
-                TextButton(
-                    onClick = { onActionSelected("audience") },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color.White,
-                        containerColor = SecondaryDark
-                    )
-                ) {
-                    Text(text = "Share with")
-                    Spacer(Modifier.width(8.dp))
-                    Icon(
-                        painter = painterResource(
-                            when(mood.audience.type) {
-                                AudienceType.PUBLIC -> R.drawable.public_world
-                                AudienceType.PRIVATE -> R.drawable.private_user
-                                AudienceType.FOLLOWERS -> R.drawable.followers
-                                AudienceType.SUPPORTERS -> R.drawable.supporter
-                                AudienceType.CUSTOM -> R.drawable.custom
-                            }
-                        ),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                SettingsButton(onActionSelected)
+                AudienceButton(onActionSelected, mood)
             }
 
-            TextButton(
-                onClick = { onActionSelected("upload") },
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = Color.White,
-                    containerColor = SecondaryDark
-                )
-            ) {
-                AsyncImage(
-                    model = currentUser?.avatarUrl.orEmpty(),
-                    contentDescription = "Avatar",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(text = "Post", fontWeight = FontWeight.Black)
-            }
+            UploadButton(currentUser, onActionSelected)
         }
+    }
+}
+
+@Composable
+private fun SettingsButton(onActionSelected: (String) -> Unit) {
+    IconButton(
+        onClick = { onActionSelected("settings") },
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = SecondaryDark,
+            contentColor = Color.White
+        )
+    ) {
+        Icon(imageVector = Icons.Default.Settings, contentDescription = null)
+    }
+}
+
+@Composable
+private fun AudienceButton(onActionSelected: (String) -> Unit, mood: DailyMoodEntity) {
+    TextButton(
+        onClick = { onActionSelected("audience") },
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = Color.White,
+            containerColor = SecondaryDark
+        )
+    ) {
+        Text(text = "Share with")
+        Spacer(Modifier.width(8.dp))
+        Icon(
+            painter = painterResource(
+                when (mood.audience.type) {
+                    AudienceType.PUBLIC -> R.drawable.public_world
+                    AudienceType.PRIVATE -> R.drawable.private_user
+                    AudienceType.FOLLOWERS -> R.drawable.followers
+                    AudienceType.SUPPORTERS -> R.drawable.supporter
+                    AudienceType.CUSTOM -> R.drawable.custom
+                }
+            ),
+            contentDescription = null,
+            modifier = Modifier.size(18.dp)
+        )
+    }
+}
+
+@Composable
+private fun UploadButton(currentUser: UserEntityFirebase?, onActionSelected: (String) -> Unit) {
+    TextButton(
+        onClick = { onActionSelected("upload") },
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = Color.White,
+            containerColor = SecondaryDark
+        )
+    ) {
+        AsyncImage(
+            model = currentUser?.avatarUrl.orEmpty(),
+            contentDescription = "Avatar",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(text = "Post", fontWeight = FontWeight.Black)
     }
 }
 
@@ -866,8 +880,7 @@ private fun BoxScope.LocationSection(mood: DailyMoodEntity) {
         visible = mood.location != null,
         enter = fadeIn(),
         exit = fadeOut(),
-        modifier = Modifier
-            .align(Alignment.BottomStart)
+        modifier = Modifier.align(Alignment.BottomStart)
     ) {
         mood.location?.let { location ->
             Row(

@@ -1,5 +1,6 @@
 package com.emc.moodmingle.ui.dailymood.visibility
 
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,9 +20,14 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +43,7 @@ import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
+import com.emc.moodmingle.utils.components.UserSelectorDialog
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 
 @Composable
@@ -49,7 +56,7 @@ fun DailyMoodAudience(
         containerColor = Color.Black,
         topBar = { ScaffoldHeader(title = "Audience") { onDismiss() } }
     ) { paddingValues ->
-        Content(paddingValues, mood, onEdited)
+        Content(paddingValues, mood, onEdited, onDismiss)
     }
 }
 
@@ -58,24 +65,43 @@ private fun Content(
     paddingValues: PaddingValues,
     mood: DailyMoodEntity,
     onEdited: (DailyMoodEntity) -> Unit,
+    onDismiss: () -> Unit,
 ) {
     val selectedUsers = remember { mutableStateListOf<String>() }
+//    selectedUsers.addAll(mood.audience.selectedUsers)
+
+    LaunchedEffect(selectedUsers) {
+        Log.d("Audience", "Selected Users: ${selectedUsers.size}")
+    }
+
+    var showCustomDialog by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.padding(paddingValues)) {
         getAudienceTypes().forEach { (type, description, icon) ->
             val isChecked = mood.audience.type == type
 
             AudienceItem(mood, type, description, icon, isChecked) {
-                onEdited(
-                    mood.copy(
-                        audience = mood.audience.copy(
-                            type = type,
-                            selectedUsers = if (type == AudienceType.CUSTOM) selectedUsers else emptyList()
-                        )
-                    )
-                )
+                if (type == AudienceType.CUSTOM) {
+                    showCustomDialog = true
+                } else {
+                    onEdited(mood.copy(audience = mood.audience.copy(type = type)))
+                }
             }
         }
+    }
+
+    if (showCustomDialog) {
+        Log.d("Audience", "Selected Users: ${selectedUsers.size}")
+
+        UserSelectorDialog(
+            headerLabel = "Select Users",
+            userIds = mood.audience.selectedUsers,
+            onUsersSelected = { result ->
+                val userIds = (result as SnapshotStateList<*>).map { it.toString() }
+                onEdited(mood.copy(audience = mood.audience.copy(selectedUsers = userIds)))
+            },
+            onDismiss = { showCustomDialog = false }
+        )
     }
 }
 
@@ -108,7 +134,8 @@ fun AudienceItem(
                 Icon(
                     painter = painterResource(icon),
                     contentDescription = null,
-                    modifier = Modifier.size(28.dp)
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
@@ -132,7 +159,7 @@ private fun TypeAndDescription(mood: DailyMoodEntity, type: AudienceType, descri
 
     Column {
         Text(
-            text = type.toString().replaceFirstChar { it.uppercase() },
+            text = type.toString().lowercase().replaceFirstChar { it.uppercase() },
             color = Color.White,
             fontWeight = FontWeight.Bold
         )

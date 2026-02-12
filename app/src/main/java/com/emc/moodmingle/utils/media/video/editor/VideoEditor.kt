@@ -3,6 +3,7 @@ package com.emc.moodmingle.utils.media.video.editor
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
@@ -138,6 +139,8 @@ fun VideoEditor(
             }
         }
     }
+
+    BackHandler { onDismiss() }
 
     Scaffold(
         containerColor = Color.Black,

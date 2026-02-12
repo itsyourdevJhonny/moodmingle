@@ -13,11 +13,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 
 @Composable
-fun VideoEditorContent(
-    paddingValues: PaddingValues,
-    exoPlayer: ExoPlayer,
-    state: VideoEditorState,
-) {
+fun VideoEditorContent(paddingValues: PaddingValues, exoPlayer: ExoPlayer) {
     Box(
         modifier = Modifier
             .padding(paddingValues)
@@ -29,7 +25,6 @@ fun VideoEditorContent(
                 PlayerView(it).apply {
                     player = exoPlayer
                     useController = false
-                    rotation = state.rotation
                 }
             },
             modifier = Modifier.fillMaxWidth()

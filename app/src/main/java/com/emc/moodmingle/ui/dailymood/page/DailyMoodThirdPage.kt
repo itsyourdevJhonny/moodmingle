@@ -82,6 +82,7 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.emc.moodmingle.R
+import com.emc.moodmingle.data.firebase.model.post.dailymood.AudienceType
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodImage
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodMediaType
@@ -149,7 +150,7 @@ fun DailyMoodThirdPage(
                     onBack = onBack
                 )
             },
-            bottomBar = { Footer(currentUser) { selectedAction = it } },
+            bottomBar = { Footer(currentUser, mood) { selectedAction = it } },
             floatingActionButton = {
                 DailyMoodFloatingActions(mood, selectedAction) { selectedAction = it }
             }
@@ -226,7 +227,11 @@ fun DailyMoodThirdPage(
 }
 
 @Composable
-private fun Footer(currentUser: UserEntityFirebase?, onActionSelected: (String) -> Unit) {
+private fun Footer(
+    currentUser: UserEntityFirebase?,
+    mood: DailyMoodEntity,
+    onActionSelected: (String) -> Unit,
+) {
     BottomAppBar(
         contentPadding = PaddingValues(),
         containerColor = PrimaryDark,
@@ -263,7 +268,15 @@ private fun Footer(currentUser: UserEntityFirebase?, onActionSelected: (String) 
                     Text(text = "Share with")
                     Spacer(Modifier.width(8.dp))
                     Icon(
-                        painter = painterResource(R.drawable.public_world),
+                        painter = painterResource(
+                            when(mood.audience.type) {
+                                AudienceType.PUBLIC -> R.drawable.public_world
+                                AudienceType.PRIVATE -> R.drawable.private_user
+                                AudienceType.FOLLOWERS -> R.drawable.followers
+                                AudienceType.SUPPORTERS -> R.drawable.supporter
+                                AudienceType.CUSTOM -> R.drawable.custom
+                            }
+                        ),
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )

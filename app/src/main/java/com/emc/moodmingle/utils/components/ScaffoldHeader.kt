@@ -24,6 +24,7 @@ import com.emc.moodmingle.ui.theme.SecondaryDark
 @OptIn(ExperimentalMaterial3Api::class)
 fun ScaffoldHeader(
     title: String = "",
+    doneLabel: String = "Done",
     enabled: Boolean = false,
     onDone: (() -> Unit)? = null,
     onBack: () -> Unit
@@ -56,7 +57,7 @@ fun ScaffoldHeader(
                     ),
                     enabled = enabled
                 ) {
-                    Text(text = "Done", fontWeight = FontWeight.Bold)
+                    Text(text = doneLabel, fontWeight = FontWeight.Bold)
                 }
             }
         }

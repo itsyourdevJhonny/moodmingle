@@ -5,5 +5,10 @@ import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodSettings
 
 @Composable
-fun DailyMoodSettings(mood: DailyMoodEntity, onSettingsEdited: (DailyMoodSettings) -> Unit) {
+fun DailyMoodSettings(
+    mood: DailyMoodEntity,
+    onSettingsEdited: (DailyMoodSettings) -> Unit,
+    onDismiss: () -> Unit,
+) {
+
 }

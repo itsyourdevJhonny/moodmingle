@@ -209,7 +209,14 @@ fun DailyMoodThirdPage(
         // Footer
         when (selectedAction) {
             "audience" -> DailyMoodAudience(mood, onEdited) { selectedAction = "" }
-            "settings" -> DailyMoodSettings(mood) { onEdited(mood.copy(settings = it)) }
+            "settings" -> {
+                DailyMoodSettings(
+                    mood,
+                    onSettingsEdited = { onEdited(mood.copy(settings = it)) },
+                    onDismiss =  { selectedAction = "" }
+                )
+            }
+
             "upload" -> {}
         }
     }

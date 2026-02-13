@@ -13,6 +13,7 @@ import com.emc.moodmingle.utils.media.video.editor.VideoEditorState
 import com.emc.moodmingle.utils.text.toFontName
 import com.squareup.moshi.Json
 import kotlinx.parcelize.Parcelize
+import java.time.LocalDate
 
 data class DailyMoodEntity(
     val id: String = "",
@@ -127,6 +128,33 @@ enum class AudienceType {
     CUSTOM
 }
 
+@Parcelize
 data class DailyMoodSettings(
-    val reactionEnabled: Boolean = true,
-)
+    val timing: SettingsTiming = SettingsTiming(),
+    val sharePlatform: SharePlatformType = SharePlatformType.NONE,
+    val notify: NotifyType = NotifyType.NONE,
+) : Parcelable
+
+@Parcelize
+data class SettingsTiming(
+    val type: TimingType = TimingType.AUTO_POST_NOW,
+    val date: LocalDate? = null,
+) : Parcelable
+
+enum class TimingType {
+    AUTO_POST_NOW,
+    SCHEDULE,
+    MANUAL_ONLY
+}
+
+enum class SharePlatformType {
+    NONE,
+    FACEBOOK,
+    INSTAGRAM
+}
+
+enum class NotifyType {
+    NONE,
+    FOLLOWERS,
+    SUPPORTERS
+}

@@ -103,6 +103,7 @@ import com.emc.moodmingle.ui.dailymood.media.image.DailyMoodSelectMedia
 import com.emc.moodmingle.ui.dailymood.media.image.animatedShape
 import com.emc.moodmingle.ui.dailymood.mention.DailyMoodMentionSection
 import com.emc.moodmingle.ui.dailymood.mood.DailyMoodMoodSection
+import com.emc.moodmingle.ui.dailymood.settings.DailyMoodSettings
 import com.emc.moodmingle.ui.dailymood.text.DailyMoodEditText
 import com.emc.moodmingle.ui.dailymood.visibility.DailyMoodAudience
 import com.emc.moodmingle.ui.remix.MoodPickerDialog
@@ -208,7 +209,7 @@ fun DailyMoodThirdPage(
         // Footer
         when (selectedAction) {
             "audience" -> DailyMoodAudience(mood, onEdited) { selectedAction = "" }
-            "settings" -> {}
+            "settings" -> DailyMoodSettings(mood) { onEdited(mood.copy(settings = it)) }
             "upload" -> {}
         }
     }

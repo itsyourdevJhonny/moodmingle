@@ -24,6 +24,7 @@ data class DailyMoodEntity(
     val location: NominatimPlace? = null,
     val text: DailyMoodText = DailyMoodText(),
     val audience: DailyMoodAudience = DailyMoodAudience(),
+    val settings: DailyMoodSettings = DailyMoodSettings(),
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = 0,
 )
@@ -125,3 +126,7 @@ enum class AudienceType {
     SUPPORTERS,
     CUSTOM
 }
+
+data class DailyMoodSettings(
+    val reactionEnabled: Boolean = true,
+)

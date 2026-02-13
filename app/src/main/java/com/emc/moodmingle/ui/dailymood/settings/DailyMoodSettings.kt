@@ -1,5 +1,6 @@
 package com.emc.moodmingle.ui.dailymood.settings
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -21,13 +22,15 @@ fun DailyMoodSettings(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    val originalMood = remember(Unit) { mood }
+    val originalSettings = remember(Unit) { mood.settings }
+
+    BackHandler { onDismiss() }
 
     Scaffold(
         containerColor = Color.Black,
         topBar = {
             ScaffoldHeader(title = "Story Settings") {
-                if (originalMood != mood) toastMessage(context, "Settings Saved")
+                if (originalSettings != mood.settings) toastMessage(context, "Settings Saved")
                 onDismiss()
             }
         }

@@ -1,26 +1,31 @@
 package com.emc.moodmingle.ui.dailymood.settings
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodSettings
-import com.emc.moodmingle.ui.post.action.toastMessage
 import com.emc.moodmingle.utils.components.ScaffoldHeader
 
 @Composable
@@ -29,8 +34,9 @@ fun DailyMoodSettings(
     onSettingsEdited: (DailyMoodSettings) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val context = LocalContext.current
     val originalSettings = remember(Unit) { mood.settings }
+
+    var selectedSetting by remember { mutableStateOf(Settings.DEFAULT) }
 
     BackHandler { onDismiss() }
 
@@ -46,27 +52,25 @@ fun DailyMoodSettings(
             )
         }
     ) { paddingValues ->
-        Content(paddingValues, onSettingsEdited)
+        Content(paddingValues) { selectedSetting = it }
+    }
+
+    when(selectedSetting) {
+        Settings.DEFAULT -> {}
+        Settings.TIMING -> {}
+        Settings.SHARE_PLATFORM -> {}
+        Settings.NOTIFY -> {}
     }
 }
 
 @Composable
-private fun Content(paddingValues: PaddingValues, onSettingsEdited: (DailyMoodSettings) -> Unit) {
-    Column(
-        modifier = Modifier.padding(paddingValues)
-    ) {
+private fun Content(paddingValues: PaddingValues, onSettingSelected: (Settings) -> Unit) {
+    Column(modifier = Modifier.padding(paddingValues)) {
         getDailyMoodSettings().forEach { (setting, icon) ->
             SettingItem(
                 setting = setting,
                 icon = icon,
-                onSelected = {
-                    when (setting) {
-                        Settings.DEFAULT -> {}
-                        Settings.TIMING -> {}
-                        Settings.SHARE_PLATFORM -> {}
-                        Settings.NOTIFY -> {}
-                    }
-                }
+                onSelected = { onSettingSelected(setting) }
             )
         }
     }
@@ -74,9 +78,27 @@ private fun Content(paddingValues: PaddingValues, onSettingsEdited: (DailyMoodSe
 
 @Composable
 private fun SettingItem(setting: Settings, icon: Int, onSelected: () -> Unit) {
-    Row {
-        SettingIcon(icon = icon)
-        SettingTitle(title = setting.name)
+    Row(
+        modifier = Modifier
+            .clickable { onSelected() }
+            .padding(12.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SettingIcon(icon = icon)
+            SettingTitle(title = setting.name)
+        }
+
+        Icon(
+            painter = painterResource(R.drawable.chevron_right),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(32.dp)
+        )
     }
 }
 

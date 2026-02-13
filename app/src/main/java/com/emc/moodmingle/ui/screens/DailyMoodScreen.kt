@@ -14,7 +14,7 @@ import com.emc.moodmingle.ui.remix.MoodPickerDialog
 
 @Composable
 fun DailyMoodScreen(onBack: () -> Unit) {
-    var currentPage by remember { mutableIntStateOf(1) }
+    var currentPage by remember { mutableIntStateOf(3) }
     var showMoodDialog by remember { mutableStateOf(false) }
     var mood by remember { mutableStateOf(DailyMoodEntity()) }
 

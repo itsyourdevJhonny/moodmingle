@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,16 +72,20 @@ fun DailyMoodSettings(
 
 @Composable
 fun DailyMoodTimingSetting() {
-    Row {
+    var selectedTiming by remember { mutableStateOf("") }
+
+    Column {
         listOf("Auto Post Now", "Schedule", "Manual Only").forEach {
-            TimingItem(title = it)
+            TimingItem(title = it, onClick = { selectedTiming = it })
         }
     }
 }
 
 @Composable
-fun TimingItem(title: String) {
-
+fun TimingItem(title: String, onClick: () -> Unit) {
+    Row {
+        Text(text = title)
+    }
 }
 
 @Composable

@@ -101,7 +101,10 @@ fun TimingItem(title: String, @DrawableRes icon: Int, isSelected: Boolean, onCli
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Icon(
                 painter = painterResource(icon),
                 contentDescription = null,

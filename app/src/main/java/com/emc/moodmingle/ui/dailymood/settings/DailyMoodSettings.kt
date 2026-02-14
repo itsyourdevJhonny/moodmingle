@@ -104,9 +104,10 @@ fun TimingItem(title: String, @DrawableRes icon: Int, isSelected: Boolean, onCli
             Icon(
                 painter = painterResource(icon),
                 contentDescription = null,
+                tint = Color.White,
                 modifier = Modifier.size(24.dp)
             )
-            Text(text = title)
+            Text(text = title, color = Color.White)
         }
 
         RadioButton(selected = isSelected, onClick = null)

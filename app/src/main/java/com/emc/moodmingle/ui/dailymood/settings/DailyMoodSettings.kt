@@ -87,7 +87,11 @@ fun DailyMoodTimingSetting() {
 
 @Composable
 fun TimingItem(title: String, isSelected: Boolean, onClick: () -> Unit) {
-    Row {
+    Row(
+        modifier = Modifier
+            .clickable { onClick() }
+            .padding(12.dp)
+    ) {
         Text(text = title)
 
         RadioButton(selected = isSelected, onClick = null)

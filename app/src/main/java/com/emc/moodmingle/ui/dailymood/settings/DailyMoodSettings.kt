@@ -114,7 +114,10 @@ fun TimingItem(title: String, @DrawableRes icon: Int, isSelected: Boolean, onCli
         RadioButton(
             selected = isSelected,
             onClick = null,
-            colors = RadioButtonDefaults.colors(selectedColor = Color.White)
+            colors = RadioButtonDefaults.colors(
+                selectedColor = Color.White,
+                unselectedColor = Color.White
+            )
         )
     }
 }

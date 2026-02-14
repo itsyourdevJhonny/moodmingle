@@ -103,7 +103,8 @@ fun TimingItem(title: String, @DrawableRes icon: Int, isSelected: Boolean, onCli
         Row {
             Icon(
                 painter = painterResource(icon),
-                contentDescription = null
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
             )
             Text(text = title)
         }

@@ -58,7 +58,9 @@ fun DailyMoodSettings(
     }
 
     when (selectedSetting) {
-        Settings.DEFAULT -> {}
+        Settings.DEFAULT -> {
+            onSettingsEdited(DailyMoodSettings())
+        }
         Settings.TIMING -> {}
         Settings.SHARE_PLATFORM -> {}
         Settings.NOTIFY -> {}

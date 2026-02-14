@@ -1,6 +1,7 @@
 package com.emc.moodmingle.ui.dailymood.settings
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -77,16 +78,20 @@ fun DailyMoodTimingSetting() {
     var selectedTiming by remember { mutableStateOf("") }
 
     Column {
-        listOf("Auto Post Now", "Schedule", "Manual Only").forEach {
-            val isSelected = it == selectedTiming
+        listOf(
+            R.drawable.automatic to "Auto Post Now",
+            R.drawable.schedule to "Schedule",
+            R.drawable.manual to "Manual Only"
+        ).forEach { (icon, title) ->
+            val isSelected = title == selectedTiming
 
-            TimingItem(title = it, isSelected, onClick = { selectedTiming = it })
+            TimingItem(title = title, icon, isSelected, onClick = { selectedTiming = title })
         }
     }
 }
 
 @Composable
-fun TimingItem(title: String, isSelected: Boolean, onClick: () -> Unit) {
+fun TimingItem(title: String, @DrawableRes icon: Int, isSelected: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .clickable { onClick() }
@@ -95,7 +100,13 @@ fun TimingItem(title: String, isSelected: Boolean, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = title)
+        Row {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null
+            )
+            Text(text = title)
+        }
 
         RadioButton(selected = isSelected, onClick = null)
     }

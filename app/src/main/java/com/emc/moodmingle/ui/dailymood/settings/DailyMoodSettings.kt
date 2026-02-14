@@ -111,7 +111,11 @@ fun TimingItem(title: String, @DrawableRes icon: Int, isSelected: Boolean, onCli
             Text(text = title, color = Color.White)
         }
 
-        RadioButton(selected = isSelected, onClick = null, colors = RadioButtonDefaults.colors(selectedColor = Color.White))
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+            colors = RadioButtonDefaults.colors(selectedColor = Color.White)
+        )
     }
 }
 
@@ -168,8 +172,7 @@ fun SettingIcon(icon: Int) {
 @Composable
 fun SettingTitle(title: String) {
     Text(
-        text = title.lowercase().replaceFirstChar { it.uppercase() }
-            .split("_")[1].replaceFirstChar { it.uppercase() },
+        text = title.lowercase().replaceFirstChar { it.uppercase() }.replace("_", " "),
         color = Color.White,
         fontWeight = FontWeight.Bold
     )

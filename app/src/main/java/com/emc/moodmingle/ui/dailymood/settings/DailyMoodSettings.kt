@@ -62,9 +62,11 @@ fun DailyMoodSettings(
         Settings.DEFAULT -> {
             onSettingsEdited(DailyMoodSettings())
         }
+
         Settings.TIMING -> {
             DailyMoodTimingSetting()
         }
+
         Settings.SHARE_PLATFORM -> {}
         Settings.NOTIFY -> {}
     }
@@ -76,15 +78,19 @@ fun DailyMoodTimingSetting() {
 
     Column {
         listOf("Auto Post Now", "Schedule", "Manual Only").forEach {
-            TimingItem(title = it, onClick = { selectedTiming = it })
+            val isSelected = it == selectedTiming
+
+            TimingItem(title = it, isSelected, onClick = { selectedTiming = it })
         }
     }
 }
 
 @Composable
-fun TimingItem(title: String, onClick: () -> Unit) {
+fun TimingItem(title: String, isSelected: Boolean, onClick: () -> Unit) {
     Row {
         Text(text = title)
+
+        RadioButton(selected = isSelected, onClick = null)
     }
 }
 

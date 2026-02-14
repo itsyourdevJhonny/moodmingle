@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -110,7 +111,7 @@ fun TimingItem(title: String, @DrawableRes icon: Int, isSelected: Boolean, onCli
             Text(text = title, color = Color.White)
         }
 
-        RadioButton(selected = isSelected, onClick = null)
+        RadioButton(selected = isSelected, onClick = null, colors = RadioButtonDefaults.colors(selectedColor = Color.White))
     }
 }
 

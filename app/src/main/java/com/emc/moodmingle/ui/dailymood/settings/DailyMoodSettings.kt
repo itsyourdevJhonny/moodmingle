@@ -198,7 +198,13 @@ fun SettingIcon(icon: Int) {
 @Composable
 fun SettingTitle(title: String) {
     Text(
-        text = title.lowercase().replaceFirstChar { it.uppercase() }.replace("_", " "),
+        text = when(title) {
+            "DEFAULT" -> "Default"
+            "TIMING" -> "Timing"
+            "SHARE_PLATFORM" -> "Share Platform"
+            "NOTIFY" -> "Notify"
+            else -> title
+        },
         color = Color.White,
         fontWeight = FontWeight.Bold
     )

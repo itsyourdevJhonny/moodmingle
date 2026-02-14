@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodSettings
+import com.emc.moodmingle.data.firebase.model.post.dailymood.TimingType
 import com.emc.moodmingle.utils.components.ScaffoldHeader
 
 @Composable
@@ -66,7 +67,7 @@ fun DailyMoodSettings(
         }
 
         Settings.TIMING -> {
-            DailyMoodTimingSetting()
+            DailyMoodTimingSetting(mood, onSettingsEdited)
         }
 
         Settings.SHARE_PLATFORM -> {}
@@ -75,7 +76,7 @@ fun DailyMoodSettings(
 }
 
 @Composable
-fun DailyMoodTimingSetting() {
+fun DailyMoodTimingSetting(mood: DailyMoodEntity, onSettingsEdited: (DailyMoodSettings) -> Unit) {
     var selectedTiming by remember { mutableStateOf("") }
 
     Column {
@@ -86,7 +87,26 @@ fun DailyMoodTimingSetting() {
         ).forEach { (icon, title) ->
             val isSelected = title == selectedTiming
 
-            TimingItem(title = title, icon, isSelected, onClick = { selectedTiming = title })
+            TimingItem(
+                title = title,
+                icon,
+                isSelected,
+                onClick = {
+                    selectedTiming = title
+
+                    onSettingsEdited(
+                        mood.settings.copy(
+                            timing = mood.settings.timing.copy(
+                                type = when (selectedTiming) {
+                                    "Auto Post Now" -> TimingType.AUTO_POST_NOW
+                                    "Schedule" -> TimingType.SCHEDULE
+                                    else -> TimingType.MANUAL_ONLY
+                                }
+                            )
+                        )
+                    )
+                }
+            )
         }
     }
 }

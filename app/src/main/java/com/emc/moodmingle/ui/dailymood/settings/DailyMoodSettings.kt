@@ -90,7 +90,10 @@ fun TimingItem(title: String, isSelected: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .clickable { onClick() }
-            .padding(12.dp)
+            .fillMaxWidth()
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = title)
 

@@ -71,7 +71,11 @@ fun DailyMoodSettings(
 
 @Composable
 fun DailyMoodTimingSetting() {
+    Row {
+        listOf("Auto Post Now", "Schedule", "Manual Only").forEach {
 
+        }
+    }
 }
 
 @Composable

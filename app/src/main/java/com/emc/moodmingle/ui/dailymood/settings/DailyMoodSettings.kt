@@ -61,10 +61,17 @@ fun DailyMoodSettings(
         Settings.DEFAULT -> {
             onSettingsEdited(DailyMoodSettings())
         }
-        Settings.TIMING -> {}
+        Settings.TIMING -> {
+            DailyMoodTimingSetting()
+        }
         Settings.SHARE_PLATFORM -> {}
         Settings.NOTIFY -> {}
     }
+}
+
+@Composable
+fun DailyMoodTimingSetting() {
+
 }
 
 @Composable

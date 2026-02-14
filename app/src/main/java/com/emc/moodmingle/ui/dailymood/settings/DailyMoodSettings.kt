@@ -47,7 +47,9 @@ fun DailyMoodSettings(
                 title = "Story Settings",
                 doneLabel = "Apply Changes",
                 enabled = originalSettings != mood.settings,
-                onDone = {},
+                onDone = {
+                    onSettingsEdited(mood.settings.copy())
+                },
                 onBack = { onDismiss() }
             )
         }
@@ -55,7 +57,7 @@ fun DailyMoodSettings(
         Content(paddingValues) { selectedSetting = it }
     }
 
-    when(selectedSetting) {
+    when (selectedSetting) {
         Settings.DEFAULT -> {}
         Settings.TIMING -> {}
         Settings.SHARE_PLATFORM -> {}
@@ -83,7 +85,8 @@ private fun SettingItem(setting: Settings, icon: Int, onSelected: () -> Unit) {
             .clickable { onSelected() }
             .padding(12.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -97,7 +100,7 @@ private fun SettingItem(setting: Settings, icon: Int, onSelected: () -> Unit) {
             painter = painterResource(R.drawable.chevron_right),
             contentDescription = null,
             tint = Color.White,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(20.dp)
         )
     }
 }
@@ -108,14 +111,15 @@ fun SettingIcon(icon: Int) {
         painter = painterResource(icon),
         contentDescription = null,
         tint = Color.White,
-        modifier = Modifier.size(28.dp)
+        modifier = Modifier.size(24.dp)
     )
 }
 
 @Composable
 fun SettingTitle(title: String) {
     Text(
-        text = title,
+        text = title.lowercase().replaceFirstChar { it.uppercase() }
+            .split("_")[1].replaceFirstChar { it.uppercase() },
         color = Color.White,
         fontWeight = FontWeight.Bold
     )

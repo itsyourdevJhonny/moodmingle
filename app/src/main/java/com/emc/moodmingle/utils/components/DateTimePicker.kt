@@ -60,15 +60,20 @@ data class DateTimePickerState(
 )
 
 @Composable
-fun DateTimePicker(onCreated: (DateTimePickerState) -> Unit, onDismiss: () -> Unit) {
+fun DateTimePicker(
+    title: String,
+    doneLabel: String,
+    onCreated: (DateTimePickerState) -> Unit,
+    onDismiss: () -> Unit,
+) {
     var dateTimeState by remember { mutableStateOf(DateTimePickerState()) }
 
     Scaffold(
         containerColor = Color.Black,
         topBar = {
             ScaffoldHeader(
-                title = "Manual Timing",
-                doneLabel = "Save",
+                title = title,
+                doneLabel = doneLabel,
                 enabled = dateTimeState.date != null && dateTimeState.time != null,
                 onDone = { onCreated(dateTimeState); onDismiss() },
                 onBack = { onDismiss() }

@@ -1,10 +1,10 @@
 package com.emc.moodmingle.ui.dailymood.settings.timing
 
 import androidx.compose.runtime.Composable
-import com.emc.moodmingle.ui.create.post.settings.schedule.ScheduleDialog
+import com.emc.moodmingle.utils.components.DateTimePicker
 import java.time.LocalDate
 
 @Composable
-fun DailyMoodManualDialog(onManualCreated: (LocalDate?) -> Unit, onDismiss: () -> Unit) {
-    ScheduleDialog(onScheduleCreated = { onManualCreated(it.expirationDate) }, onDismiss)
+fun DailyMoodManualDialog(onManualCreated: (LocalDate?, Long?) -> Unit, onDismiss: () -> Unit) {
+    DateTimePicker(onCreated = { onManualCreated(it.date, it.time) }, onDismiss)
 }

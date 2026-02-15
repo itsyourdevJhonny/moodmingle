@@ -211,7 +211,7 @@ fun DailyMoodThirdPage(
             "audience" -> DailyMoodAudience(mood, onEdited) { selectedAction = "" }
             "settings" -> {
                 DailyMoodSettings(
-                    mood,
+                    settings = mood.settings,
                     onSettingsEdited = { onEdited(mood.copy(settings = it)) },
                     onDismiss =  { selectedAction = "" }
                 )

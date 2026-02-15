@@ -139,6 +139,7 @@ data class DailyMoodSettings(
 data class SettingsTiming(
     val type: TimingType = TimingType.AUTO_POST_NOW,
     val date: LocalDate? = null,
+    val time: Long? = null
 ) : Parcelable
 
 enum class TimingType {

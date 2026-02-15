@@ -6,5 +6,11 @@ import java.time.LocalDate
 
 @Composable
 fun DailyMoodManualDialog(onManualCreated: (LocalDate?, Long?) -> Unit, onDismiss: () -> Unit) {
-    DateTimePicker(onCreated = { onManualCreated(it.date, it.time) }, onDismiss)
+
+    DateTimePicker(
+        title = "Manual Timing",
+        doneLabel = "Save",
+        onCreated = { onManualCreated(it.date, it.time) },
+        onDismiss = onDismiss
+    )
 }

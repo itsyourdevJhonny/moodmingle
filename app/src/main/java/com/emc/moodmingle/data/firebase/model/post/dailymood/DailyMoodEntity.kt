@@ -150,7 +150,9 @@ enum class TimingType {
 enum class SharePlatformType {
     NONE,
     FACEBOOK,
-    INSTAGRAM
+    INSTAGRAM,
+    X,
+    THREADS
 }
 
 enum class NotifyType {

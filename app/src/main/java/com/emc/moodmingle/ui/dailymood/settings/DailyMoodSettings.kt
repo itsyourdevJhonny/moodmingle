@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,6 +38,7 @@ import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DailyMoodSettings(
     settings: DailyMoodSettings,
@@ -166,10 +168,10 @@ fun DailyMoodSettings(
 
         "manual_only" -> {
             DailyMoodManualDialog(
-                onManualCreated = { date ->
+                onManualCreated = { date, time ->
                     onSettingsEdited(
                         settings.copy(
-                            timing = settings.timing.copy(type = TimingType.MANUAL_ONLY, date)
+                            timing = settings.timing.copy(type = TimingType.MANUAL_ONLY, date, time)
                         )
                     )
                 },

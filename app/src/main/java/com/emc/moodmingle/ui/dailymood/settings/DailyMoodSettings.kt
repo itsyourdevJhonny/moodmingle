@@ -2,19 +2,23 @@ package com.emc.moodmingle.ui.dailymood.settings
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,11 +29,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodSettings
+import com.emc.moodmingle.data.firebase.model.post.dailymood.NotifyType
+import com.emc.moodmingle.data.firebase.model.post.dailymood.SharePlatformType
 import com.emc.moodmingle.data.firebase.model.post.dailymood.TimingType
+import com.emc.moodmingle.ui.theme.GrayTextColor
+import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
 
 @Composable
@@ -40,98 +49,168 @@ fun DailyMoodSettings(
 ) {
     val originalSettings = remember(Unit) { mood.settings }
 
+    val hasChanges = originalSettings != mood.settings
+
     var selectedSetting by remember { mutableStateOf(Settings.DEFAULT) }
 
     BackHandler { onDismiss() }
 
+    Box {
+        Scaffold(
+            containerColor = Color.Black,
+            topBar = {
+                ScaffoldHeader(
+                    title = "Story Settings",
+                    doneLabel = "Apply Changes",
+                    enabled = hasChanges,
+                    onDone = {},
+                    onBack = { onDismiss() }
+                )
+            },
+            floatingActionButton = {
+                TextButton(
+                    onClick = { onSettingsEdited(DailyMoodSettings()) },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.settings_default),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(text = " Reset To Default")
+                }
+            }
+        ) { paddingValues ->
+            Content(paddingValues, mood) {
+                selectedSetting = it
+            }
+        }
+
+        when (selectedSetting) {
+            Settings.TIMING -> {
+                SettingContainer(
+                    title = "Select Timing",
+                    contents = listOf(
+                        R.drawable.automatic to TimingType.AUTO_POST_NOW,
+                        R.drawable.schedule to TimingType.SCHEDULE,
+                        R.drawable.manual to TimingType.MANUAL_ONLY
+                    ),
+                    type = mood.settings.timing.type,
+                    onSelected = { onSettingsEdited(mood.settings.copy(timing = mood.settings.timing.copy(type = (it as TimingType)))) },
+                    onDismiss = { selectedSetting = Settings.DEFAULT }
+                )
+            }
+
+            Settings.SHARE_PLATFORM -> {
+                SettingContainer(
+                    title = "Select Platform",
+                    contents = listOf(
+                        R.drawable.facebook to SharePlatformType.FACEBOOK,
+                        R.drawable.instragram to SharePlatformType.INSTAGRAM,
+                        R.drawable.x_black to SharePlatformType.X,
+                        R.drawable.threads_black to SharePlatformType.THREADS
+                    ),
+                    type = mood.settings.sharePlatform,
+                    isImage = true,
+                    size = 42.dp,
+                    onSelected = { onSettingsEdited(mood.settings.copy(sharePlatform = (it as SharePlatformType))) },
+                    onDismiss = { selectedSetting = Settings.DEFAULT }
+                )
+            }
+
+            Settings.NOTIFY -> {
+                SettingContainer(
+                    title = "Notify To",
+                    contents = listOf(
+                        R.drawable.blocked to NotifyType.NONE,
+                        R.drawable.followers to NotifyType.FOLLOWERS,
+                        R.drawable.supporter to NotifyType.SUPPORTERS,
+                    ),
+                    type = mood.settings.notify,
+                    onSelected = { onSettingsEdited(mood.settings.copy(notify = (it as NotifyType))) },
+                    onDismiss = { selectedSetting = Settings.DEFAULT }
+                )
+            }
+
+            else -> {}
+        }
+    }
+}
+
+@Composable
+private fun SettingContainer(
+    title: String,
+    contents: List<Pair<Int, Any>>,
+    type: Any,
+    isImage: Boolean = false,
+    size: Dp = 20.dp,
+    onSelected: (Any) -> Unit,
+    onDismiss: () -> Unit,
+) {
     Scaffold(
         containerColor = Color.Black,
-        topBar = {
-            ScaffoldHeader(
-                title = "Story Settings",
-                doneLabel = "Apply Changes",
-                enabled = originalSettings != mood.settings,
-                onDone = {
-                    onSettingsEdited(mood.settings.copy())
-                },
-                onBack = { onDismiss() }
-            )
-        }
+        topBar = { ScaffoldHeader(title = title) { onDismiss() } }
     ) { paddingValues ->
-        Content(paddingValues) { selectedSetting = it }
-    }
-
-    when (selectedSetting) {
-        Settings.DEFAULT -> {
-            onSettingsEdited(DailyMoodSettings())
-        }
-
-        Settings.TIMING -> {
-            DailyMoodTimingSetting(mood, onSettingsEdited)
-        }
-
-        Settings.SHARE_PLATFORM -> {}
-        Settings.NOTIFY -> {}
-    }
-}
-
-@Composable
-fun DailyMoodTimingSetting(mood: DailyMoodEntity, onSettingsEdited: (DailyMoodSettings) -> Unit) {
-    var selectedTiming by remember { mutableStateOf("") }
-
-    Column {
-        listOf(
-            R.drawable.automatic to "Auto Post Now",
-            R.drawable.schedule to "Schedule",
-            R.drawable.manual to "Manual Only"
-        ).forEach { (icon, title) ->
-            val isSelected = title == selectedTiming
-
-            TimingItem(
-                title = title,
-                icon,
-                isSelected,
-                onClick = {
-                    selectedTiming = title
-
-                    onSettingsEdited(
-                        mood.settings.copy(
-                            timing = mood.settings.timing.copy(
-                                type = when (selectedTiming) {
-                                    "Auto Post Now" -> TimingType.AUTO_POST_NOW
-                                    "Schedule" -> TimingType.SCHEDULE
-                                    else -> TimingType.MANUAL_ONLY
-                                }
-                            )
-                        )
-                    )
-                }
-            )
+        Column(modifier = Modifier.padding(paddingValues)) {
+            contents.forEach { (contentIcon, contentType) ->
+                val isSelected = contentType == type
+                SettingItem(
+                    title = (contentType as Enum<*>).name,
+                    contentIcon,
+                    isSelected,
+                    isImage,
+                    size,
+                    onClick = { onSelected(contentType) }
+                )
+            }
         }
     }
 }
 
+
 @Composable
-fun TimingItem(title: String, @DrawableRes icon: Int, isSelected: Boolean, onClick: () -> Unit) {
+private fun SettingItem(
+    title: String,
+    @DrawableRes icon: Int,
+    isSelected: Boolean,
+    isImage: Boolean,
+    size: Dp,
+    onClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .clickable { onClick() }
             .fillMaxWidth()
-            .padding(12.dp),
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
+            if (isImage) {
+                Image(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(size)
+                )
+            } else {
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(size)
+                )
+            }
+            Text(
+                text = title
+                    .lowercase()
+                    .split("_")
+                    .joinToString(" ")
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                color = Color.White
             )
-            Text(text = title, color = Color.White, fontWeight = FontWeight.Bold)
         }
 
         RadioButton(
@@ -146,24 +225,29 @@ fun TimingItem(title: String, @DrawableRes icon: Int, isSelected: Boolean, onCli
 }
 
 @Composable
-private fun Content(paddingValues: PaddingValues, onSettingSelected: (Settings) -> Unit) {
+private fun Content(
+    paddingValues: PaddingValues,
+    mood: DailyMoodEntity,
+    onSettingSelected: (Settings) -> Unit,
+) {
     Column(modifier = Modifier.padding(paddingValues)) {
         getDailyMoodSettings().forEach { (setting, icon) ->
-            SettingItem(
-                setting = setting,
-                icon = icon,
-                onSelected = { onSettingSelected(setting) }
-            )
+            SettingItem(mood, setting, icon) { onSettingSelected(setting) }
         }
     }
 }
 
 @Composable
-private fun SettingItem(setting: Settings, icon: Int, onSelected: () -> Unit) {
+private fun SettingItem(
+    mood: DailyMoodEntity,
+    setting: Settings,
+    icon: Int,
+    onSelected: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .clickable { onSelected() }
-            .padding(12.dp)
+            .padding(16.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -173,7 +257,7 @@ private fun SettingItem(setting: Settings, icon: Int, onSelected: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             SettingIcon(icon = icon)
-            SettingTitle(title = setting.name)
+            SettingTitle(title = setting.name, mood)
         }
 
         Icon(
@@ -186,7 +270,7 @@ private fun SettingItem(setting: Settings, icon: Int, onSelected: () -> Unit) {
 }
 
 @Composable
-fun SettingIcon(icon: Int) {
+private fun SettingIcon(icon: Int) {
     Icon(
         painter = painterResource(icon),
         contentDescription = null,
@@ -196,23 +280,47 @@ fun SettingIcon(icon: Int) {
 }
 
 @Composable
-fun SettingTitle(title: String) {
-    Text(
-        text = when(title) {
-            "DEFAULT" -> "Default"
-            "TIMING" -> "Timing"
-            "SHARE_PLATFORM" -> "Share Platform"
-            "NOTIFY" -> "Notify"
-            else -> title
-        },
-        color = Color.White,
-        fontWeight = FontWeight.Bold
-    )
+private fun SettingTitle(title: String, mood: DailyMoodEntity) {
+    val settings = mood.settings
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = when (title) {
+                "TIMING" -> "Timing"
+                "SHARE_PLATFORM" -> "Share Platform"
+                "NOTIFY" -> "Notify"
+                else -> title
+            },
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = "(${
+                when (title) {
+                    "TIMING" -> when (settings.timing.type) {
+                        TimingType.AUTO_POST_NOW -> "Auto"
+                        TimingType.SCHEDULE -> "Scheduled"
+                        TimingType.MANUAL_ONLY -> "Manual"
+                    }
+
+                    "SHARE_PLATFORM" -> settings.sharePlatform.name.lowercase()
+                        .replaceFirstChar { it.titlecase() }
+
+                    "NOTIFY" -> settings.notify.name.lowercase().replaceFirstChar { it.titlecase() }
+                    else -> title
+                }
+            })",
+            style = Typography.bodyMedium.copy(color = GrayTextColor)
+        )
+    }
 }
 
 private fun getDailyMoodSettings(): List<Pair<Settings, Int>> {
     return listOf(
-        Settings.DEFAULT to R.drawable.settings_default,
         Settings.TIMING to R.drawable.timing,
         Settings.SHARE_PLATFORM to R.drawable.share_platform,
         Settings.NOTIFY to R.drawable.notify,

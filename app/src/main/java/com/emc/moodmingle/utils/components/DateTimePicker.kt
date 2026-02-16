@@ -31,7 +31,6 @@ import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -106,10 +105,7 @@ private fun ScheduleDialogContent(
 
     datePickerState.selectedDateMillis?.let { dateMillis ->
         selectedDate = LocalDate.ofEpochDay(dateMillis / (1000 * 60 * 60 * 24))
-        onDateTimeStateChanged(dateTimeState.copy(date = selectedDate))
-    }
 
-    LaunchedEffect(timePickerState.hour, timePickerState.minute) {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
         calendar.set(Calendar.MINUTE, timePickerState.minute)
@@ -117,9 +113,7 @@ private fun ScheduleDialogContent(
 
         selectedTime = calendar.timeInMillis
 
-        if (timePickerState.hour != LocalTime.now().hour || timePickerState.minute != LocalTime.now().minute) {
-            onDateTimeStateChanged(dateTimeState.copy(time = selectedTime))
-        }
+        onDateTimeStateChanged(dateTimeState.copy(date = selectedDate, time = selectedTime))
     }
 
     Column(

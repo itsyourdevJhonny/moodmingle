@@ -32,11 +32,13 @@ import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodSettings
 import com.emc.moodmingle.data.firebase.model.post.dailymood.NotifyType
 import com.emc.moodmingle.data.firebase.model.post.dailymood.SharePlatformType
 import com.emc.moodmingle.data.firebase.model.post.dailymood.TimingType
+import com.emc.moodmingle.ui.dailymood.settings.privacy.DailyMoodPrivacy
 import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodManualDialog
 import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodScheduleDialog
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
+import com.emc.moodmingle.utils.text.toSentenceCase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,23 +67,9 @@ fun DailyMoodSettings(
                     onBack = { onDismiss() }
                 )
             },
-            floatingActionButton = {
-                TextButton(
-                    onClick = { onSettingsEdited(DailyMoodSettings()) },
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.settings_default),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text(text = " Reset To Default")
-                }
-            }
+            floatingActionButton = { DefaultActionButton(onSettingsEdited) }
         ) { paddingValues ->
-            Content(paddingValues, settings) {
-                selectedSetting = it
-            }
+            Content(paddingValues, settings) { selectedSetting = it }
         }
 
         when (selectedSetting) {
@@ -94,17 +82,17 @@ fun DailyMoodSettings(
                         R.drawable.manual to TimingType.MANUAL_ONLY
                     ),
                     type = settings.timing.type,
-                    onSelected = {
-                        when (it as TimingType) {
+                    onSelected = { data ->
+                        when (data as TimingType) {
                             TimingType.AUTO_POST_NOW -> {
                                 onSettingsEdited(
                                     settings.copy(
-                                        timing = settings.timing.copy(type = it, date = null)
+                                        timing = settings.timing.copy(type = data, date = null)
                                     )
                                 )
                             }
 
-                            TimingType.SCHEDULE, TimingType.MANUAL_ONLY -> timingAction = it.name
+                            TimingType.SCHEDULE, TimingType.MANUAL_ONLY -> timingAction = data.name
                         }
                     },
                     onDismiss = { selectedSetting = Settings.DEFAULT }
@@ -120,10 +108,13 @@ fun DailyMoodSettings(
                         R.drawable.x_black to SharePlatformType.X,
                         R.drawable.threads_black to SharePlatformType.THREADS
                     ),
-                    type = settings.sharePlatform,
+                    type = settings.sharePlatformType,
                     isImage = true,
                     size = 42.dp,
-                    onSelected = { onSettingsEdited(settings.copy(sharePlatform = (it as SharePlatformType))) },
+                    onSelected = { data ->
+                        val isCurrent = (data as SharePlatformType) == settings.sharePlatformType
+                        onSettingsEdited(settings.copy(sharePlatformType = if (isCurrent) SharePlatformType.NONE else data))
+                    },
                     onDismiss = { selectedSetting = Settings.DEFAULT }
                 )
             }
@@ -136,9 +127,17 @@ fun DailyMoodSettings(
                         R.drawable.followers to NotifyType.FOLLOWERS,
                         R.drawable.supporter to NotifyType.SUPPORTERS,
                     ),
-                    type = settings.notify,
-                    onSelected = { onSettingsEdited(settings.copy(notify = (it as NotifyType))) },
+                    type = settings.notifyType,
+                    onSelected = { data -> onSettingsEdited(settings.copy(notifyType = (data as NotifyType))) },
                     onDismiss = { selectedSetting = Settings.DEFAULT }
+                )
+            }
+
+            Settings.PRIVACY -> {
+                DailyMoodPrivacy(
+                    privacy = settings.privacy,
+                    onPrivacyChanged = { onSettingsEdited(settings.copy(privacy = it)) },
+                    onBack = { selectedSetting = Settings.DEFAULT }
                 )
             }
 
@@ -178,6 +177,21 @@ fun DailyMoodSettings(
                 onDismiss = { timingAction = "" }
             )
         }
+    }
+}
+
+@Composable
+private fun DefaultActionButton(onSettingsEdited: (DailyMoodSettings) -> Unit) {
+    TextButton(
+        onClick = { onSettingsEdited(DailyMoodSettings()) },
+        colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.settings_default),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp)
+        )
+        Text(text = " Reset To Default")
     }
 }
 
@@ -242,33 +256,19 @@ private fun SettingTitle(title: String, settings: DailyMoodSettings) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = when (title) {
-                "TIMING" -> "Timing"
-                "SHARE_PLATFORM" -> "Share Platform"
-                "NOTIFY" -> "Notify"
-                else -> title
-            },
-            color = Color.White,
-            fontWeight = FontWeight.Bold
-        )
+        Text(text = title.toSentenceCase(), color = Color.White, fontWeight = FontWeight.Bold)
 
         Text(
-            text = "(${
-                when (title) {
-                    "TIMING" -> when (settings.timing.type) {
-                        TimingType.AUTO_POST_NOW -> "Auto"
-                        TimingType.SCHEDULE -> "Scheduled"
-                        TimingType.MANUAL_ONLY -> "Manual"
+            text = if (title == "PRIVACY") "" else {
+                "(${
+                    when (title) {
+                        "TIMING" -> settings.timing.type.name.toSentenceCase()
+                        "SHARE_PLATFORM" -> settings.sharePlatformType.name.toSentenceCase()
+                        "NOTIFY" -> settings.notifyType.name.toSentenceCase()
+                        else -> title
                     }
-
-                    "SHARE_PLATFORM" -> settings.sharePlatform.name.lowercase()
-                        .replaceFirstChar { it.titlecase() }
-
-                    "NOTIFY" -> settings.notify.name.lowercase().replaceFirstChar { it.titlecase() }
-                    else -> title
-                }
-            })",
+                })"
+            },
             style = Typography.bodyMedium.copy(color = GrayTextColor)
         )
     }
@@ -276,6 +276,7 @@ private fun SettingTitle(title: String, settings: DailyMoodSettings) {
 
 private fun getDailyMoodSettings(): List<Pair<Settings, Int>> {
     return listOf(
+        Settings.PRIVACY to R.drawable.privacy,
         Settings.TIMING to R.drawable.timing,
         Settings.SHARE_PLATFORM to R.drawable.share_platform,
         Settings.NOTIFY to R.drawable.notify,
@@ -284,6 +285,7 @@ private fun getDailyMoodSettings(): List<Pair<Settings, Int>> {
 
 private enum class Settings {
     DEFAULT,
+    PRIVACY,
     TIMING,
     SHARE_PLATFORM,
     NOTIFY,

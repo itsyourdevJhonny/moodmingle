@@ -130,9 +130,15 @@ enum class AudienceType {
 
 @Parcelize
 data class DailyMoodSettings(
+    val privacy: DailyMoodPrivacy = DailyMoodPrivacy(),
     val timing: SettingsTiming = SettingsTiming(),
-    val sharePlatform: SharePlatformType = SharePlatformType.NONE,
-    val notify: NotifyType = NotifyType.NONE,
+    val sharePlatformType: SharePlatformType = SharePlatformType.NONE,
+    val notifyType: NotifyType = NotifyType.NONE,
+) : Parcelable
+
+@Parcelize
+data class DailyMoodPrivacy(
+    val hiddenUsers: List<String> = emptyList(),
 ) : Parcelable
 
 @Parcelize

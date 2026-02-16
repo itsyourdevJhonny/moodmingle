@@ -227,8 +227,8 @@ private fun Content(
     onActionSelected: (String) -> Unit,
 ) {
     Column(modifier = Modifier.padding(paddingValues)) {
-        getActions().forEach { (icon, title) ->
-            ActionItem(onActionSelected, title, icon, privacy, userViewModel)
+        getActions().forEach { actionGroup ->
+            ActionItem(onActionSelected, actionGroup, privacy, userViewModel)
         }
     }
 }
@@ -236,34 +236,49 @@ private fun Content(
 @Composable
 private fun ActionItem(
     onActionSelected: (String) -> Unit,
-    title: String,
-    icon: Int,
+    actionGroup: ActionGroup,
     privacy: DailyMoodPrivacy,
     userViewModel: FirebaseUserViewModel,
 ) {
     Column {
-        TextButton(
-            onClick = { onActionSelected(title) },
-            colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-            contentPadding = PaddingValues(16.dp),
-            shape = RectangleShape
-        ) {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
+        actionGroup.actions.forEach { action ->
+            Column {
+                TextButton(
+                    onClick = { onActionSelected(action.title) },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
+                    shape = RectangleShape
+                ) {
+                    Icon(
+                        painter = painterResource(action.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
 
-            Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(8.dp))
 
-            Text(text = title, color = Color.White, modifier = Modifier.fillMaxWidth())
-        }
+                    Text(
+                        text = action.title,
+                        color = Color.White,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
-        when (title) {
-            "Hide Daily Mood from People" -> {
-                HiddenPeople(privacy, userViewModel, onActionSelected)
+                Text(
+                    text = action.description,
+                    color = GrayTextColor,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            when (action.title) {
+                "Hide Daily Mood from People" -> {
+                    HiddenPeople(privacy, userViewModel, onActionSelected)
+                }
             }
         }
+
+        HorizontalDivider(thickness = 0.5.dp)
     }
 }
 
@@ -277,8 +292,6 @@ private fun HiddenPeople(
 
     if (hiddenUsers.isNotEmpty()) {
         Column {
-            HorizontalDivider(thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 16.dp))
-
             TextButton(
                 onClick = { onActionSelected("view_hidden_people") },
                 modifier = Modifier.padding(horizontal = 8.dp)
@@ -316,8 +329,144 @@ private fun HiddenPeople(
     }
 }
 
-private fun getActions(): List<Pair<Int, String>> {
+private fun getActions(): List<ActionGroup> {
     return listOf(
-        R.drawable.hidden to "Hide Daily Mood from People"
+
+        ActionGroup(
+            groupName = "Viewer Controls",
+            actions = listOf(
+                Action(
+                    icon = R.drawable.view,
+                    title = "View List Visibility",
+                    description = "Choose whether you can see who viewed your daily moods."
+                ),
+                Action(
+                    icon = R.drawable.screenshot,
+                    title = "Screenshot Alerts",
+                    description = "Receive a notification when someone screenshots your mood."
+                ),
+                Action(
+                    icon = R.drawable.replay_filled,
+                    title = "Replay Limit",
+                    description = "Control how many times people can replay your mood."
+                ),
+                Action(
+                    icon = R.drawable.hidden,
+                    title = "Hide Mood from Specific People",
+                    description = "Select people who won’t be able to see your daily moods."
+                )
+            )
+        ),
+
+        ActionGroup(
+            groupName = "Interaction Controls",
+            actions = listOf(
+                Action(
+                    icon = R.drawable.reply,
+                    title = "Reply Permissions",
+                    description = "Choose who can reply to your daily moods."
+                ),
+                Action(
+                    icon = R.drawable.love,
+                    title = "Reaction Settings",
+                    description = "Allow or disable reactions to your moods."
+                ),
+                Action(
+                    icon = R.drawable.share,
+                    title = "Sharing & Forwarding",
+                    description = "Control whether others can share or forward your mood."
+                )
+            )
+        ),
+
+        ActionGroup(
+            groupName = "Block & Restrict",
+            actions = listOf(
+                Action(
+                    icon = R.drawable.block_filled,
+                    title = "Blocked Users",
+                    description = "Manage people who are blocked from viewing or interacting with your moods."
+                ),
+                Action(
+                    icon = R.drawable.restrict_filled,
+                    title = "Restricted Accounts",
+                    description = "Limit certain people’s interactions without them knowing."
+                )
+            )
+        ),
+
+        ActionGroup(
+            groupName = "Expiration & Archive",
+            actions = listOf(
+                Action(
+                    icon = R.drawable.timer_filled,
+                    title = "Mood Duration",
+                    description = "Set how long your daily moods remain visible."
+                ),
+                Action(
+                    icon = R.drawable.archive_filled,
+                    title = "Auto Archive",
+                    description = "Automatically save expired moods to your private archive."
+                ),
+                Action(
+                    icon = R.drawable.delete,
+                    title = "Expire Mood Instantly",
+                    description = "Remove your active mood immediately."
+                )
+            )
+        ),
+
+        ActionGroup(
+            groupName = "Download & Data Controls",
+            actions = listOf(
+                Action(
+                    icon = R.drawable.download,
+                    title = "Allow Downloads",
+                    description = "Choose whether viewers can download your mood."
+                ),
+                Action(
+                    icon = R.drawable.save_post,
+                    title = "Auto-Save to Device",
+                    description = "Automatically save posted moods to your device."
+                ),
+                Action(
+                    icon = R.drawable.quality_filled,
+                    title = "Upload Quality",
+                    description = "Select high quality or data-saving upload mode."
+                )
+            )
+        ),
+
+        ActionGroup(
+            groupName = "Stealth & Privacy Modes",
+            actions = listOf(
+                Action(
+                    icon = R.drawable.ghost_filled,
+                    title = "Ghost Mode",
+                    description = "Hide your online status while viewing moods."
+                ),
+                Action(
+                    icon = R.drawable.private_filled,
+                    title = "Private Mood Mode",
+                    description = "Share moods with selected people only and restrict forwarding."
+                ),
+                Action(
+                    icon = R.drawable.record_filled,
+                    title = "Screen Recording Protection",
+                    description = "Prevent screen recording while viewing your mood."
+                )
+            )
+        )
     )
 }
+
+data class ActionGroup(
+    val groupName: String,
+    val actions: List<Action>,
+)
+
+data class Action(
+    val icon: Int,
+    val title: String,
+    val description: String,
+)

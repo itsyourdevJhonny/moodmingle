@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.utils.components.ScaffoldHeader
+import com.emc.moodmingle.utils.text.toSentenceCase
 
 @Composable
 fun SettingContainer(
@@ -110,12 +111,7 @@ private fun ItemIcon(
 
 @Composable
 private fun ItemTitle(title: String) {
-    Text(
-        text = title
-            .split("_")
-            .joinToString(" ") { text -> text.lowercase().replaceFirstChar { it.titlecase() } },
-        color = Color.White
-    )
+    Text(text = title.toSentenceCase(), color = Color.White)
 }
 
 @Composable

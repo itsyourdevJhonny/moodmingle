@@ -66,8 +66,6 @@ fun DailyMoodSettings(
                 ScaffoldHeader(
                     title = "Story Settings",
                     doneLabel = "Apply Changes",
-                    enabled = hasChanges,
-                    onDone = { onDismiss() },
                     onBack = { onDismiss() }
                 )
             }

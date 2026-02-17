@@ -54,7 +54,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodPrivacy
+import com.emc.moodmingle.data.firebase.model.post.dailymood.settings.DailyMoodPrivacy
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.MentionTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark

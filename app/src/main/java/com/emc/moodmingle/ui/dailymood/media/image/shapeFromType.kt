@@ -14,7 +14,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
-import com.emc.moodmingle.data.firebase.model.post.dailymood.ShapeType
+import com.emc.moodmingle.data.firebase.model.post.dailymood.media.ShapeType
 import kotlin.math.cos
 import kotlin.math.sin
 

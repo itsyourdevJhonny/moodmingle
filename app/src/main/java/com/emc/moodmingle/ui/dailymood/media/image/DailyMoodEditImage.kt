@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
-import com.emc.moodmingle.data.firebase.model.post.dailymood.ShapeType
+import com.emc.moodmingle.data.firebase.model.post.dailymood.media.ShapeType
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography

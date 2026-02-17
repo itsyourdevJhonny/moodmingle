@@ -30,18 +30,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodSettings
-import com.emc.moodmingle.data.firebase.model.post.dailymood.NotifyType
-import com.emc.moodmingle.data.firebase.model.post.dailymood.SharePlatformType
-import com.emc.moodmingle.data.firebase.model.post.dailymood.TimingType
+import com.emc.moodmingle.data.firebase.model.post.dailymood.settings.DailyMoodSettings
+import com.emc.moodmingle.ui.dailymood.settings.block.BlockedPeopleScreen
+import com.emc.moodmingle.ui.dailymood.settings.hide.HideMoodFromScreen
+import com.emc.moodmingle.ui.dailymood.settings.notify.NotifyPeopleScreen
 import com.emc.moodmingle.ui.dailymood.settings.privacy.Action
 import com.emc.moodmingle.ui.dailymood.settings.privacy.ActionGroup
 import com.emc.moodmingle.ui.dailymood.settings.privacy.getDailyMoodSettingsActions
-import com.emc.moodmingle.ui.dailymood.settings.screenshot.ScreenshotAlerts
-import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodManualDialog
-import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodScheduleDialog
-import com.emc.moodmingle.ui.dailymood.settings.viewlist.ViewListVisibility
+import com.emc.moodmingle.ui.dailymood.settings.reaction.ReactionSettingsScreen
+import com.emc.moodmingle.ui.dailymood.settings.replay.ReplayLimitScreen
+import com.emc.moodmingle.ui.dailymood.settings.reply.ReplyPermissionScreen
+import com.emc.moodmingle.ui.dailymood.settings.screenshot.ScreenshotAlertScreen
+import com.emc.moodmingle.ui.dailymood.settings.shareplatform.SharePlatformScreen
+import com.emc.moodmingle.ui.dailymood.settings.sharing.SharingForwardingScreen
+import com.emc.moodmingle.ui.dailymood.settings.timing.TimingScreen
+import com.emc.moodmingle.ui.dailymood.settings.viewlist.ViewListVisibilityScreen
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
@@ -49,13 +52,12 @@ import com.emc.moodmingle.utils.modifier.drawGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DailyMoodSettings(
+fun DailyMoodSettingsScreen(
     settings: DailyMoodSettings,
     onSettingsEdited: (DailyMoodSettings) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var selectedAction by remember { mutableStateOf("") }
-    var timingAction by remember { mutableStateOf("") }
 
     BackHandler { onDismiss() }
 
@@ -75,80 +77,48 @@ fun DailyMoodSettings(
 
         when (selectedAction) {
             "View List Visibility" -> {
-                ViewListVisibility(settings, onSettingsEdited) { selectedAction = "" }
+                ViewListVisibilityScreen(settings, onSettingsEdited) { selectedAction = "" }
             }
 
             "Screenshot Alerts" -> {
-                ScreenshotAlerts(settings, onSettingsEdited) { selectedAction = "" }
+                ScreenshotAlertScreen(settings, onSettingsEdited) { selectedAction = "" }
             }
 
-            "Share Platform" -> {
-                SettingContainer(
-                    title = "Select Platform",
-                    contents = listOf(
-                        R.drawable.facebook to SharePlatformType.FACEBOOK,
-                        R.drawable.instragram to SharePlatformType.INSTAGRAM,
-                        R.drawable.x_black to SharePlatformType.X,
-                        R.drawable.threads_black to SharePlatformType.THREADS
-                    ),
-                    type = settings.sharePlatformType,
-                    isImage = true,
-                    size = 42.dp,
-                    onSelected = { data ->
-                        val isCurrent = (data as SharePlatformType) == settings.sharePlatformType
-                        onSettingsEdited(settings.copy(sharePlatformType = if (isCurrent) SharePlatformType.NONE else data))
-                    },
-                    onDismiss = { selectedAction = "" }
-                )
+            "Replay Limit" -> {
+                ReplayLimitScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
+            "Hide Mood from Specific People" -> {
+                HideMoodFromScreen(settings, onSettingsEdited) { selectedAction = "" }
             }
 
             "Notify People" -> {
-                SettingContainer(
-                    title = "Notify People",
-                    contents = listOf(
-                        R.drawable.blocked to NotifyType.NONE,
-                        R.drawable.followers to NotifyType.FOLLOWERS,
-                        R.drawable.supporter to NotifyType.SUPPORTERS,
-                    ),
-                    type = settings.notifyType,
-                    onSelected = { data -> onSettingsEdited(settings.copy(notifyType = (data as NotifyType))) },
-                    onDismiss = { selectedAction = "" }
-                )
+                NotifyPeopleScreen(settings, onSettingsEdited) { selectedAction = "" }
             }
-        }
-    }
 
-    when (timingAction.lowercase()) {
-        "schedule" -> {
-            DailyMoodScheduleDialog(
-                timing = settings.timing,
-                onScheduleCreated = { date ->
-                    val isNullOrCurrent = date == null || date == settings.timing.date
+            "Timing" -> {
+                TimingScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
 
-                    onSettingsEdited(
-                        settings.copy(
-                            timing = settings.timing.copy(
-                                type = if (isNullOrCurrent) TimingType.AUTO_POST_NOW else TimingType.SCHEDULE,
-                                date = if (isNullOrCurrent) null else date
-                            )
-                        )
-                    )
-                },
-                onDismiss = { timingAction = "" }
-            )
-        }
+            "Reply Permissions" -> {
+                ReplyPermissionScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
 
-        "manual_only" -> {
-            DailyMoodManualDialog(
-                onManualCreated = { date, time ->
-                    onSettingsEdited(
-                        settings.copy(
-                            timing = settings.timing.copy(type = TimingType.MANUAL_ONLY, date, time)
-                        )
-                    )
-                },
-                onDismiss = { timingAction = "" }
-            )
+            "Reaction Settings" -> {
+                ReactionSettingsScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
+            "Sharing & Forwarding" -> {
+                SharingForwardingScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
+            "Blocked People" -> {
+                BlockedPeopleScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
+            "Share Platform" -> {
+                SharePlatformScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
         }
     }
 }

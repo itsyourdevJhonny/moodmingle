@@ -2,7 +2,6 @@ package com.emc.moodmingle.data.firebase.model.post.dailymood.settings
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Parcelize

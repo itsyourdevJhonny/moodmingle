@@ -43,6 +43,7 @@ import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodScheduleDialog
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
+import com.emc.moodmingle.utils.modifier.drawGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -162,14 +163,7 @@ private fun SettingsGroup(actionGroup: ActionGroup, onActionSelected: (String) -
             modifier = Modifier.padding(top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = actionGroup.groupName,
-                fontSize = 18.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-
+            SettingsGroupIconAndName(actionGroup)
             HorizontalDivider(thickness = 0.5.dp)
         }
 
@@ -177,6 +171,30 @@ private fun SettingsGroup(actionGroup: ActionGroup, onActionSelected: (String) -
             SettingItem(action, onActionSelected)
             SettingBottomLine(index, actionGroup)
         }
+    }
+}
+
+@Composable
+private fun SettingsGroupIconAndName(actionGroup: ActionGroup) {
+    Row(
+        modifier = Modifier.padding(start = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            painter = painterResource(actionGroup.groudIcon),
+            contentDescription = null,
+            modifier = Modifier
+                .size(24.dp)
+                .drawGradient()
+        )
+
+        Text(
+            text = actionGroup.groupName,
+            fontSize = 18.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 

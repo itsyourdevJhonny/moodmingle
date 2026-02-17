@@ -84,13 +84,13 @@ import coil.request.ImageRequest
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.post.dailymood.AudienceType
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodImage
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodMediaType
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodText
-import com.emc.moodmingle.data.firebase.model.post.dailymood.Gif
-import com.emc.moodmingle.data.firebase.model.post.dailymood.GifType
-import com.emc.moodmingle.data.firebase.model.post.dailymood.ShapeType
-import com.emc.moodmingle.data.firebase.model.post.dailymood.TextStyle
+import com.emc.moodmingle.data.firebase.model.post.dailymood.media.DailyMoodImage
+import com.emc.moodmingle.data.firebase.model.post.dailymood.media.DailyMoodMediaType
+import com.emc.moodmingle.data.firebase.model.post.dailymood.text.DailyMoodText
+import com.emc.moodmingle.data.firebase.model.post.dailymood.gif.Gif
+import com.emc.moodmingle.data.firebase.model.post.dailymood.gif.GifType
+import com.emc.moodmingle.data.firebase.model.post.dailymood.media.ShapeType
+import com.emc.moodmingle.data.firebase.model.post.dailymood.text.TextStyle
 import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.create.detectLongPress
 import com.emc.moodmingle.ui.create.getMimeType
@@ -103,7 +103,7 @@ import com.emc.moodmingle.ui.dailymood.media.image.DailyMoodSelectMedia
 import com.emc.moodmingle.ui.dailymood.media.image.animatedShape
 import com.emc.moodmingle.ui.dailymood.mention.DailyMoodMentionSection
 import com.emc.moodmingle.ui.dailymood.mood.DailyMoodMoodSection
-import com.emc.moodmingle.ui.dailymood.settings.DailyMoodSettings
+import com.emc.moodmingle.ui.dailymood.settings.DailyMoodSettingsScreen
 import com.emc.moodmingle.ui.dailymood.text.DailyMoodEditText
 import com.emc.moodmingle.ui.dailymood.visibility.DailyMoodAudience
 import com.emc.moodmingle.ui.remix.MoodPickerDialog
@@ -210,7 +210,7 @@ fun DailyMoodThirdPage(
         when (selectedAction) {
             "audience" -> DailyMoodAudience(mood, onEdited) { selectedAction = "" }
             "settings" -> {
-                DailyMoodSettings(
+                DailyMoodSettingsScreen(
                     settings = mood.settings,
                     onSettingsEdited = { onEdited(mood.copy(settings = it)) },
                     onDismiss =  { selectedAction = "" }

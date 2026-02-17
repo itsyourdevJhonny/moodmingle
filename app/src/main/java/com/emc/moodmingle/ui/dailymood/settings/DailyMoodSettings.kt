@@ -51,9 +51,6 @@ fun DailyMoodSettings(
     onSettingsEdited: (DailyMoodSettings) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val originalSettings = remember(Unit) { settings }
-    val hasChanges = originalSettings != settings
-
     var selectedAction by remember { mutableStateOf("") }
     var timingAction by remember { mutableStateOf("") }
 

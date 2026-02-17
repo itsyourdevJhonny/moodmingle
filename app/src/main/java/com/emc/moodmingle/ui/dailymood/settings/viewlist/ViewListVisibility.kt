@@ -50,7 +50,7 @@ fun Content(
         HorizontalDivider(thickness = 0.5.dp)
 
         Text(
-            text = if (settings.viewListEnabled) "Views will be displayed in the list." else "Views will not be displayed in the list.",
+            text = if (settings.viewListEnabled) "Views will be displayed in the list." else "Views will not be displayed in the list. You can still change this later.",
             style = Typography.bodySmall.copy(color = GrayTextColor),
             modifier = Modifier
                 .padding(top = 12.dp, start = 16.dp)

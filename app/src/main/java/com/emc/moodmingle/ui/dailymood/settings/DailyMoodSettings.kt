@@ -74,7 +74,7 @@ fun DailyMoodSettings(
 
         when (selectedAction) {
             "View List Visibility" -> {
-                ViewListVisibility() { selectedAction = "" }
+                ViewListVisibility(settings, onSettingsEdited) { selectedAction = "" }
             }
 
             "Share Platform" -> {

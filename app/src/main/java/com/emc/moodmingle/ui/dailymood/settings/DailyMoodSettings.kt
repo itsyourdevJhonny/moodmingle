@@ -40,6 +40,7 @@ import com.emc.moodmingle.ui.dailymood.settings.privacy.ActionGroup
 import com.emc.moodmingle.ui.dailymood.settings.privacy.getDailyMoodSettingsActions
 import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodManualDialog
 import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodScheduleDialog
+import com.emc.moodmingle.ui.dailymood.settings.viewlist.ViewListVisibility
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
@@ -73,7 +74,7 @@ fun DailyMoodSettings(
 
         when (selectedAction) {
             "View List Visibility" -> {
-
+                ViewListVisibility() { selectedAction = "" }
             }
 
             "Share Platform" -> {

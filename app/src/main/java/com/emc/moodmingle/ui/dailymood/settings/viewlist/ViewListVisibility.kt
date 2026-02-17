@@ -32,7 +32,7 @@ fun ViewListVisibility(
 }
 
 @Composable
-fun Content(
+private fun Content(
     paddingValues: PaddingValues,
     settings: DailyMoodSettings,
     onSettingsEdited: (DailyMoodSettings) -> Unit,
@@ -56,6 +56,5 @@ fun Content(
                 .padding(top = 12.dp, start = 16.dp)
                 .animateContentSize()
         )
-
     }
 }

@@ -38,6 +38,7 @@ import com.emc.moodmingle.data.firebase.model.post.dailymood.TimingType
 import com.emc.moodmingle.ui.dailymood.settings.privacy.Action
 import com.emc.moodmingle.ui.dailymood.settings.privacy.ActionGroup
 import com.emc.moodmingle.ui.dailymood.settings.privacy.getDailyMoodSettingsActions
+import com.emc.moodmingle.ui.dailymood.settings.screenshot.ScreenshotAlerts
 import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodManualDialog
 import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodScheduleDialog
 import com.emc.moodmingle.ui.dailymood.settings.viewlist.ViewListVisibility
@@ -75,6 +76,10 @@ fun DailyMoodSettings(
         when (selectedAction) {
             "View List Visibility" -> {
                 ViewListVisibility(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
+            "Screenshot Alerts" -> {
+                ScreenshotAlerts(settings, onSettingsEdited) { selectedAction = "" }
             }
 
             "Share Platform" -> {

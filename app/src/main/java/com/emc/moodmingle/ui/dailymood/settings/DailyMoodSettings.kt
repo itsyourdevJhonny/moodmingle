@@ -67,7 +67,7 @@ fun DailyMoodSettings(
                     title = "Story Settings",
                     doneLabel = "Apply Changes",
                     enabled = hasChanges,
-                    onDone = {},
+                    onDone = { onDismiss() },
                     onBack = { onDismiss() }
                 )
             }
@@ -75,7 +75,7 @@ fun DailyMoodSettings(
             Content(paddingValues) { selectedAction = it }
         }
 
-        when(selectedAction) {
+        when (selectedAction) {
             "View List Visibility" -> {
 
             }

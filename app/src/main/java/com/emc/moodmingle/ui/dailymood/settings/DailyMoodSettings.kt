@@ -1,17 +1,18 @@
 package com.emc.moodmingle.ui.dailymood.settings
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -24,21 +25,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodSettings
 import com.emc.moodmingle.data.firebase.model.post.dailymood.NotifyType
 import com.emc.moodmingle.data.firebase.model.post.dailymood.SharePlatformType
 import com.emc.moodmingle.data.firebase.model.post.dailymood.TimingType
-import com.emc.moodmingle.ui.dailymood.settings.privacy.DailyMoodPrivacy
+import com.emc.moodmingle.ui.dailymood.settings.privacy.Action
+import com.emc.moodmingle.ui.dailymood.settings.privacy.ActionGroup
+import com.emc.moodmingle.ui.dailymood.settings.privacy.getDailyMoodSettingsActions
 import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodManualDialog
 import com.emc.moodmingle.ui.dailymood.settings.timing.DailyMoodScheduleDialog
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
-import com.emc.moodmingle.utils.text.toSentenceCase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +54,7 @@ fun DailyMoodSettings(
     val originalSettings = remember(Unit) { settings }
     val hasChanges = originalSettings != settings
 
-    var selectedSetting by remember { mutableStateOf(Settings.DEFAULT) }
+    var selectedAction by remember { mutableStateOf("") }
     var timingAction by remember { mutableStateOf("") }
 
     BackHandler { onDismiss() }
@@ -66,40 +70,17 @@ fun DailyMoodSettings(
                     onDone = {},
                     onBack = { onDismiss() }
                 )
-            },
-            floatingActionButton = { DefaultActionButton(onSettingsEdited) }
+            }
         ) { paddingValues ->
-            Content(paddingValues, settings) { selectedSetting = it }
+            Content(paddingValues) { selectedAction = it }
         }
 
-        when (selectedSetting) {
-            Settings.TIMING -> {
-                SettingContainer(
-                    title = "Select Timing",
-                    contents = listOf(
-                        R.drawable.automatic to TimingType.AUTO_POST_NOW,
-                        R.drawable.schedule to TimingType.SCHEDULE,
-                        R.drawable.manual to TimingType.MANUAL_ONLY
-                    ),
-                    type = settings.timing.type,
-                    onSelected = { data ->
-                        when (data as TimingType) {
-                            TimingType.AUTO_POST_NOW -> {
-                                onSettingsEdited(
-                                    settings.copy(
-                                        timing = settings.timing.copy(type = data, date = null)
-                                    )
-                                )
-                            }
+        when(selectedAction) {
+            "View List Visibility" -> {
 
-                            TimingType.SCHEDULE, TimingType.MANUAL_ONLY -> timingAction = data.name
-                        }
-                    },
-                    onDismiss = { selectedSetting = Settings.DEFAULT }
-                )
             }
 
-            Settings.SHARE_PLATFORM -> {
+            "Share Platform" -> {
                 SettingContainer(
                     title = "Select Platform",
                     contents = listOf(
@@ -115,13 +96,13 @@ fun DailyMoodSettings(
                         val isCurrent = (data as SharePlatformType) == settings.sharePlatformType
                         onSettingsEdited(settings.copy(sharePlatformType = if (isCurrent) SharePlatformType.NONE else data))
                     },
-                    onDismiss = { selectedSetting = Settings.DEFAULT }
+                    onDismiss = { selectedAction = "" }
                 )
             }
 
-            Settings.NOTIFY -> {
+            "Notify People" -> {
                 SettingContainer(
-                    title = "Notify To",
+                    title = "Notify People",
                     contents = listOf(
                         R.drawable.blocked to NotifyType.NONE,
                         R.drawable.followers to NotifyType.FOLLOWERS,
@@ -129,19 +110,9 @@ fun DailyMoodSettings(
                     ),
                     type = settings.notifyType,
                     onSelected = { data -> onSettingsEdited(settings.copy(notifyType = (data as NotifyType))) },
-                    onDismiss = { selectedSetting = Settings.DEFAULT }
+                    onDismiss = { selectedAction = "" }
                 )
             }
-
-            Settings.PRIVACY -> {
-                DailyMoodPrivacy(
-                    privacy = settings.privacy,
-                    onPrivacyChanged = { onSettingsEdited(settings.copy(privacy = it)) },
-                    onBack = { selectedSetting = Settings.DEFAULT }
-                )
-            }
-
-            else -> {}
         }
     }
 
@@ -181,112 +152,84 @@ fun DailyMoodSettings(
 }
 
 @Composable
-private fun DefaultActionButton(onSettingsEdited: (DailyMoodSettings) -> Unit) {
-    TextButton(
-        onClick = { onSettingsEdited(DailyMoodSettings()) },
-        colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.settings_default),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp)
-        )
-        Text(text = " Reset To Default")
-    }
-}
-
-@Composable
-private fun Content(
-    paddingValues: PaddingValues,
-    settings: DailyMoodSettings,
-    onSettingSelected: (Settings) -> Unit,
-) {
-    Column(modifier = Modifier.padding(paddingValues)) {
-        getDailyMoodSettings().forEach { (setting, icon) ->
-            SettingItem(settings, setting, icon) { onSettingSelected(setting) }
+private fun Content(paddingValues: PaddingValues, onActionSelected: (String) -> Unit) {
+    LazyColumn(modifier = Modifier.padding(paddingValues)) {
+        items(getDailyMoodSettingsActions()) { actionGroup ->
+            SettingsGroup(actionGroup, onActionSelected)
         }
     }
 }
 
 @Composable
-private fun SettingItem(
-    settings: DailyMoodSettings,
-    setting: Settings,
-    icon: Int,
-    onSelected: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .clickable { onSelected() }
-            .padding(16.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+private fun SettingsGroup(actionGroup: ActionGroup, onActionSelected: (String) -> Unit) {
+    Column {
+        Column(
+            modifier = Modifier.padding(top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            SettingIcon(icon = icon)
-            SettingTitle(title = setting.name, settings)
+            Text(
+                text = actionGroup.groupName,
+                fontSize = 18.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+
+            HorizontalDivider(thickness = 0.5.dp)
         }
 
+        actionGroup.actions.forEachIndexed { index, action ->
+            SettingItem(action, onActionSelected)
+            SettingBottomLine(index, actionGroup)
+        }
+    }
+}
+
+@Composable
+private fun SettingItem(action: Action, onActionSelected: (String) -> Unit) {
+    TextButton(
+        onClick = { onActionSelected(action.title) },
+        colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+        contentPadding = PaddingValues(16.dp),
+        shape = RectangleShape
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            SettingItemIconAndTitle(action)
+            SettingItemDescription(action)
+        }
+    }
+}
+
+@Composable
+private fun SettingItemIconAndTitle(action: Action) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Icon(
-            painter = painterResource(R.drawable.chevron_right),
+            painter = painterResource(action.icon),
             contentDescription = null,
-            tint = Color.White,
             modifier = Modifier.size(20.dp)
         )
+
+        Text(text = action.title)
     }
 }
 
 @Composable
-private fun SettingIcon(icon: Int) {
-    Icon(
-        painter = painterResource(icon),
-        contentDescription = null,
-        tint = Color.White,
-        modifier = Modifier.size(24.dp)
+private fun SettingItemDescription(action: Action) {
+    Text(
+        text = action.description,
+        color = GrayTextColor,
+        style = Typography.bodySmall,
+        modifier = Modifier.padding(horizontal = 28.dp)
     )
 }
 
 @Composable
-private fun SettingTitle(title: String, settings: DailyMoodSettings) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = title.toSentenceCase(), color = Color.White, fontWeight = FontWeight.Bold)
-
-        Text(
-            text = if (title == "PRIVACY") "" else {
-                "(${
-                    when (title) {
-                        "TIMING" -> settings.timing.type.name.toSentenceCase()
-                        "SHARE_PLATFORM" -> settings.sharePlatformType.name.toSentenceCase()
-                        "NOTIFY" -> settings.notifyType.name.toSentenceCase()
-                        else -> title
-                    }
-                })"
-            },
-            style = Typography.bodyMedium.copy(color = GrayTextColor)
-        )
-    }
-}
-
-private fun getDailyMoodSettings(): List<Pair<Settings, Int>> {
-    return listOf(
-        Settings.PRIVACY to R.drawable.privacy,
-        Settings.TIMING to R.drawable.timing,
-        Settings.SHARE_PLATFORM to R.drawable.share_platform,
-        Settings.NOTIFY to R.drawable.notify,
+private fun SettingBottomLine(index: Int, actionGroup: ActionGroup) {
+    HorizontalDivider(
+        thickness = 0.5.dp,
+        modifier = Modifier.padding(horizontal = if (index == actionGroup.actions.lastIndex) 0.dp else 20.dp)
     )
-}
-
-private enum class Settings {
-    DEFAULT,
-    PRIVACY,
-    TIMING,
-    SHARE_PLATFORM,
-    NOTIFY,
 }

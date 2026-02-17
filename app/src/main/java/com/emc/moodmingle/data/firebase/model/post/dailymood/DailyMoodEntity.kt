@@ -131,6 +131,7 @@ enum class AudienceType {
 @Parcelize
 data class DailyMoodSettings(
     val viewListEnabled: Boolean = true,
+    val screenshotAlertEnabled: Boolean = false,
     val privacy: DailyMoodPrivacy = DailyMoodPrivacy(),
     val timing: SettingsTiming = SettingsTiming(),
     val sharePlatformType: SharePlatformType = SharePlatformType.NONE,

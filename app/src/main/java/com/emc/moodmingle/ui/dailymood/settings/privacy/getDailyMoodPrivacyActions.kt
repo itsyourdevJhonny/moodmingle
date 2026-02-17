@@ -69,13 +69,13 @@ fun getDailyMoodSettingsActions(): List<ActionGroup> {
             actions = listOf(
                 Action(
                     icon = R.drawable.block_filled,
-                    title = "Blocked Users",
+                    title = "Blocked People",
                     description = "Manage people who are blocked from viewing or interacting with your moods."
                 ),
                 Action(
                     icon = R.drawable.restrict_filled,
                     title = "Restricted Accounts",
-                    description = "Limit certain people’s interactions without them knowing."
+                    description = "Manage accounts that are restricted from viewing or interacting with your moods."
                 )
             )
         ),

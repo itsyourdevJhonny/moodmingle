@@ -6,6 +6,7 @@ fun getDailyMoodSettingsActions(): List<ActionGroup> {
     return listOf(
         ActionGroup(
             groupName = "Viewer Controls",
+            groudIcon = R.drawable.viewer,
             actions = listOf(
                 Action(
                     icon = R.drawable.view,
@@ -42,6 +43,7 @@ fun getDailyMoodSettingsActions(): List<ActionGroup> {
 
         ActionGroup(
             groupName = "Interaction Controls",
+            groudIcon = R.drawable.interaction,
             actions = listOf(
                 Action(
                     icon = R.drawable.reply,
@@ -63,6 +65,7 @@ fun getDailyMoodSettingsActions(): List<ActionGroup> {
 
         ActionGroup(
             groupName = "Block & Restrict",
+            groudIcon = R.drawable.block_user,
             actions = listOf(
                 Action(
                     icon = R.drawable.block_filled,
@@ -79,6 +82,7 @@ fun getDailyMoodSettingsActions(): List<ActionGroup> {
 
         ActionGroup(
             groupName = "Expiration & Archive",
+            groudIcon = R.drawable.time,
             actions = listOf(
                 Action(
                     icon = R.drawable.timer_filled,
@@ -100,6 +104,7 @@ fun getDailyMoodSettingsActions(): List<ActionGroup> {
 
         ActionGroup(
             groupName = "Download & Data Controls",
+            groudIcon = R.drawable.data_download,
             actions = listOf(
                 Action(
                     icon = R.drawable.share_platform,
@@ -126,6 +131,7 @@ fun getDailyMoodSettingsActions(): List<ActionGroup> {
 
         ActionGroup(
             groupName = "Stealth & Privacy Modes",
+            groudIcon = R.drawable.privacy,
             actions = listOf(
                 Action(
                     icon = R.drawable.ghost_filled,
@@ -149,6 +155,7 @@ fun getDailyMoodSettingsActions(): List<ActionGroup> {
 
 data class ActionGroup(
     val groupName: String,
+    val groudIcon: Int,
     val actions: List<Action>,
 )
 

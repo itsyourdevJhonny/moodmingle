@@ -19,9 +19,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodMedia
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodText
-import com.emc.moodmingle.data.firebase.model.post.dailymood.Gif
+import com.emc.moodmingle.data.firebase.model.post.dailymood.media.DailyMoodMedia
+import com.emc.moodmingle.data.firebase.model.post.dailymood.text.DailyMoodText
+import com.emc.moodmingle.data.firebase.model.post.dailymood.gif.Gif
 import com.emc.moodmingle.ui.theme.MentionTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 

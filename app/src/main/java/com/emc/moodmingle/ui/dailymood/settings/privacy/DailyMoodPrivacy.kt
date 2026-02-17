@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -56,6 +58,7 @@ import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodPrivacy
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.MentionTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
+import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
 import com.emc.moodmingle.utils.components.UserSelectorDialog
 import com.emc.moodmingle.utils.modifier.gradientCircleBorder
@@ -226,8 +229,8 @@ private fun Content(
     userViewModel: FirebaseUserViewModel,
     onActionSelected: (String) -> Unit,
 ) {
-    Column(modifier = Modifier.padding(paddingValues)) {
-        getActions().forEach { actionGroup ->
+    LazyColumn(modifier = Modifier.padding(paddingValues)) {
+        items(getDailyMoodSettingsActions()) { actionGroup ->
             ActionItem(onActionSelected, actionGroup, privacy, userViewModel)
         }
     }
@@ -241,35 +244,52 @@ private fun ActionItem(
     userViewModel: FirebaseUserViewModel,
 ) {
     Column {
-        actionGroup.actions.forEach { action ->
-            Column {
-                TextButton(
-                    onClick = { onActionSelected(action.title) },
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
-                    shape = RectangleShape
-                ) {
-                    Icon(
-                        painter = painterResource(action.icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
+        Column(
+            modifier = Modifier.padding(top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = actionGroup.groupName,
+                fontSize = 18.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 16.dp)
+            )
 
-                    Spacer(Modifier.width(8.dp))
+            HorizontalDivider(thickness = 0.5.dp)
+        }
+
+        actionGroup.actions.forEach { action ->
+            TextButton(
+                onClick = { onActionSelected(action.title) },
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                contentPadding = PaddingValues(16.dp),
+                shape = RectangleShape
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(action.icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+
+                        Text(text = action.title)
+                    }
 
                     Text(
-                        text = action.title,
-                        color = Color.White,
-                        modifier = Modifier.fillMaxWidth()
+                        text = action.description,
+                        color = GrayTextColor,
+                        style = Typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = 28.dp)
                     )
                 }
-
-                Text(
-                    text = action.description,
-                    color = GrayTextColor,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
             }
+
+            HorizontalDivider(thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 20.dp))
 
             when (action.title) {
                 "Hide Daily Mood from People" -> {
@@ -277,8 +297,6 @@ private fun ActionItem(
                 }
             }
         }
-
-        HorizontalDivider(thickness = 0.5.dp)
     }
 }
 
@@ -328,145 +346,3 @@ private fun HiddenPeople(
         }
     }
 }
-
-private fun getActions(): List<ActionGroup> {
-    return listOf(
-
-        ActionGroup(
-            groupName = "Viewer Controls",
-            actions = listOf(
-                Action(
-                    icon = R.drawable.view,
-                    title = "View List Visibility",
-                    description = "Choose whether you can see who viewed your daily moods."
-                ),
-                Action(
-                    icon = R.drawable.screenshot,
-                    title = "Screenshot Alerts",
-                    description = "Receive a notification when someone screenshots your mood."
-                ),
-                Action(
-                    icon = R.drawable.replay_filled,
-                    title = "Replay Limit",
-                    description = "Control how many times people can replay your mood."
-                ),
-                Action(
-                    icon = R.drawable.hidden,
-                    title = "Hide Mood from Specific People",
-                    description = "Select people who won’t be able to see your daily moods."
-                )
-            )
-        ),
-
-        ActionGroup(
-            groupName = "Interaction Controls",
-            actions = listOf(
-                Action(
-                    icon = R.drawable.reply,
-                    title = "Reply Permissions",
-                    description = "Choose who can reply to your daily moods."
-                ),
-                Action(
-                    icon = R.drawable.love,
-                    title = "Reaction Settings",
-                    description = "Allow or disable reactions to your moods."
-                ),
-                Action(
-                    icon = R.drawable.share,
-                    title = "Sharing & Forwarding",
-                    description = "Control whether others can share or forward your mood."
-                )
-            )
-        ),
-
-        ActionGroup(
-            groupName = "Block & Restrict",
-            actions = listOf(
-                Action(
-                    icon = R.drawable.block_filled,
-                    title = "Blocked Users",
-                    description = "Manage people who are blocked from viewing or interacting with your moods."
-                ),
-                Action(
-                    icon = R.drawable.restrict_filled,
-                    title = "Restricted Accounts",
-                    description = "Limit certain people’s interactions without them knowing."
-                )
-            )
-        ),
-
-        ActionGroup(
-            groupName = "Expiration & Archive",
-            actions = listOf(
-                Action(
-                    icon = R.drawable.timer_filled,
-                    title = "Mood Duration",
-                    description = "Set how long your daily moods remain visible."
-                ),
-                Action(
-                    icon = R.drawable.archive_filled,
-                    title = "Auto Archive",
-                    description = "Automatically save expired moods to your private archive."
-                ),
-                Action(
-                    icon = R.drawable.delete,
-                    title = "Expire Mood Instantly",
-                    description = "Remove your active mood immediately."
-                )
-            )
-        ),
-
-        ActionGroup(
-            groupName = "Download & Data Controls",
-            actions = listOf(
-                Action(
-                    icon = R.drawable.download,
-                    title = "Allow Downloads",
-                    description = "Choose whether viewers can download your mood."
-                ),
-                Action(
-                    icon = R.drawable.save_post,
-                    title = "Auto-Save to Device",
-                    description = "Automatically save posted moods to your device."
-                ),
-                Action(
-                    icon = R.drawable.quality_filled,
-                    title = "Upload Quality",
-                    description = "Select high quality or data-saving upload mode."
-                )
-            )
-        ),
-
-        ActionGroup(
-            groupName = "Stealth & Privacy Modes",
-            actions = listOf(
-                Action(
-                    icon = R.drawable.ghost_filled,
-                    title = "Ghost Mode",
-                    description = "Hide your online status while viewing moods."
-                ),
-                Action(
-                    icon = R.drawable.private_filled,
-                    title = "Private Mood Mode",
-                    description = "Share moods with selected people only and restrict forwarding."
-                ),
-                Action(
-                    icon = R.drawable.record_filled,
-                    title = "Screen Recording Protection",
-                    description = "Prevent screen recording while viewing your mood."
-                )
-            )
-        )
-    )
-}
-
-data class ActionGroup(
-    val groupName: String,
-    val actions: List<Action>,
-)
-
-data class Action(
-    val icon: Int,
-    val title: String,
-    val description: String,
-)

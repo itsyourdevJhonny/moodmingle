@@ -47,8 +47,8 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.emc.moodmingle.api.giphy.GiphyViewModel
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
-import com.emc.moodmingle.data.firebase.model.post.dailymood.Gif
-import com.emc.moodmingle.data.firebase.model.post.dailymood.GifType
+import com.emc.moodmingle.data.firebase.model.post.dailymood.gif.Gif
+import com.emc.moodmingle.data.firebase.model.post.dailymood.gif.GifType
 
 @Composable
 fun GifPicker(mood: DailyMoodEntity, onEdited: (DailyMoodEntity) -> Unit, onDismiss: () -> Unit) {

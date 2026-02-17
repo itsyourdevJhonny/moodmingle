@@ -59,8 +59,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emc.moodmingle.R
 import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodText
-import com.emc.moodmingle.data.firebase.model.post.dailymood.TextStyle
+import com.emc.moodmingle.data.firebase.model.post.dailymood.text.DailyMoodText
+import com.emc.moodmingle.data.firebase.model.post.dailymood.text.TextStyle
 import com.emc.moodmingle.ui.create.post.dialogs.CreatePostHashtagDialog
 import com.emc.moodmingle.ui.create.post.dialogs.CreatePostMentionDialog
 import com.emc.moodmingle.ui.create.post.pickers.CreatePostAlignPicker

@@ -49,7 +49,7 @@ import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
-import com.emc.moodmingle.utils.components.UserSelectorDialog
+import com.emc.moodmingle.utils.components.UserSelector
 import com.emc.moodmingle.utils.modifier.gradientCircleBorder
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 
@@ -70,8 +70,8 @@ fun BlockedPeopleScreen(
     }
 
     if (showUserSelector) {
-        UserSelectorDialog(
-            headerLabel = "Select People",
+        UserSelector(
+            title = "Select People",
             userIds = settings.blockedUserIds.toList(),
             onUsersSelected = { result ->
                 val selectedUserIds = (result as SnapshotStateList<*>).map { it.toString() }

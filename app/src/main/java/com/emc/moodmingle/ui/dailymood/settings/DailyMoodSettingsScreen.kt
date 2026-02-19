@@ -31,15 +31,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emc.moodmingle.data.firebase.model.post.dailymood.settings.DailyMoodSettings
+import com.emc.moodmingle.ui.dailymood.settings.action.Action
+import com.emc.moodmingle.ui.dailymood.settings.action.ActionGroup
+import com.emc.moodmingle.ui.dailymood.settings.action.getDailyMoodSettingsActions
+import com.emc.moodmingle.ui.dailymood.settings.archive.AutoArchiveScreen
+import com.emc.moodmingle.ui.dailymood.settings.autosave.AutoSaveToDeviceScreen
 import com.emc.moodmingle.ui.dailymood.settings.block.BlockedPeopleScreen
+import com.emc.moodmingle.ui.dailymood.settings.download.AllowDownloadsScreen
+import com.emc.moodmingle.ui.dailymood.settings.duration.MoodDurationScreen
 import com.emc.moodmingle.ui.dailymood.settings.hide.HideMoodFromScreen
 import com.emc.moodmingle.ui.dailymood.settings.notify.NotifyPeopleScreen
-import com.emc.moodmingle.ui.dailymood.settings.privacy.Action
-import com.emc.moodmingle.ui.dailymood.settings.privacy.ActionGroup
-import com.emc.moodmingle.ui.dailymood.settings.privacy.getDailyMoodSettingsActions
+import com.emc.moodmingle.ui.dailymood.settings.quality.UploadQualityScreen
 import com.emc.moodmingle.ui.dailymood.settings.reaction.ReactionSettingsScreen
 import com.emc.moodmingle.ui.dailymood.settings.replay.ReplayLimitScreen
 import com.emc.moodmingle.ui.dailymood.settings.reply.ReplyPermissionScreen
+import com.emc.moodmingle.ui.dailymood.settings.restrict.RestrictAccountsScreen
 import com.emc.moodmingle.ui.dailymood.settings.screenshot.ScreenshotAlertScreen
 import com.emc.moodmingle.ui.dailymood.settings.shareplatform.SharePlatformScreen
 import com.emc.moodmingle.ui.dailymood.settings.sharing.SharingForwardingScreen
@@ -59,7 +65,7 @@ fun DailyMoodSettingsScreen(
 ) {
     var selectedAction by remember { mutableStateOf("") }
 
-    BackHandler { onDismiss() }
+    BackHandler { if (selectedAction.isNotEmpty()) selectedAction = "" else onDismiss() }
 
     Box {
         Scaffold(
@@ -116,8 +122,32 @@ fun DailyMoodSettingsScreen(
                 BlockedPeopleScreen(settings, onSettingsEdited) { selectedAction = "" }
             }
 
+            "Restricted Accounts" -> {
+                RestrictAccountsScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
+            "Mood Duration" -> {
+                MoodDurationScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
+            "Auto Archive" -> {
+                AutoArchiveScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
             "Share Platform" -> {
                 SharePlatformScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
+            "Allow Downloads" -> {
+                AllowDownloadsScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
+            "Auto-Save to Device" -> {
+                AutoSaveToDeviceScreen(settings, onSettingsEdited) { selectedAction = "" }
+            }
+
+            "Upload Quality" -> {
+                UploadQualityScreen(settings, onSettingsEdited) { selectedAction = "" }
             }
         }
     }

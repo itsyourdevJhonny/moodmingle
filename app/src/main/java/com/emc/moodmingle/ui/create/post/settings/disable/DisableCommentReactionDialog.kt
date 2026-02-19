@@ -37,7 +37,7 @@ import com.emc.moodmingle.ui.post.action.toastMessage
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.SwitchButton
-import com.emc.moodmingle.utils.components.UserSelectorDialog
+import com.emc.moodmingle.utils.components.UserSelector
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 
@@ -77,8 +77,8 @@ fun DisableCommentReactionDialog(
         }
 
         if (showSelectUserDialog) {
-            UserSelectorDialog(
-                headerLabel = "Select People",
+            UserSelector(
+                title = "Select People",
                 userIds = commentReactionVisibility.selectedUserIds,
                 onUsersSelected = { data ->
                     val selectedUserIds = (data as SnapshotStateList<*>).map { it.toString() }

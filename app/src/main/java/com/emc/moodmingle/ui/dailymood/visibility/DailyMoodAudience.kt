@@ -42,7 +42,7 @@ import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
-import com.emc.moodmingle.utils.components.UserSelectorDialog
+import com.emc.moodmingle.utils.components.UserSelector
 import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 
 @Composable
@@ -70,8 +70,8 @@ fun DailyMoodAudience(
         }
 
         if (showCustomDialog) {
-            UserSelectorDialog(
-                headerLabel = "Select Users",
+            UserSelector(
+                title = "Select Users",
                 userIds = mood.audience.selectedUsers,
                 onUsersSelected = { result ->
                     val userIds = (result as SnapshotStateList<*>).map { it.toString() }

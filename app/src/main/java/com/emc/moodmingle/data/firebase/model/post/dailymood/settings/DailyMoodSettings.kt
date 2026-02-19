@@ -9,7 +9,6 @@ data class DailyMoodSettings(
     val screenshotAlertEnabled: Boolean = false,
     val replay: ReplayLimit = ReplayLimit(),
     val hiddenUserIds: List<String> = emptyList(),
-    val privacy: DailyMoodPrivacy = DailyMoodPrivacy(),
     val timing: SettingsTiming = SettingsTiming(),
     val sharePlatformType: SharePlatformType = SharePlatformType.NONE,
     val notifyType: NotifyType = NotifyType.NONE,
@@ -17,10 +16,10 @@ data class DailyMoodSettings(
     val reactionEnabled: Boolean = true,
     val sharingSettings: SharingSettings = SharingSettings(),
     val blockedUserIds: Set<String> = emptySet(),
-    val restrictedUserIds: Set<String> = emptySet()
-) : Parcelable
-
-@Parcelize
-data class DailyMoodPrivacy(
-    val hiddenUsers: List<String> = emptyList(),
+    val restrictedUserIds: Set<String> = emptySet(),
+    val duration: MoodDuration = MoodDuration(),
+    val autoArchive: Boolean = true,
+    val allowDownloads: Boolean = true,
+    val autoSaveToDevice: Boolean = false,
+    val uploadQuality: UploadQuality = UploadQuality.HIGH
 ) : Parcelable

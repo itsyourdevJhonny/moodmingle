@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.emc.moodmingle.ui.create.post.CreatePostDialogHeader
 import com.emc.moodmingle.ui.post.action.toastMessage
-import com.emc.moodmingle.utils.components.UserSelectorDialog
+import com.emc.moodmingle.utils.components.UserSelector
 
 @Composable
 fun BlockPeopleViewingDialog(
@@ -48,8 +48,8 @@ fun BlockPeopleViewingDialog(
         }
 
         if (showSelectUserDialog) {
-            UserSelectorDialog(
-                headerLabel = "Select User to Block",
+            UserSelector(
+                title = "Select User to Block",
                 userIds = blockedUserIds.toList(),
                 onUsersSelected = { data ->
                     val userIds = (data as SnapshotStateList<*>).map { it.toString() }

@@ -21,5 +21,7 @@ data class DailyMoodSettings(
     val autoArchive: Boolean = true,
     val allowDownloads: Boolean = true,
     val autoSaveToDevice: Boolean = false,
-    val uploadQuality: UploadQuality = UploadQuality.HIGH
+    val uploadQuality: UploadQuality = UploadQuality.HIGH,
+    val ghostMode: Boolean = false,
+    val screenProtectionEnabled: Boolean = true
 ) : Parcelable

@@ -39,7 +39,7 @@ import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
 fun AudienceDialog(audience: Any, onAudienceSelected: (Any) -> Unit, onDismiss: () -> Unit) {

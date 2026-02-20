@@ -1,8 +1,9 @@
-package com.emc.moodmingle.ui.create
+package com.emc.moodmingle.ui.create.util
 
 import android.Manifest
 import android.content.Context
 import android.database.Cursor
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
@@ -48,6 +49,7 @@ import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.utils.modifier.drawGradient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -72,10 +74,7 @@ fun AudioGallery(selectedAudios: List<Uri>, onSelectedAudio: (List<Uri>) -> Unit
     LaunchedEffect(Unit) {
         handlePermissionAndLoad(
             context = context,
-            permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                Manifest.permission.READ_MEDIA_AUDIO
-            else
-                Manifest.permission.READ_EXTERNAL_STORAGE,
+            permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.READ_MEDIA_AUDIO else Manifest.permission.READ_EXTERNAL_STORAGE,
             permissionLauncher = permissionLauncher,
             loader = { loadDeviceAudio(context) },
             onLoaded = { audios ->
@@ -84,12 +83,12 @@ fun AudioGallery(selectedAudios: List<Uri>, onSelectedAudio: (List<Uri>) -> Unit
 
                 // Preload durations asynchronously
                 CoroutineScope(Dispatchers.IO).launch {
-                    val retriever = android.media.MediaMetadataRetriever()
+                    val retriever = MediaMetadataRetriever()
                     audios.forEach { uri ->
                         try {
                             retriever.setDataSource(context, uri)
                             durations[uri] = retriever.extractMetadata(
-                                android.media.MediaMetadataRetriever.METADATA_KEY_DURATION
+                                MediaMetadataRetriever.METADATA_KEY_DURATION
                             )?.toLong() ?: 0L
                         } catch (_: Exception) {
                             durations[uri] = 0L
@@ -145,7 +144,7 @@ fun AudioGallery(selectedAudios: List<Uri>, onSelectedAudio: (List<Uri>) -> Unit
                         mediaPlayer.seekTo(0)
                         remainingTime = 0
                     }
-                    kotlinx.coroutines.delay(200)
+                    delay(200)
                 }
             }
 

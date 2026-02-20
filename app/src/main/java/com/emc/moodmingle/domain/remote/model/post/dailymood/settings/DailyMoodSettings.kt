@@ -1,4 +1,4 @@
-package com.emc.moodmingle.data.firebase.model.post.dailymood.settings
+package com.emc.moodmingle.domain.remote.model.post.dailymood.settings
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -15,8 +15,8 @@ data class DailyMoodSettings(
     val replyPermissionType: ReplyPermissionType = ReplyPermissionType.EVERYONE,
     val reactionEnabled: Boolean = true,
     val sharingSettings: SharingSettings = SharingSettings(),
-    val blockedUserIds: Set<String> = emptySet(),
-    val restrictedUserIds: Set<String> = emptySet(),
+    val blockedUserIds: List<String> = emptyList(),
+    val restrictedUserIds: List<String> = emptyList(),
     val duration: MoodDuration = MoodDuration(),
     val autoArchive: Boolean = true,
     val allowDownloads: Boolean = true,

@@ -35,14 +35,14 @@ import com.emc.moodmingle.utils.components.ScaffoldHeader
 @Composable
 fun ReplyPermissionScreen(
     settings: DailyMoodSettings,
-    onSettingsEdited: (DailyMoodSettings) -> Unit,
-    onDismiss: () -> Unit,
+    onEdit: (DailyMoodSettings) -> Unit,
+    onBack: () -> Unit,
 ) {
     Scaffold(
         containerColor = Color.Black,
-        topBar = { ScaffoldHeader(title = "Reply Permissions") { onDismiss() } }
+        topBar = { ScaffoldHeader(title = "Reply Permissions") { onBack() } }
     ) { paddingValues ->
-        Content(paddingValues, settings, onSettingsEdited)
+        Content(paddingValues, settings, onEdit)
     }
 }
 

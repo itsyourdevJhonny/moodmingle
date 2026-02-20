@@ -1,9 +1,9 @@
-package com.emc.moodmingle.viewmodel.chat
+package com.emc.moodmingle.viewmodel.remote.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.firebase.model.chat.Conversation
-import com.emc.moodmingle.data.firebase.repository.chat.ConversationRepository
+import com.emc.moodmingle.domain.remote.model.chat.Conversation
+import com.emc.moodmingle.domain.remote.repository.chat.ConversationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ConversationViewModel @Inject constructor(
-    private val conversationRepository: ConversationRepository
+    private val conversationRepository: ConversationRepository,
 ) : ViewModel() {
     private val _conversation = MutableStateFlow<Conversation?>(null)
     val conversation = _conversation.asStateFlow()
@@ -24,6 +24,7 @@ class ConversationViewModel @Inject constructor(
             }
         }
     }
+
     suspend fun createConversation(conversation: Conversation) =
         conversationRepository.insert(conversation)
 
@@ -33,10 +34,7 @@ class ConversationViewModel @Inject constructor(
     fun checkConversationExists(user1: String, user2: String, callback: (Conversation?) -> Unit) =
         conversationRepository.checkConversationExists(user1, user2, callback)
 
-    fun getConversationByPairUser(user1: String, user2: String, callback: (Conversation?) -> Unit) =
-        conversationRepository.getConversationByPairUser(user1, user2, callback)
-
-    suspend fun updateConversation(conversation: Conversation, senderId: String = "", receiverId: String = "", message: String = "") =
+    suspend fun updateConversation(conversation: Conversation) =
         conversationRepository.update(conversation)
 
     suspend fun deleteConversation(conversation: Conversation) =

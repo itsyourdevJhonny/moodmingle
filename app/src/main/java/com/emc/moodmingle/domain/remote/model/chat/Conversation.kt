@@ -1,4 +1,4 @@
-package com.emc.moodmingle.data.firebase.model.chat
+package com.emc.moodmingle.domain.remote.model.chat
 
 data class Conversation(
     val id: String = "",

@@ -1,6 +1,6 @@
-package com.emc.moodmingle.data.firebase.repository.post
+package com.emc.moodmingle.domain.remote.repository.post
 
-import com.emc.moodmingle.data.firebase.model.post.CommentEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.CommentEntityFirebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose

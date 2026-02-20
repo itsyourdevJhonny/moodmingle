@@ -1,9 +1,9 @@
-package com.emc.moodmingle.viewmodel.firebase
+package com.emc.moodmingle.viewmodel.remote
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.firebase.model.post.CommentEntityFirebase
-import com.emc.moodmingle.data.firebase.repository.post.CommentRepositoryFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.CommentEntityFirebase
+import com.emc.moodmingle.domain.remote.repository.post.CommentRepositoryFirebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow

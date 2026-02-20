@@ -1,6 +1,6 @@
-package com.emc.moodmingle.data.firebase.repository.chat
+package com.emc.moodmingle.domain.remote.repository.chat
 
-import com.emc.moodmingle.data.firebase.model.chat.Conversation
+import com.emc.moodmingle.domain.remote.model.chat.Conversation
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose

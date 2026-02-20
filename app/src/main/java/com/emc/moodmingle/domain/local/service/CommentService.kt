@@ -1,7 +1,7 @@
-package com.emc.moodmingle.data.service
+package com.emc.moodmingle.domain.local.service
 
-import com.emc.moodmingle.data.model.post.CommentEntity
-import com.emc.moodmingle.data.repository.post.CommentRepository
+import com.emc.moodmingle.domain.local.model.post.CommentEntity
+import com.emc.moodmingle.domain.local.repository.post.CommentRepository
 import javax.inject.Inject
 
 class CommentService @Inject constructor(

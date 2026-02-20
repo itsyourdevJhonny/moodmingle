@@ -27,10 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.chat.Conversation
+import com.emc.moodmingle.domain.remote.model.chat.Conversation
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.utils.components.dialogFullSizeProperties
-import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
+import com.emc.moodmingle.viewmodel.remote.chat.ConversationViewModel
 import kotlinx.coroutines.launch
 
 @Composable

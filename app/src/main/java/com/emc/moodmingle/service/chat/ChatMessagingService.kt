@@ -1,4 +1,4 @@
-package com.emc.moodmingle.service
+package com.emc.moodmingle.service.chat
 
 import android.Manifest
 import android.app.PendingIntent
@@ -46,5 +46,4 @@ class ChatMessagingService : FirebaseMessagingService() {
         NotificationManagerCompat.from(this)
             .notify(System.currentTimeMillis().toInt(), notification)
     }
-
 }

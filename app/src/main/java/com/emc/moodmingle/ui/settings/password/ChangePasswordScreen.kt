@@ -49,7 +49,7 @@ import com.emc.moodmingle.R
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 import kotlinx.coroutines.launch
 
 @Composable

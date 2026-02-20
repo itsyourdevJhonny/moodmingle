@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
+import com.emc.moodmingle.domain.remote.model.post.dailymood.DailyMoodEntity
 
 @Composable
 fun DailyMoodFloatingActions(

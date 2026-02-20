@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
+import com.emc.moodmingle.domain.remote.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.ui.create.post.hashtag.extractHashtags
 import com.emc.moodmingle.ui.theme.HashtagTextColor
 import com.emc.moodmingle.ui.theme.SecondaryDark

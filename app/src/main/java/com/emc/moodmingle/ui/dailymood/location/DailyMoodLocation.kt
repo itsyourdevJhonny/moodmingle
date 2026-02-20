@@ -28,12 +28,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.api.nominatim.NominatimPlace
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
+import com.emc.moodmingle.domain.remote.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.LocationViewModel
+import com.emc.moodmingle.viewmodel.location.LocationViewModel
 
 @Composable
 fun DailyMoodLocation(

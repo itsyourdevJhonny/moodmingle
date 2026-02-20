@@ -82,18 +82,18 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.dailymood.AudienceType
-import com.emc.moodmingle.data.firebase.model.post.dailymood.DailyMoodEntity
-import com.emc.moodmingle.data.firebase.model.post.dailymood.media.DailyMoodImage
-import com.emc.moodmingle.data.firebase.model.post.dailymood.media.DailyMoodMediaType
-import com.emc.moodmingle.data.firebase.model.post.dailymood.text.DailyMoodText
-import com.emc.moodmingle.data.firebase.model.post.dailymood.gif.Gif
-import com.emc.moodmingle.data.firebase.model.post.dailymood.gif.GifType
-import com.emc.moodmingle.data.firebase.model.post.dailymood.media.ShapeType
-import com.emc.moodmingle.data.firebase.model.post.dailymood.text.TextStyle
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.ui.create.detectLongPress
-import com.emc.moodmingle.ui.create.getMimeType
+import com.emc.moodmingle.domain.remote.model.post.dailymood.AudienceType
+import com.emc.moodmingle.domain.remote.model.post.dailymood.DailyMoodEntity
+import com.emc.moodmingle.domain.remote.model.post.dailymood.media.DailyMoodImage
+import com.emc.moodmingle.domain.remote.model.post.dailymood.media.DailyMoodMediaType
+import com.emc.moodmingle.domain.remote.model.post.dailymood.text.DailyMoodText
+import com.emc.moodmingle.domain.remote.model.post.dailymood.gif.Gif
+import com.emc.moodmingle.domain.remote.model.post.dailymood.gif.GifType
+import com.emc.moodmingle.domain.remote.model.post.dailymood.media.ShapeType
+import com.emc.moodmingle.domain.remote.model.post.dailymood.text.TextStyle
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.ui.create.util.detectLongPress
+import com.emc.moodmingle.ui.create.util.getMimeType
 import com.emc.moodmingle.ui.dailymood.action.DailyMoodContentBottomSheet
 import com.emc.moodmingle.ui.dailymood.action.DailyMoodFloatingActions
 import com.emc.moodmingle.ui.dailymood.hashtag.DailyMoodHashtagSection
@@ -119,7 +119,7 @@ import com.emc.moodmingle.utils.text.toColor
 import com.emc.moodmingle.utils.text.toColorFilter
 import com.emc.moodmingle.utils.text.toFontFamily
 import com.emc.moodmingle.utils.text.toTextAlign
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -130,6 +130,7 @@ fun DailyMoodThirdPage(
     onTextPositionChanged: (DailyMoodText) -> Unit,
     onImagePositionChanged: (DailyMoodImage) -> Unit,
     onGifPositionChanged: (Gif) -> Unit,
+    onUpload: () -> Unit,
     onBack: () -> Unit,
 ) {
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
@@ -151,7 +152,7 @@ fun DailyMoodThirdPage(
                     onBack = onBack
                 )
             },
-            bottomBar = { Footer(currentUser, mood) { selectedAction = it } },
+            bottomBar = { Footer(currentUser, mood, onUpload) { selectedAction = it } },
             floatingActionButton = {
                 DailyMoodFloatingActions(mood, selectedAction) { selectedAction = it }
             }
@@ -212,7 +213,7 @@ fun DailyMoodThirdPage(
             "settings" -> {
                 DailyMoodSettingsScreen(
                     settings = mood.settings,
-                    onSettingsEdited = { onEdited(mood.copy(settings = it)) },
+                    onEdit = { onEdited(mood.copy(settings = it)) },
                     onDismiss =  { selectedAction = "" }
                 )
             }
@@ -239,7 +240,8 @@ fun DailyMoodThirdPage(
 private fun Footer(
     currentUser: UserEntityFirebase?,
     mood: DailyMoodEntity,
-    onActionSelected: (String) -> Unit,
+    onUpload: () -> Unit,
+    onActionSelected: (String) -> Unit
 ) {
     BottomAppBar(
         contentPadding = PaddingValues(),
@@ -261,7 +263,7 @@ private fun Footer(
                 AudienceButton(onActionSelected, mood)
             }
 
-            UploadButton(currentUser, onActionSelected)
+            UploadButton(currentUser, onUpload)
         }
     }
 }
@@ -307,9 +309,9 @@ private fun AudienceButton(onActionSelected: (String) -> Unit, mood: DailyMoodEn
 }
 
 @Composable
-private fun UploadButton(currentUser: UserEntityFirebase?, onActionSelected: (String) -> Unit) {
+private fun UploadButton(currentUser: UserEntityFirebase?, onUpload: () -> Unit) {
     TextButton(
-        onClick = { onActionSelected("upload") },
+        onClick = onUpload,
         colors = ButtonDefaults.textButtonColors(
             contentColor = Color.White,
             containerColor = SecondaryDark

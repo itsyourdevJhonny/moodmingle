@@ -1,4 +1,4 @@
-package com.emc.moodmingle.data.firebase.model.post.dailymood.media
+package com.emc.moodmingle.domain.remote.model.post.dailymood.media
 
 import android.os.Parcelable
 import com.emc.moodmingle.utils.media.image.ImageFilterType

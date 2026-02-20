@@ -29,16 +29,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.viewmodel.video.VideoCommentViewModel
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.viewmodel.video.VideoCommentViewModel
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.video.more.VideoMoreBottomSheet
 import com.emc.moodmingle.ui.video.operations.performVideoReactionOperation
 import com.emc.moodmingle.ui.video.operations.performVideoRepostOperation
 import com.emc.moodmingle.utils.text.NumberFormatter
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
-import com.emc.moodmingle.viewmodel.firebase.ReactionViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.ReactionViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.notification.NotificationViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 

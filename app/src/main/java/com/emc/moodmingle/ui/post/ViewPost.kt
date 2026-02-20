@@ -22,8 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.post.text.ExpandableAutoDetectClickableText
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography

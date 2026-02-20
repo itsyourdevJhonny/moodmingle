@@ -1,10 +1,10 @@
-package com.emc.moodmingle.data.firebase.viewmodel.video
+package com.emc.moodmingle.domain.remote.viewmodel.video
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
-import com.emc.moodmingle.data.firebase.model.video.VideoCommentReply
-import com.emc.moodmingle.data.firebase.repository.video.VideoCommentRepository
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.model.video.VideoCommentReply
+import com.emc.moodmingle.domain.remote.repository.video.VideoCommentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

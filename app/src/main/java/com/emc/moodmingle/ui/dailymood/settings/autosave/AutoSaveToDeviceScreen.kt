@@ -29,14 +29,14 @@ import com.emc.moodmingle.utils.components.ScaffoldHeader
 @Composable
 fun AutoSaveToDeviceScreen(
     settings: DailyMoodSettings,
-    onSettingsEdited: (DailyMoodSettings) -> Unit,
-    onDismiss: () -> Unit,
+    onEdit: (DailyMoodSettings) -> Unit,
+    onBack: () -> Unit,
 ) {
     Scaffold(
         containerColor = Color.Black,
-        topBar = { ScaffoldHeader(title = "Auto-Save to Device") { onDismiss() } }
+        topBar = { ScaffoldHeader(title = "Auto-Save to Device") { onBack() } }
     ) { paddingValues ->
-        Content(paddingValues, settings, onSettingsEdited)
+        Content(paddingValues, settings, onEdit)
     }
 }
 

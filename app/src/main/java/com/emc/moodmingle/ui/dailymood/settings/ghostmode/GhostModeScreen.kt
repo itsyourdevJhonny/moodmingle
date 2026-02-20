@@ -1,0 +1,120 @@
+package com.emc.moodmingle.ui.dailymood.settings.ghostmode
+
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.emc.moodmingle.data.firebase.model.post.dailymood.settings.DailyMoodSettings
+import com.emc.moodmingle.ui.theme.GrayTextColor
+import com.emc.moodmingle.ui.theme.MentionTextColor
+import com.emc.moodmingle.ui.theme.PrimaryDark
+import com.emc.moodmingle.ui.theme.Typography
+import com.emc.moodmingle.utils.components.ScaffoldHeader
+
+@Composable
+fun GhostModeScreen(
+    settings: DailyMoodSettings,
+    onEdit: (DailyMoodSettings) -> Unit,
+    onBack: () -> Unit,
+) {
+    Scaffold(
+        containerColor = Color.Black,
+        topBar = { ScaffoldHeader(title = "Ghost Mode") { onBack() } }
+    ) { paddingValues ->
+        Content(paddingValues, settings, onEdit)
+    }
+}
+
+@Composable
+private fun Content(
+    paddingValues: PaddingValues,
+    settings: DailyMoodSettings,
+    onSettingsEdited: (DailyMoodSettings) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .padding(paddingValues)
+            .padding(horizontal = 16.dp)
+    ) {
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Card(colors = CardDefaults.cardColors(containerColor = PrimaryDark)) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TitleAndDescription()
+                    ToggleButton(settings, onSettingsEdited)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        GhostModeExplanation(settings.ghostMode)
+    }
+}
+
+@Composable
+private fun RowScope.TitleAndDescription() {
+    Column(modifier = Modifier.weight(1f)) {
+        Text(
+            text = "Hide your online presence",
+            color = Color.White,
+            style = Typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "You won’t appear online while viewing moods.",
+            color = GrayTextColor,
+            style = Typography.bodySmall
+        )
+    }
+}
+
+@Composable
+private fun ToggleButton(
+    settings: DailyMoodSettings,
+    onSettingsEdited: (DailyMoodSettings) -> Unit,
+) {
+    Switch(
+        checked = settings.ghostMode,
+        onCheckedChange = { onSettingsEdited(DailyMoodSettings(ghostMode = it)) },
+        colors = SwitchDefaults.colors(
+            checkedThumbColor = Color.White,
+            checkedTrackColor = MentionTextColor,
+            checkedBorderColor = Color.Transparent
+        )
+    )
+}
+
+@Composable
+private fun GhostModeExplanation(enabled: Boolean) {
+    val text = if (enabled) {
+        "While Ghost Mode is enabled, your online status and activity while viewing moods will be hidden from others."
+    } else {
+        "Others may see when you are online or viewing moods."
+    }
+
+    Text(
+        text = text,
+        color = GrayTextColor,
+        style = Typography.bodySmall,
+        modifier = Modifier.animateContentSize()
+    )
+}

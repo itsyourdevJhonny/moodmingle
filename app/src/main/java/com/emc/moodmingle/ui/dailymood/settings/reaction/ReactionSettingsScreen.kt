@@ -31,16 +31,16 @@ import com.emc.moodmingle.utils.components.ScaffoldHeader
 @Composable
 fun ReactionSettingsScreen(
     settings: DailyMoodSettings,
-    onSettingsEdited: (DailyMoodSettings) -> Unit,
-    onDismiss: () -> Unit,
+    onEdit: (DailyMoodSettings) -> Unit,
+    onBack: () -> Unit,
 ) {
     val enabled = settings.reactionEnabled
 
     Scaffold(
         containerColor = Color.Black,
-        topBar = { ScaffoldHeader(title = "Reaction Settings") { onDismiss() } }
+        topBar = { ScaffoldHeader(title = "Reaction Settings") { onBack() } }
     ) { paddingValues ->
-        Content(paddingValues, enabled, onSettingsEdited, settings)
+        Content(paddingValues, enabled, onEdit, settings)
     }
 }
 

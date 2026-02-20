@@ -2,15 +2,15 @@ package com.emc.moodmingle.di.module
 
 import android.content.Context
 import androidx.room.Room
-import com.emc.moodmingle.data.dao.UserDao
-import com.emc.moodmingle.data.dao.favorites.FavoritesDao
-import com.emc.moodmingle.data.dao.hide.HideDao
-import com.emc.moodmingle.data.dao.post.CommentDao
-import com.emc.moodmingle.data.dao.post.PostDao
-import com.emc.moodmingle.data.dao.post.ReactionDao
-import com.emc.moodmingle.data.dao.saved.SaveDao
-import com.emc.moodmingle.data.dao.search.SearchDao
-import com.emc.moodmingle.data.dao.share.ShareDao
+import com.emc.moodmingle.domain.local.dao.user.UserDao
+import com.emc.moodmingle.domain.local.dao.favorites.FavoritesDao
+import com.emc.moodmingle.domain.local.dao.hide.HideDao
+import com.emc.moodmingle.domain.local.dao.post.CommentDao
+import com.emc.moodmingle.domain.local.dao.post.PostDao
+import com.emc.moodmingle.domain.local.dao.post.ReactionDao
+import com.emc.moodmingle.domain.local.dao.saved.SaveDao
+import com.emc.moodmingle.domain.local.dao.search.SearchDao
+import com.emc.moodmingle.domain.local.dao.share.ShareDao
 import com.emc.moodmingle.di.AppDatabase
 import dagger.Module
 import dagger.Provides

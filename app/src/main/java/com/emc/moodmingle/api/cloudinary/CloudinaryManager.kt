@@ -1,4 +1,4 @@
-package com.emc.moodmingle.cloudinary
+package com.emc.moodmingle.api.cloudinary
 
 import android.content.Context
 import com.cloudinary.android.MediaManager

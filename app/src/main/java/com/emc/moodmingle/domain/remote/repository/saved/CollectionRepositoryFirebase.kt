@@ -1,6 +1,6 @@
-package com.emc.moodmingle.data.firebase.repository.saved
+package com.emc.moodmingle.domain.remote.repository.saved
 
-import com.emc.moodmingle.data.firebase.model.saved.CollectionEntityFirebase
+import com.emc.moodmingle.domain.remote.model.saved.CollectionEntityFirebase
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject

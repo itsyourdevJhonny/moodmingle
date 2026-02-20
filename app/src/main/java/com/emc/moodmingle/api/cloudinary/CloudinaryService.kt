@@ -1,4 +1,4 @@
-package com.emc.moodmingle.cloudinary
+package com.emc.moodmingle.api.cloudinary
 
 import android.content.Context
 import android.net.Uri
@@ -10,6 +10,7 @@ import com.cloudinary.utils.ObjectUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlin.collections.get
 import kotlin.coroutines.resume
 
 object CloudinaryService {

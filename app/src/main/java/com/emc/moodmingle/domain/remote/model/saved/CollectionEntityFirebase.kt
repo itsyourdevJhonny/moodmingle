@@ -1,4 +1,4 @@
-package com.emc.moodmingle.data.firebase.model.saved
+package com.emc.moodmingle.domain.remote.model.saved
 
 data class CollectionEntityFirebase(
     val id: String = "",

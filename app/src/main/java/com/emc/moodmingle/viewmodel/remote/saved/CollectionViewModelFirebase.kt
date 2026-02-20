@@ -1,9 +1,9 @@
-package com.emc.moodmingle.viewmodel.firebase.saved
+package com.emc.moodmingle.viewmodel.remote.saved
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.firebase.model.saved.CollectionEntityFirebase
-import com.emc.moodmingle.data.firebase.repository.saved.CollectionRepositoryFirebase
+import com.emc.moodmingle.domain.remote.model.saved.CollectionEntityFirebase
+import com.emc.moodmingle.domain.remote.repository.saved.CollectionRepositoryFirebase
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.awaitClose

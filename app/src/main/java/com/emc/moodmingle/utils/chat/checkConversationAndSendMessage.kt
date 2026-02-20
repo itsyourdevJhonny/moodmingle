@@ -1,7 +1,7 @@
 package com.emc.moodmingle.utils.chat
 
-import com.emc.moodmingle.data.firebase.model.chat.Conversation
-import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
+import com.emc.moodmingle.domain.remote.model.chat.Conversation
+import com.emc.moodmingle.viewmodel.remote.chat.ConversationViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

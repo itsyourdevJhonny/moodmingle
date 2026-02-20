@@ -1,7 +1,7 @@
-package com.emc.moodmingle.data.model.post.user
+package com.emc.moodmingle.domain.local.model.post.user
 
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.post.ShareEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.ShareEntityFirebase
 
 
 data class CombinedPost(

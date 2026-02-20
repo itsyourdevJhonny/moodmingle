@@ -1,18 +1,20 @@
-package com.emc.moodmingle.data.firebase.model.post.dailymood
+package com.emc.moodmingle.domain.remote.model.post.dailymood
 
 import android.os.Parcelable
 import com.emc.moodmingle.api.nominatim.NominatimPlace
-import com.emc.moodmingle.data.firebase.model.post.dailymood.gif.Gif
-import com.emc.moodmingle.data.firebase.model.post.dailymood.media.DailyMoodMedia
-import com.emc.moodmingle.data.firebase.model.post.dailymood.music.MusicTrack
-import com.emc.moodmingle.data.firebase.model.post.dailymood.settings.DailyMoodSettings
-import com.emc.moodmingle.data.firebase.model.post.dailymood.text.DailyMoodText
-import com.emc.moodmingle.data.firebase.model.post.normal.PostDescription
-import com.emc.moodmingle.data.firebase.model.remix.Mood
+import com.emc.moodmingle.domain.remote.model.post.dailymood.gif.Gif
+import com.emc.moodmingle.domain.remote.model.post.dailymood.media.DailyMoodMedia
+import com.emc.moodmingle.domain.remote.model.post.dailymood.music.MusicTrack
+import com.emc.moodmingle.domain.remote.model.post.dailymood.settings.DailyMoodSettings
+import com.emc.moodmingle.domain.remote.model.post.dailymood.text.DailyMoodText
+import com.emc.moodmingle.domain.remote.model.post.normal.PostDescription
+import com.emc.moodmingle.domain.remote.model.post.remix.Mood
 import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class DailyMoodEntity(
     val id: String = "",
+    val userId: String = "",
     val mood: Mood = Mood(),
     val description: PostDescription? = null,
     val media: DailyMoodMedia = DailyMoodMedia(),
@@ -24,7 +26,9 @@ data class DailyMoodEntity(
     val settings: DailyMoodSettings = DailyMoodSettings(),
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = 0,
-)
+    val expiresAt: Long? = null,
+    val isActive: Boolean = true
+) : Parcelable
 
 @Parcelize
 data class DailyMoodAudience(

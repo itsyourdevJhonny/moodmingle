@@ -1,9 +1,9 @@
-package com.emc.moodmingle.data.model.post
+package com.emc.moodmingle.domain.local.model.post
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "comments",)
+@Entity(tableName = "comments")
 data class CommentEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

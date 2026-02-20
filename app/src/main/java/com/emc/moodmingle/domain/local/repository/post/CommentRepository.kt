@@ -1,7 +1,7 @@
-package com.emc.moodmingle.data.repository.post
+package com.emc.moodmingle.domain.local.repository.post
 
-import com.emc.moodmingle.data.dao.post.CommentDao
-import com.emc.moodmingle.data.model.post.CommentEntity
+import com.emc.moodmingle.domain.local.dao.post.CommentDao
+import com.emc.moodmingle.domain.local.model.post.CommentEntity
 import javax.inject.Inject
 
 class CommentRepository @Inject constructor(

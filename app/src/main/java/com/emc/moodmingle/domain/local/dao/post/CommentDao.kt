@@ -1,4 +1,4 @@
-package com.emc.moodmingle.data.dao.post
+package com.emc.moodmingle.domain.local.dao.post
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.emc.moodmingle.data.model.post.CommentEntity
+import com.emc.moodmingle.domain.local.model.post.CommentEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -1,4 +1,4 @@
-package com.emc.moodmingle.data.firebase.model.post
+package com.emc.moodmingle.domain.remote.model.post.normal
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentId

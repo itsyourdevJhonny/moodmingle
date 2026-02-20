@@ -1,4 +1,4 @@
-package com.emc.moodmingle.ui.create
+package com.emc.moodmingle.ui.create.util
 
 import android.content.Context
 import android.media.MediaPlayer

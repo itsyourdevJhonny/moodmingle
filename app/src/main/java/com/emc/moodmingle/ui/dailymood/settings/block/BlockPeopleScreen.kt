@@ -1,8 +1,6 @@
 package com.emc.moodmingle.ui.dailymood.settings.block
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -22,16 +20,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,84 +36,45 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.dailymood.settings.DailyMoodSettings
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.dailymood.settings.DailyMoodSettings
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.components.ScaffoldHeader
-import com.emc.moodmingle.utils.components.UserSelector
 import com.emc.moodmingle.utils.modifier.gradientCircleBorder
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BlockedPeopleScreen(
     settings: DailyMoodSettings,
+    onPeopleSelectorOpen: () -> Unit,
     onEdit: (DailyMoodSettings) -> Unit,
-    onBack: () -> Unit,
-) {
-    var showUserSelector by remember { mutableStateOf(false) }
-
-    Scaffold(
-        containerColor = Color.Black,
-        topBar = { ScaffoldHeader(title = "Exclude People") { onBack() } }
-    ) { paddingValues ->
-        Content(paddingValues, settings, onEdit) { showUserSelector = true }
-    }
-
-    if (showUserSelector) {
-        UserSelector(
-            title = "Select People",
-            userIds = settings.blockedUserIds.toList(),
-            onUsersSelected = { result ->
-                val selectedUserIds = (result as SnapshotStateList<*>).map { it.toString() }
-                onEdit(settings.copy(blockedUserIds = selectedUserIds.toSet()))
-            },
-            onDismiss = { showUserSelector = false }
-        )
-    }
-}
-
-@Composable
-private fun Content(
-    paddingValues: PaddingValues,
-    settings: DailyMoodSettings,
-    onSettingsEdited: (DailyMoodSettings) -> Unit,
-    onSelect: () -> Unit,
 ) {
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
     val blockedIds = settings.blockedUserIds
 
-    Column(
-        modifier = Modifier
-            .padding(paddingValues)
-            .padding(horizontal = 16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
+    Description()
 
-        Description()
+    Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(12.dp))
+    SelectPeopleButton(onPeopleSelectorOpen, blockedIds)
 
-        SelectPeopleButton(onSelect, blockedIds)
+    HorizontalDivider(thickness = 0.5.dp, modifier = Modifier.padding(bottom = 16.dp))
 
-        HorizontalDivider(thickness = 0.5.dp, modifier = Modifier.padding(bottom = 16.dp))
+    if (blockedIds.isNotEmpty()) {
+        BlockedCounter(blockedIds)
+    }
 
-        if (blockedIds.isNotEmpty()) {
-            BlockedCounter(blockedIds)
-        }
+    Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (blockedIds.isEmpty()) {
-            EmptyComponent(R.drawable.block_user, "No people excluded.")
-        } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(items = blockedIds.toList(), key = { it }) { userId ->
-                    val user by userViewModel.getUserById(userId).collectAsState(initial = null)
-                    BlockedUserItem(user) { onSettingsEdited(settings.copy(blockedUserIds = settings.blockedUserIds - userId)) }
-                }
+    if (blockedIds.isEmpty()) {
+        EmptyComponent(R.drawable.block_user, "No people excluded.")
+    } else {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(items = blockedIds.toList(), key = { it }) { userId ->
+                val user by userViewModel.getUserById(userId).collectAsState(initial = null)
+                BlockedUserItem(user) { onEdit(settings.copy(blockedUserIds = settings.blockedUserIds - userId)) }
             }
         }
     }
@@ -136,9 +90,9 @@ private fun Description() {
 }
 
 @Composable
-private fun SelectPeopleButton(onSelect: () -> Unit, blockedIds: Set<String>) {
+private fun SelectPeopleButton(onPeopleSelectorOpen: () -> Unit, blockedIds: List<String>) {
     TextButton(
-        onClick = onSelect,
+        onClick = onPeopleSelectorOpen,
         colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -156,7 +110,7 @@ private fun SelectPeopleButton(onSelect: () -> Unit, blockedIds: Set<String>) {
 }
 
 @Composable
-private fun BlockedCounter(blockedIds: Set<String>) {
+private fun BlockedCounter(blockedIds: List<String>) {
     Text(
         text = "${blockedIds.size} people excluded",
         color = GrayTextColor,

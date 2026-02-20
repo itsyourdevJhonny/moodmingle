@@ -24,8 +24,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.normal.NormalPostEntity
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.NormalPostEntity
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.BrushSecondaryDarkGradient
 import com.emc.moodmingle.ui.theme.Typography

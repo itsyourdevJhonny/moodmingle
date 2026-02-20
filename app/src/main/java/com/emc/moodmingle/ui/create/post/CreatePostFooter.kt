@@ -22,7 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.normal.NormalPostEntity
+import com.emc.moodmingle.domain.remote.model.post.normal.NormalPostEntity
 import com.emc.moodmingle.ui.theme.PrimaryDark
 
 @Composable

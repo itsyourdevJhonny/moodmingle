@@ -20,10 +20,10 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.emc.moodmingle.data.firebase.model.post.normal.NormalPostEntity
-import com.emc.moodmingle.data.firebase.model.post.settings.PostSettings
+import com.emc.moodmingle.domain.remote.model.post.normal.NormalPostEntity
+import com.emc.moodmingle.domain.remote.model.post.settings.PostSettings
 import com.emc.moodmingle.service.post.NormalPostService
-import com.emc.moodmingle.ui.create.AllMediaGallery
+import com.emc.moodmingle.ui.create.util.AllMediaGallery
 import com.emc.moodmingle.ui.create.post.CreatePostContent
 import com.emc.moodmingle.ui.create.post.CreatePostFooter
 import com.emc.moodmingle.ui.create.post.CreatePostHeader
@@ -42,7 +42,7 @@ import com.emc.moodmingle.utils.text.toColor
 import com.emc.moodmingle.utils.text.toFontFamily
 import com.emc.moodmingle.utils.text.toFontName
 import com.emc.moodmingle.utils.text.toTextAlign
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
 fun CreatePostScreen(onBack: () -> Unit) {

@@ -40,7 +40,7 @@ import com.emc.moodmingle.ui.create.post.CreatePostDialogHeader
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.viewmodel.LocationViewModel
+import com.emc.moodmingle.viewmodel.location.LocationViewModel
 
 @Composable
 fun CreatePostLocationDialog(

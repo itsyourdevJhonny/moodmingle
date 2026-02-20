@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.create.post.CreatePostDialogHeader
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
@@ -57,7 +57,7 @@ import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.rememberUsersByIds
 import com.emc.moodmingle.utils.modifier.gradientCircleBorder
 import com.emc.moodmingle.utils.text.NumberFormatter
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
 fun CreatePostTagDialog(

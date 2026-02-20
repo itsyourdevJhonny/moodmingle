@@ -31,8 +31,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.settings.PostSettings
-import com.emc.moodmingle.data.firebase.model.post.settings.PostTemporary
+import com.emc.moodmingle.domain.remote.model.post.settings.PostSettings
+import com.emc.moodmingle.domain.remote.model.post.settings.PostTemporary
 import com.emc.moodmingle.ui.create.post.CreatePostDialogHeader
 import com.emc.moodmingle.ui.create.post.settings.activity.ActivityDialog
 import com.emc.moodmingle.ui.create.post.settings.audience.AudienceDialog

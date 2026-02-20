@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.emc.moodmingle.data.firebase.model.post.dailymood.settings.MoodDuration
+import com.emc.moodmingle.domain.remote.model.post.dailymood.settings.MoodDuration
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
 

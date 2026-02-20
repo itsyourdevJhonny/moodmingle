@@ -49,7 +49,7 @@ import com.emc.moodmingle.utils.components.BackIcon
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.utils.modifier.gradientCircleBorder
 import com.emc.moodmingle.utils.modifier.roundedGradientBorder
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 private data class PostType(
     @DrawableRes val imageIcon: Int,

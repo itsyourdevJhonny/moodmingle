@@ -1,6 +1,6 @@
-package com.emc.moodmingle.data.firebase.repository.user
+package com.emc.moodmingle.domain.remote.repository.user
 
-import com.emc.moodmingle.data.firebase.model.user.StoryMoodEntity
+import com.emc.moodmingle.domain.remote.model.user.StoryMoodEntity
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose

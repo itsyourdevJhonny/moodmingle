@@ -29,14 +29,14 @@ import com.emc.moodmingle.utils.components.ScaffoldHeader
 @Composable
 fun AllowDownloadsScreen(
     settings: DailyMoodSettings,
-    onSettingsEdited: (DailyMoodSettings) -> Unit,
-    onDismiss: () -> Unit,
+    onEdit: (DailyMoodSettings) -> Unit,
+    onBack: () -> Unit,
 ) {
     Scaffold(
         containerColor = Color.Black,
-        topBar = { ScaffoldHeader(title = "Allow Downloads") { onDismiss() } }
+        topBar = { ScaffoldHeader(title = "Allow Downloads") { onBack() } }
     ) { paddingValues ->
-        Content(paddingValues, settings, onSettingsEdited)
+        Content(paddingValues, settings, onEdit)
     }
 }
 

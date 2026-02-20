@@ -4,24 +4,24 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.emc.moodmingle.data.dao.UserDao
-import com.emc.moodmingle.data.dao.favorites.FavoritesDao
-import com.emc.moodmingle.data.dao.hide.HideDao
-import com.emc.moodmingle.data.dao.post.CommentDao
-import com.emc.moodmingle.data.dao.post.PostDao
-import com.emc.moodmingle.data.dao.post.ReactionDao
-import com.emc.moodmingle.data.dao.saved.SaveDao
-import com.emc.moodmingle.data.dao.search.SearchDao
-import com.emc.moodmingle.data.dao.share.ShareDao
-import com.emc.moodmingle.data.model.UserEntity
-import com.emc.moodmingle.data.model.favorites.FavoritesEntity
-import com.emc.moodmingle.data.model.hide.HideEntity
-import com.emc.moodmingle.data.model.post.CommentEntity
-import com.emc.moodmingle.data.model.post.PostEntity
-import com.emc.moodmingle.data.model.post.ReactionEntity
-import com.emc.moodmingle.data.model.save.SaveEntity
-import com.emc.moodmingle.data.model.search.SearchEntity
-import com.emc.moodmingle.data.model.share.ShareEntity
+import com.emc.moodmingle.domain.local.dao.user.UserDao
+import com.emc.moodmingle.domain.local.dao.favorites.FavoritesDao
+import com.emc.moodmingle.domain.local.dao.hide.HideDao
+import com.emc.moodmingle.domain.local.dao.post.CommentDao
+import com.emc.moodmingle.domain.local.dao.post.PostDao
+import com.emc.moodmingle.domain.local.dao.post.ReactionDao
+import com.emc.moodmingle.domain.local.dao.saved.SaveDao
+import com.emc.moodmingle.domain.local.dao.search.SearchDao
+import com.emc.moodmingle.domain.local.dao.share.ShareDao
+import com.emc.moodmingle.domain.local.model.user.UserEntity
+import com.emc.moodmingle.domain.local.model.favorites.FavoritesEntity
+import com.emc.moodmingle.domain.local.model.hide.HideEntity
+import com.emc.moodmingle.domain.local.model.post.CommentEntity
+import com.emc.moodmingle.domain.local.model.post.PostEntity
+import com.emc.moodmingle.domain.local.model.post.ReactionEntity
+import com.emc.moodmingle.domain.local.model.save.SaveEntity
+import com.emc.moodmingle.domain.local.model.search.SearchEntity
+import com.emc.moodmingle.domain.local.model.share.ShareEntity
 
 @Database(
     entities = [

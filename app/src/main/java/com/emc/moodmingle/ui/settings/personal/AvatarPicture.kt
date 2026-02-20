@@ -46,15 +46,15 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.cloudinary.CloudinaryService
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.api.cloudinary.CloudinaryService
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.post.action.DrawNoPaddingLine
 import com.emc.moodmingle.ui.profile.DrawUserNoPaddingLine
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.viewmodel.local.UserViewModel
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

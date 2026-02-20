@@ -38,8 +38,8 @@ import com.emc.moodmingle.utils.components.ScaffoldHeader
 @Composable
 fun SharePlatformScreen(
     settings: DailyMoodSettings,
-    onSettingsEdited: (DailyMoodSettings) -> Unit,
-    onDismiss: () -> Unit,
+    onEdit: (DailyMoodSettings) -> Unit,
+    onBack: () -> Unit,
 ) {
 
     Scaffold(
@@ -47,7 +47,7 @@ fun SharePlatformScreen(
         topBar = {
             ScaffoldHeader(
                 title = "Auto Share"
-            ) { onDismiss() }
+            ) { onBack() }
         }
     ) { paddingValues ->
 
@@ -70,7 +70,7 @@ fun SharePlatformScreen(
             SharePlatformGrid(
                 selected = settings.sharePlatformType,
                 onSelected = { selectedPlatform ->
-                    onSettingsEdited(
+                    onEdit(
                         settings.copy(
                             sharePlatformType = selectedPlatform
                         )

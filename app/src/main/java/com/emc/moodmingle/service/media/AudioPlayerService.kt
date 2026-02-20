@@ -1,4 +1,4 @@
-package com.emc.moodmingle.service
+package com.emc.moodmingle.service.media
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -137,7 +137,8 @@ class AudioPlayerService : Service() {
         val remoteViews = RemoteViews(this.packageName, R.layout.notification_player)
 
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        val channel = NotificationChannel(channelId, "Audio Playback", NotificationManager.IMPORTANCE_LOW)
+        val channel =
+            NotificationChannel(channelId, "Audio Playback", NotificationManager.IMPORTANCE_LOW)
         manager.createNotificationChannel(channel)
 
         remoteViews.setTextViewText(R.id.currentTime, "0:00")

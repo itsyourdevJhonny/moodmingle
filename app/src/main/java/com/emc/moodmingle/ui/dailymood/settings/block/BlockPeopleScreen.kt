@@ -57,16 +57,16 @@ import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
 @Composable
 fun BlockedPeopleScreen(
     settings: DailyMoodSettings,
-    onSettingsEdited: (DailyMoodSettings) -> Unit,
-    onDismiss: () -> Unit,
+    onEdit: (DailyMoodSettings) -> Unit,
+    onBack: () -> Unit,
 ) {
     var showUserSelector by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color.Black,
-        topBar = { ScaffoldHeader(title = "Exclude People") { onDismiss() } }
+        topBar = { ScaffoldHeader(title = "Exclude People") { onBack() } }
     ) { paddingValues ->
-        Content(paddingValues, settings, onSettingsEdited) { showUserSelector = true }
+        Content(paddingValues, settings, onEdit) { showUserSelector = true }
     }
 
     if (showUserSelector) {
@@ -75,7 +75,7 @@ fun BlockedPeopleScreen(
             userIds = settings.blockedUserIds.toList(),
             onUsersSelected = { result ->
                 val selectedUserIds = (result as SnapshotStateList<*>).map { it.toString() }
-                onSettingsEdited(settings.copy(blockedUserIds = selectedUserIds.toSet()))
+                onEdit(settings.copy(blockedUserIds = selectedUserIds.toSet()))
             },
             onDismiss = { showUserSelector = false }
         )

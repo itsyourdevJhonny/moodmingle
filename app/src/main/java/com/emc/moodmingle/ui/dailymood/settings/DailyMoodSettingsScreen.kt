@@ -34,7 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.emc.moodmingle.data.firebase.model.post.dailymood.settings.DailyMoodSettings
+import com.emc.moodmingle.domain.remote.model.post.dailymood.settings.DailyMoodSettings
 import com.emc.moodmingle.ui.dailymood.settings.action.Action
 import com.emc.moodmingle.ui.dailymood.settings.action.ActionGroup
 import com.emc.moodmingle.ui.dailymood.settings.action.getDailyMoodSettingsActions
@@ -70,7 +70,7 @@ import com.emc.moodmingle.utils.modifier.drawGradient
 @Composable
 fun DailyMoodSettingsScreen(
     settings: DailyMoodSettings,
-    onSettingsEdited: (DailyMoodSettings) -> Unit,
+    onEdit: (DailyMoodSettings) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var currentScreen by remember { mutableStateOf<SettingsScreenType?>(null) }
@@ -86,80 +86,13 @@ fun DailyMoodSettingsScreen(
                     doneLabel = "Apply Changes",
                     onBack = { onDismiss() }
                 )
-            }
-        ) { paddingValues ->
-            Content(paddingValues) { currentScreen = it }
-        }
+            },
+            content = { paddingValues -> Content(paddingValues) { currentScreen = it } }
+        )
 
         currentScreen?.let { screen ->
-            CurrentScreen(settings, screen, onSettingsEdited) { currentScreen = null }
+            CurrentScreen(settings, screen, onEdit) { currentScreen = null }
         }
-
-        /*val screenMap: Map<SettingsScreenType, @Composable (DailyMoodSettings, (DailyMoodSettings) -> Unit, () -> Unit) -> Unit> =
-            mapOf(
-                SettingsScreenType.ViewListVisibility to { settings, onEdit, onBack ->
-                    ViewListVisibilityScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.ScreenshotAlerts to { settings, onEdit, onBack ->
-                    ScreenshotAlertScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.ReplayLimit to { settings, onEdit, onBack ->
-                    ReplayLimitScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.HideMood to { settings, onEdit, onBack ->
-                    HideMoodFromScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.NotifyPeople to { settings, onEdit, onBack ->
-                    NotifyPeopleScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.Timing to { settings, onEdit, onBack ->
-                    TimingScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.ReplyPermissions to { settings, onEdit, onBack ->
-                    ReplyPermissionScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.ReactionSettings to { settings, onEdit, onBack ->
-                    ReactionSettingsScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.SharingForwarding to { settings, onEdit, onBack ->
-                    SharingForwardingScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.BlockedPeople to { settings, onEdit, onBack ->
-                    BlockedPeopleScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.RestrictedAccounts to { settings, onEdit, onBack ->
-                    RestrictAccountsScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.MoodDuration to { settings, onEdit, onBack ->
-                    MoodDurationScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.AutoArchive to { settings, onEdit, onBack ->
-                    AutoArchiveScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.SharePlatform to { settings, onEdit, onBack ->
-                    SharePlatformScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.AllowDownloads to { settings, onEdit, onBack ->
-                    AllowDownloadsScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.AutoSaveDevice to { settings, onEdit, onBack ->
-                    AutoSaveToDeviceScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.UploadQuality to { settings, onEdit, onBack ->
-                    UploadQualityScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.GhostMode to { settings, onEdit, onBack ->
-                    GhostModeScreen(settings, onEdit, onBack)
-                },
-                SettingsScreenType.ScreenProtection to { settings, onEdit, onBack ->
-                    ScreenProtectionScreen(settings, onEdit, onBack)
-                }
-            )
-
-        currentScreen?.let { screen ->
-            val onBack = { currentScreen = null }
-            screenMap[screen]?.invoke(settings, onSettingsEdited, onBack)
-        }*/
     }
 }
 
@@ -176,7 +109,7 @@ private fun Content(paddingValues: PaddingValues, onActionSelected: (SettingsScr
 private fun CurrentScreen(
     settings: DailyMoodSettings,
     screen: SettingsScreenType?,
-    onSettingsEdited: (DailyMoodSettings) -> Unit,
+    onEdit: (DailyMoodSettings) -> Unit,
     onBack: () -> Unit,
 ) {
     var openSelector by remember { mutableStateOf(false) }
@@ -195,8 +128,8 @@ private fun CurrentScreen(
             InvokeScreen(
                 settings,
                 screen,
-                onSelectorOpen = { openSelector = true },
-                onSettingsEdited,
+                onPeopleSelectorOpen = { openSelector = true },
+                onEdit,
                 onBack
             )
         }
@@ -208,9 +141,11 @@ private fun CurrentScreen(
             userIds = settings.hiddenUserIds,
             onUsersSelected = { selected ->
                 val selectedUserIds = (selected as SnapshotStateList<*>).map { it.toString() }
-                onSettingsEdited(
+                onEdit(
                     when (screen) {
                         SettingsScreenType.HideMood -> settings.copy(hiddenUserIds = selectedUserIds)
+                        SettingsScreenType.BlockedPeople -> settings.copy(blockedUserIds = selectedUserIds)
+                        SettingsScreenType.RestrictedAccounts -> settings.copy(restrictedUserIds = selectedUserIds)
                         else -> settings
                     }
                 )
@@ -225,8 +160,8 @@ private fun CurrentScreen(
 private fun InvokeScreen(
     settings: DailyMoodSettings,
     screen: SettingsScreenType?,
-    onSelectorOpen: () -> Unit,
-    onSettingsEdited: (DailyMoodSettings) -> Unit,
+    onPeopleSelectorOpen: () -> Unit,
+    onEdit: (DailyMoodSettings) -> Unit,
     onBack: () -> Unit,
 ) {
     val screenMap: Map<SettingsScreenType, @Composable (DailyMoodSettings, (DailyMoodSettings) -> Unit, () -> Unit) -> Unit> =
@@ -241,7 +176,7 @@ private fun InvokeScreen(
                 ReplayLimitScreen(settings, onEdit)
             },
             SettingsScreenType.HideMood to { settings, onEdit, onBack ->
-                HideMoodFromPeopleScreen(settings, onSelectorOpen, onEdit)
+                HideMoodFromPeopleScreen(settings, onPeopleSelectorOpen, onEdit)
             },
             SettingsScreenType.NotifyPeople to { settings, onEdit, onBack ->
                 NotifyPeopleScreen(settings, onEdit)
@@ -250,47 +185,47 @@ private fun InvokeScreen(
                 TimingScreen(settings, onEdit)
             },
             SettingsScreenType.ReplyPermissions to { settings, onEdit, onBack ->
-                ReplyPermissionScreen(settings, onEdit, onBack) // Ine sunod
+                ReplyPermissionScreen(settings, onEdit)
             },
             SettingsScreenType.ReactionSettings to { settings, onEdit, onBack ->
-                ReactionSettingsScreen(settings, onEdit, onBack)
+                ReactionSettingsScreen(settings, onEdit)
             },
             SettingsScreenType.SharingForwarding to { settings, onEdit, onBack ->
-                SharingForwardingScreen(settings, onEdit, onBack)
+                SharingForwardingScreen(settings, onEdit)
             },
             SettingsScreenType.BlockedPeople to { settings, onEdit, onBack ->
-                BlockedPeopleScreen(settings, onEdit, onBack)
+                BlockedPeopleScreen(settings, onPeopleSelectorOpen, onEdit)
             },
             SettingsScreenType.RestrictedAccounts to { settings, onEdit, onBack ->
-                RestrictAccountsScreen(settings, onEdit, onBack)
+                RestrictAccountsScreen(settings, onPeopleSelectorOpen, onEdit)
             },
             SettingsScreenType.MoodDuration to { settings, onEdit, onBack ->
-                MoodDurationScreen(settings, onEdit, onBack)
+                MoodDurationScreen(settings, onEdit)
             },
             SettingsScreenType.AutoArchive to { settings, onEdit, onBack ->
-                AutoArchiveScreen(settings, onEdit, onBack)
+                AutoArchiveScreen(settings, onEdit)
             },
             SettingsScreenType.SharePlatform to { settings, onEdit, onBack ->
-                SharePlatformScreen(settings, onEdit, onBack)
+                SharePlatformScreen(settings, onEdit)
             },
             SettingsScreenType.AllowDownloads to { settings, onEdit, onBack ->
-                AllowDownloadsScreen(settings, onEdit, onBack)
+                AllowDownloadsScreen(settings, onEdit)
             },
             SettingsScreenType.AutoSaveDevice to { settings, onEdit, onBack ->
-                AutoSaveToDeviceScreen(settings, onEdit, onBack)
+                AutoSaveToDeviceScreen(settings, onEdit)
             },
             SettingsScreenType.UploadQuality to { settings, onEdit, onBack ->
-                UploadQualityScreen(settings, onEdit, onBack)
+                UploadQualityScreen(settings, onEdit)
             },
             SettingsScreenType.GhostMode to { settings, onEdit, onBack ->
-                GhostModeScreen(settings, onEdit, onBack)
+                GhostModeScreen(settings, onEdit)
             },
             SettingsScreenType.ScreenProtection to { settings, onEdit, onBack ->
-                ScreenProtectionScreen(settings, onEdit, onBack)
+                ScreenProtectionScreen(settings, onEdit)
             }
         )
 
-    screen?.let { screenMap[it]?.invoke(settings, onSettingsEdited, onBack) }
+    screen?.let { screenMap[it]?.invoke(settings, onEdit, onBack) }
 }
 
 @Composable

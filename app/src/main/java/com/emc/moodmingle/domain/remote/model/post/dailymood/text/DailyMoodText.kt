@@ -1,4 +1,4 @@
-package com.emc.moodmingle.data.firebase.model.post.dailymood.text
+package com.emc.moodmingle.domain.remote.model.post.dailymood.text
 
 import android.os.Parcelable
 import androidx.compose.ui.graphics.Color

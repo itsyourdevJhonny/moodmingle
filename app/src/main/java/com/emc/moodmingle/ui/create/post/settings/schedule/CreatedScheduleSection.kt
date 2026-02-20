@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.emc.moodmingle.data.firebase.model.post.settings.PostSchedule
+import com.emc.moodmingle.domain.remote.model.post.settings.PostSchedule
 import com.emc.moodmingle.ui.post.action.toastMessage
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.MentionTextColor

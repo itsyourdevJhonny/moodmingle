@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.chat.ChatMessage
+import com.emc.moodmingle.domain.remote.model.chat.ChatMessage
 import com.emc.moodmingle.utils.text.copyText
 import com.emc.moodmingle.utils.modifier.drawGradient
 

@@ -38,14 +38,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.saved.CollectionEntityFirebase
+import com.emc.moodmingle.domain.remote.model.saved.CollectionEntityFirebase
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.LoadingDialog
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.firebase.saved.CollectionViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.saved.CollectionViewModelFirebase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

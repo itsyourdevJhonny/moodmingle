@@ -48,8 +48,8 @@ import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
 import com.emc.moodmingle.api.soundcloud.viewmodel.SearchViewModel
-import com.emc.moodmingle.data.firebase.model.post.normal.NormalPostEntity
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.NormalPostEntity
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.create.post.hashtag.extractHashtags
 import com.emc.moodmingle.ui.post.PostHeader
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
@@ -63,7 +63,7 @@ import com.emc.moodmingle.utils.media.MediaUtils
 import com.emc.moodmingle.utils.text.toColor
 import com.emc.moodmingle.utils.text.toFontFamily
 import com.emc.moodmingle.utils.text.toTextAlign
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
 fun CreatePostContent(

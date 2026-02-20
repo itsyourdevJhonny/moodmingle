@@ -1,11 +1,14 @@
 package com.emc.moodmingle.ui.dailymood.settings
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,21 +43,27 @@ import com.emc.moodmingle.ui.dailymood.settings.autosave.AutoSaveToDeviceScreen
 import com.emc.moodmingle.ui.dailymood.settings.block.BlockedPeopleScreen
 import com.emc.moodmingle.ui.dailymood.settings.download.AllowDownloadsScreen
 import com.emc.moodmingle.ui.dailymood.settings.duration.MoodDurationScreen
-import com.emc.moodmingle.ui.dailymood.settings.hide.HideMoodFromScreen
+import com.emc.moodmingle.ui.dailymood.settings.ghostmode.GhostModeScreen
+import com.emc.moodmingle.ui.dailymood.settings.hide.HideMoodFromPeopleScreen
 import com.emc.moodmingle.ui.dailymood.settings.notify.NotifyPeopleScreen
 import com.emc.moodmingle.ui.dailymood.settings.quality.UploadQualityScreen
 import com.emc.moodmingle.ui.dailymood.settings.reaction.ReactionSettingsScreen
 import com.emc.moodmingle.ui.dailymood.settings.replay.ReplayLimitScreen
 import com.emc.moodmingle.ui.dailymood.settings.reply.ReplyPermissionScreen
 import com.emc.moodmingle.ui.dailymood.settings.restrict.RestrictAccountsScreen
+import com.emc.moodmingle.ui.dailymood.settings.screenprotection.ScreenProtectionScreen
 import com.emc.moodmingle.ui.dailymood.settings.screenshot.ScreenshotAlertScreen
 import com.emc.moodmingle.ui.dailymood.settings.shareplatform.SharePlatformScreen
 import com.emc.moodmingle.ui.dailymood.settings.sharing.SharingForwardingScreen
 import com.emc.moodmingle.ui.dailymood.settings.timing.TimingScreen
+import com.emc.moodmingle.ui.dailymood.settings.util.SettingsScreenType
+import com.emc.moodmingle.ui.dailymood.settings.util.toSettingsScreenType
+import com.emc.moodmingle.ui.dailymood.settings.util.toTitle
 import com.emc.moodmingle.ui.dailymood.settings.viewlist.ViewListVisibilityScreen
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.ScaffoldHeader
+import com.emc.moodmingle.utils.components.UserSelector
 import com.emc.moodmingle.utils.modifier.drawGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,9 +73,9 @@ fun DailyMoodSettingsScreen(
     onSettingsEdited: (DailyMoodSettings) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var selectedAction by remember { mutableStateOf("") }
+    var currentScreen by remember { mutableStateOf<SettingsScreenType?>(null) }
 
-    BackHandler { if (selectedAction.isNotEmpty()) selectedAction = "" else onDismiss() }
+    BackHandler { if (currentScreen != null) currentScreen = null else onDismiss() }
 
     Box {
         Scaffold(
@@ -78,83 +88,83 @@ fun DailyMoodSettingsScreen(
                 )
             }
         ) { paddingValues ->
-            Content(paddingValues) { selectedAction = it }
+            Content(paddingValues) { currentScreen = it }
         }
 
-        when (selectedAction) {
-            "View List Visibility" -> {
-                ViewListVisibilityScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Screenshot Alerts" -> {
-                ScreenshotAlertScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Replay Limit" -> {
-                ReplayLimitScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Hide Mood from Specific People" -> {
-                HideMoodFromScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Notify People" -> {
-                NotifyPeopleScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Timing" -> {
-                TimingScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Reply Permissions" -> {
-                ReplyPermissionScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Reaction Settings" -> {
-                ReactionSettingsScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Sharing & Forwarding" -> {
-                SharingForwardingScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Blocked People" -> {
-                BlockedPeopleScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Restricted Accounts" -> {
-                RestrictAccountsScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Mood Duration" -> {
-                MoodDurationScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Auto Archive" -> {
-                AutoArchiveScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Share Platform" -> {
-                SharePlatformScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Allow Downloads" -> {
-                AllowDownloadsScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Auto-Save to Device" -> {
-                AutoSaveToDeviceScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
-
-            "Upload Quality" -> {
-                UploadQualityScreen(settings, onSettingsEdited) { selectedAction = "" }
-            }
+        currentScreen?.let { screen ->
+            CurrentScreen(settings, screen, onSettingsEdited) { currentScreen = null }
         }
+
+        /*val screenMap: Map<SettingsScreenType, @Composable (DailyMoodSettings, (DailyMoodSettings) -> Unit, () -> Unit) -> Unit> =
+            mapOf(
+                SettingsScreenType.ViewListVisibility to { settings, onEdit, onBack ->
+                    ViewListVisibilityScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.ScreenshotAlerts to { settings, onEdit, onBack ->
+                    ScreenshotAlertScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.ReplayLimit to { settings, onEdit, onBack ->
+                    ReplayLimitScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.HideMood to { settings, onEdit, onBack ->
+                    HideMoodFromScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.NotifyPeople to { settings, onEdit, onBack ->
+                    NotifyPeopleScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.Timing to { settings, onEdit, onBack ->
+                    TimingScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.ReplyPermissions to { settings, onEdit, onBack ->
+                    ReplyPermissionScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.ReactionSettings to { settings, onEdit, onBack ->
+                    ReactionSettingsScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.SharingForwarding to { settings, onEdit, onBack ->
+                    SharingForwardingScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.BlockedPeople to { settings, onEdit, onBack ->
+                    BlockedPeopleScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.RestrictedAccounts to { settings, onEdit, onBack ->
+                    RestrictAccountsScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.MoodDuration to { settings, onEdit, onBack ->
+                    MoodDurationScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.AutoArchive to { settings, onEdit, onBack ->
+                    AutoArchiveScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.SharePlatform to { settings, onEdit, onBack ->
+                    SharePlatformScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.AllowDownloads to { settings, onEdit, onBack ->
+                    AllowDownloadsScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.AutoSaveDevice to { settings, onEdit, onBack ->
+                    AutoSaveToDeviceScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.UploadQuality to { settings, onEdit, onBack ->
+                    UploadQualityScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.GhostMode to { settings, onEdit, onBack ->
+                    GhostModeScreen(settings, onEdit, onBack)
+                },
+                SettingsScreenType.ScreenProtection to { settings, onEdit, onBack ->
+                    ScreenProtectionScreen(settings, onEdit, onBack)
+                }
+            )
+
+        currentScreen?.let { screen ->
+            val onBack = { currentScreen = null }
+            screenMap[screen]?.invoke(settings, onSettingsEdited, onBack)
+        }*/
     }
 }
 
 @Composable
-private fun Content(paddingValues: PaddingValues, onActionSelected: (String) -> Unit) {
+private fun Content(paddingValues: PaddingValues, onActionSelected: (SettingsScreenType) -> Unit) {
     LazyColumn(modifier = Modifier.padding(paddingValues)) {
         items(getDailyMoodSettingsActions()) { actionGroup ->
             SettingsGroup(actionGroup, onActionSelected)
@@ -163,7 +173,131 @@ private fun Content(paddingValues: PaddingValues, onActionSelected: (String) -> 
 }
 
 @Composable
-private fun SettingsGroup(actionGroup: ActionGroup, onActionSelected: (String) -> Unit) {
+private fun CurrentScreen(
+    settings: DailyMoodSettings,
+    screen: SettingsScreenType?,
+    onSettingsEdited: (DailyMoodSettings) -> Unit,
+    onBack: () -> Unit,
+) {
+    var openSelector by remember { mutableStateOf(false) }
+
+    Scaffold(
+        containerColor = Color.Black,
+        topBar = { ScaffoldHeader(title = screen?.toTitle().orEmpty()) { onBack() } }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+                .animateContentSize()
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+            InvokeScreen(
+                settings,
+                screen,
+                onSelectorOpen = { openSelector = true },
+                onSettingsEdited,
+                onBack
+            )
+        }
+    }
+
+    if (openSelector) {
+        UserSelector(
+            title = "Hide mood from",
+            userIds = settings.hiddenUserIds,
+            onUsersSelected = { selected ->
+                val selectedUserIds = (selected as SnapshotStateList<*>).map { it.toString() }
+                onSettingsEdited(
+                    when (screen) {
+                        SettingsScreenType.HideMood -> settings.copy(hiddenUserIds = selectedUserIds)
+                        else -> settings
+                    }
+                )
+                openSelector = false
+            },
+            onDismiss = { openSelector = false }
+        )
+    }
+}
+
+@Composable
+private fun InvokeScreen(
+    settings: DailyMoodSettings,
+    screen: SettingsScreenType?,
+    onSelectorOpen: () -> Unit,
+    onSettingsEdited: (DailyMoodSettings) -> Unit,
+    onBack: () -> Unit,
+) {
+    val screenMap: Map<SettingsScreenType, @Composable (DailyMoodSettings, (DailyMoodSettings) -> Unit, () -> Unit) -> Unit> =
+        mapOf(
+            SettingsScreenType.ViewListVisibility to { settings, onEdit, onBack ->
+                ViewListVisibilityScreen(settings, onEdit)
+            },
+            SettingsScreenType.ScreenshotAlerts to { settings, onEdit, onBack ->
+                ScreenshotAlertScreen(settings, onEdit)
+            },
+            SettingsScreenType.ReplayLimit to { settings, onEdit, onBack ->
+                ReplayLimitScreen(settings, onEdit)
+            },
+            SettingsScreenType.HideMood to { settings, onEdit, onBack ->
+                HideMoodFromPeopleScreen(settings, onSelectorOpen, onEdit)
+            },
+            SettingsScreenType.NotifyPeople to { settings, onEdit, onBack ->
+                NotifyPeopleScreen(settings, onEdit)
+            },
+            SettingsScreenType.Timing to { settings, onEdit, onBack ->
+                TimingScreen(settings, onEdit)
+            },
+            SettingsScreenType.ReplyPermissions to { settings, onEdit, onBack ->
+                ReplyPermissionScreen(settings, onEdit, onBack) // Ine sunod
+            },
+            SettingsScreenType.ReactionSettings to { settings, onEdit, onBack ->
+                ReactionSettingsScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.SharingForwarding to { settings, onEdit, onBack ->
+                SharingForwardingScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.BlockedPeople to { settings, onEdit, onBack ->
+                BlockedPeopleScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.RestrictedAccounts to { settings, onEdit, onBack ->
+                RestrictAccountsScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.MoodDuration to { settings, onEdit, onBack ->
+                MoodDurationScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.AutoArchive to { settings, onEdit, onBack ->
+                AutoArchiveScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.SharePlatform to { settings, onEdit, onBack ->
+                SharePlatformScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.AllowDownloads to { settings, onEdit, onBack ->
+                AllowDownloadsScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.AutoSaveDevice to { settings, onEdit, onBack ->
+                AutoSaveToDeviceScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.UploadQuality to { settings, onEdit, onBack ->
+                UploadQualityScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.GhostMode to { settings, onEdit, onBack ->
+                GhostModeScreen(settings, onEdit, onBack)
+            },
+            SettingsScreenType.ScreenProtection to { settings, onEdit, onBack ->
+                ScreenProtectionScreen(settings, onEdit, onBack)
+            }
+        )
+
+    screen?.let { screenMap[it]?.invoke(settings, onSettingsEdited, onBack) }
+}
+
+@Composable
+private fun SettingsGroup(
+    actionGroup: ActionGroup,
+    onActionSelected: (SettingsScreenType) -> Unit,
+) {
     Column {
         Column(
             modifier = Modifier.padding(top = 16.dp),
@@ -205,9 +339,9 @@ private fun SettingsGroupIconAndName(actionGroup: ActionGroup) {
 }
 
 @Composable
-private fun SettingItem(action: Action, onActionSelected: (String) -> Unit) {
+private fun SettingItem(action: Action, onActionSelected: (SettingsScreenType) -> Unit) {
     TextButton(
-        onClick = { onActionSelected(action.title) },
+        onClick = { onActionSelected(action.title.toSettingsScreenType()!!) },
         colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
         contentPadding = PaddingValues(16.dp),
         shape = RectangleShape

@@ -27,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,22 +47,20 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.CommentEntityFirebase
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.chat.Conversation
-import com.emc.moodmingle.data.firebase.model.notification.NotificationEntity
-import com.emc.moodmingle.data.model.UserEntity
-import com.emc.moodmingle.data.model.post.formatTimeAgo
-import com.emc.moodmingle.di.AppDatabase
+import com.emc.moodmingle.domain.local.model.post.formatTimeAgo
+import com.emc.moodmingle.domain.remote.model.chat.Conversation
+import com.emc.moodmingle.domain.remote.model.notification.NotificationEntity
+import com.emc.moodmingle.domain.remote.model.post.normal.CommentEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
 import com.emc.moodmingle.ui.profile.DrawUserNoPaddingLine
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
-import com.emc.moodmingle.viewmodel.firebase.CommentViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
-import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
+import com.emc.moodmingle.viewmodel.remote.CommentViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.chat.ConversationViewModel
+import com.emc.moodmingle.viewmodel.remote.notification.NotificationViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,9 +74,6 @@ fun DisplayComment(postEntity: PostEntityFirebase, onChatClick: (String, String)
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
     val notificationViewModel = hiltViewModel<NotificationViewModel>()
 
-    val currentUserDao = remember { AppDatabase.getDatabase(context).userDao() }
-    var currentUserEntity by remember { mutableStateOf<UserEntity?>(null) }
-
     val currentUser by userViewModel.loggedUser
     val currentUserId = currentUser?.uid ?: ""
     val postUserId = postEntity.userId
@@ -92,10 +86,6 @@ fun DisplayComment(postEntity: PostEntityFirebase, onChatClick: (String, String)
     val userLookup = remember(allUsers, comments) { allUsers.associateBy { it.uid } }
 
     var newCommentText by remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit) {
-        currentUserEntity = currentUserDao.getLoggedUser()
-    }
 
     Scaffold(
         containerColor = Color.Black,

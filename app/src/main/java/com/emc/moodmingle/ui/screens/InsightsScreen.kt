@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.ui.insight.MainContent
 import com.emc.moodmingle.ui.insight.TimeRangeSelector
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 import com.emc.moodmingle.viewmodel.local.InsightViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

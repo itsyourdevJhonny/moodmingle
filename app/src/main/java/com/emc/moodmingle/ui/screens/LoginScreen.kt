@@ -62,7 +62,7 @@ import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.utils.components.LoadingDialog
-import com.emc.moodmingle.viewmodel.firebase.UserViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.UserViewModelFirebase
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

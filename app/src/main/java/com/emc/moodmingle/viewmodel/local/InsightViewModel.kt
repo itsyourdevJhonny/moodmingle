@@ -1,6 +1,6 @@
 package com.emc.moodmingle.viewmodel.local
 
-import com.emc.moodmingle.data.repository.insight.InsightRepository
+import com.emc.moodmingle.domain.remote.repository.insight.InsightRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emc.moodmingle.ui.screens.InsightData

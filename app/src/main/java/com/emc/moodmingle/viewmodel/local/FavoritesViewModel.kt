@@ -2,8 +2,8 @@ package com.emc.moodmingle.viewmodel.local
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.model.favorites.FavoritesEntity
-import com.emc.moodmingle.data.service.FavoritesService
+import com.emc.moodmingle.domain.local.model.favorites.FavoritesEntity
+import com.emc.moodmingle.domain.local.service.FavoritesService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow

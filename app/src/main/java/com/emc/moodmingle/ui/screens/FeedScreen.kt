@@ -67,13 +67,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.HideEntityFirebase
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.post.ShareEntityFirebase
-import com.emc.moodmingle.data.firebase.model.remix.RemixEntity
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.data.firebase.viewmodel.post.remix.RemixViewModel
-import com.emc.moodmingle.data.model.post.user.PostType
+import com.emc.moodmingle.domain.local.model.post.user.PostType
+import com.emc.moodmingle.domain.remote.model.post.normal.HideEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.ShareEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.remix.RemixEntity
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.viewmodel.post.remix.RemixViewModel
 import com.emc.moodmingle.ui.post.MultimediaCard
 import com.emc.moodmingle.ui.post.PostMedia
 import com.emc.moodmingle.ui.post.comment.CommentBottomSheet
@@ -85,11 +85,12 @@ import com.emc.moodmingle.ui.profile.SharedUserInformation
 import com.emc.moodmingle.ui.remix.RemixItem
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.SecondaryDark
+import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.ui.users.ActiveUserList
-import com.emc.moodmingle.viewmodel.firebase.CombinedPost
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
-import com.emc.moodmingle.viewmodel.firebase.HideViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.CombinedPost
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.HideViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.PostViewModelFirebase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -102,7 +103,7 @@ fun FeedScreen(
     onClick: (String) -> Unit,
     onChat: (String, String) -> Unit,
     onRemix: (String, String) -> Unit,
-    onCreate: () -> Unit
+    onCreate: () -> Unit,
 ) {
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
     val postViewModel = hiltViewModel<PostViewModelFirebase>()
@@ -194,10 +195,9 @@ fun FeedScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                        contentAlignment = Alignment.Center,
+                        content =  { CircularProgressIndicator() }
+                    )
                 }
             }
         }
@@ -218,7 +218,7 @@ private fun PostItem(
     hiddenPosts: List<HideEntityFirebase>,
     userViewModel: FirebaseUserViewModel,
     onClick: (String) -> Unit,
-    onChatClick: (String, String) -> Unit
+    onChatClick: (String, String) -> Unit,
 ) {
     val post by remember { mutableStateOf(combinedPost.entity as PostEntityFirebase) }
 
@@ -274,7 +274,7 @@ private fun PostItem(
 private fun ShareItem(
     combinedPost: CombinedPost,
     postViewModel: PostViewModelFirebase,
-    onChatClick: (String, String) -> Unit
+    onChatClick: (String, String) -> Unit,
 ) {
     val shareEntity = combinedPost.entity as ShareEntityFirebase
     val postId = shareEntity.postId
@@ -445,10 +445,7 @@ fun LoadingMorePosts() {
             .fillMaxWidth()
             .padding(bottom = 12.dp),
         text = "Loading more post...",
-        style = MaterialTheme.typography.titleMedium.copy(
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp
-        ),
+        style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 16.sp),
         textAlign = TextAlign.Center,
         color = Color.Gray
     )

@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.favorites.FavoritesEntityFirebase
+import com.emc.moodmingle.domain.remote.model.favorites.FavoritesEntityFirebase
 import com.emc.moodmingle.di.AppDatabase
 import com.emc.moodmingle.ui.post.action.DrawNoPaddingLine
 import com.emc.moodmingle.ui.settings.favorites.collection.FavoritesCollection
@@ -45,7 +45,7 @@ import com.emc.moodmingle.ui.theme.BrushGrayGradient
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.firebase.favorites.FavoritesViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.favorites.FavoritesViewModelFirebase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn

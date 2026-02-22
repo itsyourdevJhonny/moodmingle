@@ -1,8 +1,8 @@
 package com.emc.moodmingle.ui.settings.saved.collection
 
-import com.emc.moodmingle.data.firebase.model.saved.CollectionEntityFirebase
-import com.emc.moodmingle.data.firebase.model.saved.SaveEntityFirebase
-import com.emc.moodmingle.viewmodel.firebase.saved.CollectionViewModelFirebase
+import com.emc.moodmingle.domain.remote.model.saved.CollectionEntityFirebase
+import com.emc.moodmingle.domain.remote.model.saved.SaveEntityFirebase
+import com.emc.moodmingle.viewmodel.remote.saved.CollectionViewModelFirebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

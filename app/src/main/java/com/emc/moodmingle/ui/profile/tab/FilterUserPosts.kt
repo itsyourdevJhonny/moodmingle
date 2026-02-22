@@ -7,10 +7,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.model.post.user.CombinedPost
+import com.emc.moodmingle.domain.local.model.post.user.CombinedPost
 import com.emc.moodmingle.ui.profile.UserPostContent
 import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
-import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.PostViewModelFirebase
 
 @Composable
 fun FilterUserPosts(
@@ -31,11 +31,7 @@ fun FilterUserPosts(
         EmptyComponent(R.drawable.empty, "No ${filterType.lowercase()} posts.")
     } else {
         filteredPosts.forEach { post ->
-            UserPostContent(
-                post,
-                postViewModel,
-                onChatClick
-            )
+            UserPostContent(post, postViewModel, onChatClick)
         }
     }
 }

@@ -1,14 +1,14 @@
 package com.emc.moodmingle.di.module
 
-import com.emc.moodmingle.data.firebase.datasource.FirebaseUserDataSource
-import com.emc.moodmingle.data.firebase.repository.chat.ChatRepository
-import com.emc.moodmingle.data.firebase.repository.favorites.FavoritesRepositoryFirebase
-import com.emc.moodmingle.data.firebase.repository.post.CommentRepositoryFirebase
-import com.emc.moodmingle.data.firebase.repository.post.HideRepositoryFirebase
-import com.emc.moodmingle.data.firebase.repository.post.ShareRepositoryFirebase
-import com.emc.moodmingle.data.firebase.repository.post.reaction.ReactionRepositoryFirebase
-import com.emc.moodmingle.data.firebase.repository.saved.SaveRepositoryFirebase
-import com.emc.moodmingle.data.firebase.repository.user.UserRepositoryFirebase
+import com.emc.moodmingle.domain.remote.datasource.FirebaseUserDataSource
+import com.emc.moodmingle.domain.remote.repository.chat.ChatRepository
+import com.emc.moodmingle.domain.remote.repository.favorites.FavoritesRepositoryFirebase
+import com.emc.moodmingle.domain.remote.repository.post.CommentRepositoryFirebase
+import com.emc.moodmingle.domain.remote.repository.post.HideRepositoryFirebase
+import com.emc.moodmingle.domain.remote.repository.post.ShareRepositoryFirebase
+import com.emc.moodmingle.domain.remote.repository.post.reaction.ReactionRepositoryFirebase
+import com.emc.moodmingle.domain.remote.repository.saved.SaveRepositoryFirebase
+import com.emc.moodmingle.domain.remote.repository.user.UserRepositoryFirebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings

@@ -28,9 +28,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.ui.create.AllMediaGallery
-import com.emc.moodmingle.ui.create.formatDuration
-import com.emc.moodmingle.ui.create.getFileName
+import com.emc.moodmingle.ui.create.util.AllMediaGallery
+import com.emc.moodmingle.ui.create.util.formatDuration
+import com.emc.moodmingle.ui.create.util.getFileName
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.Typography
 

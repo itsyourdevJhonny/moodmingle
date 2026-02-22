@@ -1,4 +1,4 @@
-package com.emc.moodmingle.ui.dailymood.settings.viewlist
+package com.emc.moodmingle.ui.create.dailymood.settings.viewlist
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.emc.moodmingle.data.firebase.model.post.dailymood.settings.DailyMoodSettings
+import com.emc.moodmingle.domain.remote.model.post.dailymood.settings.DailyMoodSettings
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.SwitchButton

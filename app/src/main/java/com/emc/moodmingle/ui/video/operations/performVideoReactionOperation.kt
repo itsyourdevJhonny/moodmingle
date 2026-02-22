@@ -4,12 +4,12 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.post.reaction.ReactionEntityFirebase
-import com.emc.moodmingle.data.firebase.model.notification.NotificationEntity
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.viewmodel.firebase.ReactionViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.reaction.ReactionEntityFirebase
+import com.emc.moodmingle.domain.remote.model.notification.NotificationEntity
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.viewmodel.remote.ReactionViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.notification.NotificationViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

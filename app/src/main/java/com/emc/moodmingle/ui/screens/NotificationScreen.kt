@@ -55,13 +55,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.notification.NotificationEntity
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.data.model.post.formatTimeAgo
-import com.emc.moodmingle.ui.notification.getNotificationColor
-import com.emc.moodmingle.ui.notification.getNotificationIcon
-import com.emc.moodmingle.ui.notification.getNotificationText
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.model.notification.NotificationEntity
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.local.model.post.formatTimeAgo
+import com.emc.moodmingle.ui.notification.NotificationUtils
 import com.emc.moodmingle.ui.post.text.ExpandableAutoDetectClickableText
 import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
@@ -71,9 +69,9 @@ import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.TertiaryDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
-import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.PostViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.notification.NotificationViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -119,6 +117,8 @@ private fun Content() {
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
     val notificationViewModel = hiltViewModel<NotificationViewModel>()
     val postViewModel = hiltViewModel<PostViewModelFirebase>()
+
+    val notificationUtils = NotificationUtils()
 
     val currentUser = userViewModel.loggedUser.value
 
@@ -168,9 +168,9 @@ private fun Content() {
                 lastUser = userViewModel.getUserCached(lastUserId ?: "")
             }
 
-            val notificationIcon = getNotificationIcon(notification?.type)
-            val notificationText = getNotificationText(notification?.type)
-            val notificationColor = getNotificationColor(notification?.type)
+            val notificationIcon = notificationUtils.getNotificationIcon(notification?.type)
+            val notificationText = notificationUtils.getNotificationText(notification?.type)
+            val notificationColor = notificationUtils.getNotificationColor(notification?.type)
 
             var showActionsSheet by remember { mutableStateOf(false) }
 

@@ -24,7 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.settings.PostCommentReactionVisibility
+import com.emc.moodmingle.domain.remote.model.post.settings.PostCommentReactionVisibility
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
@@ -33,7 +33,7 @@ import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.utils.modifier.gradientCircleBorder
 import com.emc.moodmingle.utils.modifier.roundedGrayBorder
 import com.emc.moodmingle.utils.text.NumberFormatter
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
 fun DisableToSelectedPeopleSection(

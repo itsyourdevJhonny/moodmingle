@@ -44,7 +44,7 @@ import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.SwitchButton
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.utils.text.encryptData
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
 fun EncryptionScreen(onBack: () -> Unit) {

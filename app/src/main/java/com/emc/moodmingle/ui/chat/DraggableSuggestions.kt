@@ -26,13 +26,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.chat.Conversation
+import com.emc.moodmingle.domain.remote.model.chat.Conversation
 import com.emc.moodmingle.ui.chat.input.sendMessage
 import com.emc.moodmingle.ui.chat.utils.InfiniteScrollingRow
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
+import com.emc.moodmingle.viewmodel.remote.chat.ConversationViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 

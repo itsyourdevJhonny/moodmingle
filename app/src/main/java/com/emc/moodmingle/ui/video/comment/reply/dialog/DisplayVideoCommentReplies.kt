@@ -10,9 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
-import com.emc.moodmingle.data.firebase.viewmodel.video.VideoCommentReplyViewModel
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.viewmodel.video.VideoCommentReplyViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

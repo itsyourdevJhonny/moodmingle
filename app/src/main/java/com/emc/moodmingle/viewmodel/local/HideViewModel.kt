@@ -2,8 +2,8 @@ package com.emc.moodmingle.viewmodel.local
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.dao.hide.HideDao
-import com.emc.moodmingle.data.model.hide.HideEntity
+import com.emc.moodmingle.domain.local.dao.hide.HideDao
+import com.emc.moodmingle.domain.local.model.hide.HideEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch

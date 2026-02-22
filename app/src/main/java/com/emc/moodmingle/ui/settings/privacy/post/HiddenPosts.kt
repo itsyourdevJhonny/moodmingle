@@ -54,9 +54,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.HideEntityFirebase
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.HideEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.post.action.DrawNoPaddingLine
 import com.emc.moodmingle.ui.settings.favorites.FavoriteSkeletonCard
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
@@ -67,9 +67,9 @@ import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.dialogFullSizeProperties
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.utils.pagination.executePagination
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
-import com.emc.moodmingle.viewmodel.firebase.HideViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.HideViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.PostViewModelFirebase
 import kotlinx.coroutines.flow.first
 import kotlin.collections.set
 

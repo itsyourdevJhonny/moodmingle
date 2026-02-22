@@ -48,7 +48,7 @@ import com.emc.moodmingle.di.AppDatabase
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
+import com.emc.moodmingle.viewmodel.remote.chat.ConversationViewModel
 import com.emc.moodmingle.viewmodel.local.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -64,7 +64,7 @@ fun HomeScreen(
     onChatClick: (String, String) -> Unit,
     onConversationClick: () -> Unit,
     onRemix: (String, String) -> Unit,
-    onCreate: () -> Unit
+    onCreate: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -81,7 +81,7 @@ fun TopNavigationBar(
     onCreateClick: () -> Unit,
     onSearchClick: () -> Unit,
     onAvatarClick: () -> Unit,
-    onConversationClick: () -> Unit
+    onConversationClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -98,12 +98,7 @@ fun TopNavigationBar(
         conversationViewModel.getConversationsByUser(currentUserUid)
     }.collectAsState(initial = emptyList())
 
-    val unreadConversations =
-        conversations.filter { conversation -> !conversation.lastMessageRead }
-
-    conversations.forEach { conversation ->
-        Log.d("HOME SCREEN", "LAST MESSAGE: ${conversation.lastMessage} UNREAD?: ${conversation.lastMessageRead}")
-    }
+    val unreadConversations = conversations.filter { conversation -> !conversation.lastMessageRead }
 
     Box(
         modifier = Modifier

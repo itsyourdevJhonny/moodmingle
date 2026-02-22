@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
 import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.viewmodel.dailymood.DailyMoodViewModel
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
@@ -51,6 +52,7 @@ import kotlin.random.Random
 @Composable
 fun ActiveUserList(onCreate: () -> Unit) {
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
+    val dailyMoodViewModel = hiltViewModel<DailyMoodViewModel>()
 
     val currentUser by userViewModel.loggedUser
     val allUsers by userViewModel.getAllUsers().collectAsState(initial = emptyList())
@@ -77,7 +79,10 @@ fun ActiveUserList(onCreate: () -> Unit) {
                 items = (followerIds + followingIds + supporterIds + allUserIds).distinct(),
                 key = { it + it.hashCode() + Random.nextInt(0, 1000) }
             ) { userId ->
-                UserItem(userId)
+                val user by remember(userId) { userViewModel.getUserById(userId) }
+                    .collectAsState(initial = null)
+
+                UserItem(user, dailyMoodViewModel)
             }
         }
     }
@@ -129,22 +134,19 @@ private fun Header(onCreate: () -> Unit) {
 }
 
 @Composable
-private fun UserItem(userId: String) {
-    val userViewModel = hiltViewModel<FirebaseUserViewModel>()
+private fun UserItem(user: UserEntityFirebase?, dailyMoodViewModel: DailyMoodViewModel) {
+    val dailyMoods by dailyMoodViewModel.getDailyMoodsByUserId(user?.uid.orEmpty())
+        .collectAsState(initial = emptyList())
 
-    val user by remember(userId) {
-        userViewModel.getUserById(userId)
-    }.collectAsState(initial = null)
-
-    val isDailyMoodActive = user?.username == "cristina" || user?.username == "jhonnnn"
+    val hasDailyMood = dailyMoods.any { it.active }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.clickable {}
     ) {
         Box(contentAlignment = Alignment.Center) {
-            ItemAvatar(user, isDailyMoodActive)
-            ItemActiveIndicator(isDailyMoodActive)
+            ItemAvatar(user, hasDailyMood)
+            ItemActiveIndicator(hasDailyMood)
         }
 
         ItemUsername(user)
@@ -163,8 +165,8 @@ private fun ItemUsername(user: UserEntityFirebase?) {
 }
 
 @Composable
-private fun BoxScope.ItemActiveIndicator(isDailyMoodActive: Boolean) {
-    if (isDailyMoodActive) {
+private fun BoxScope.ItemActiveIndicator(hasDailyMood: Boolean) {
+    if (hasDailyMood) {
         Box(
             modifier = Modifier
                 .size(68.dp)
@@ -194,12 +196,12 @@ private fun BoxScope.ItemActiveIndicator(isDailyMoodActive: Boolean) {
 }
 
 @Composable
-private fun ItemAvatar(user: UserEntityFirebase?, isDailyMoodActive: Boolean) {
+private fun ItemAvatar(user: UserEntityFirebase?, hasDailyMood: Boolean) {
     AsyncImage(
         model = user?.avatarUrl,
         contentDescription = "Avatar",
         modifier = Modifier
-            .size(if (isDailyMoodActive) 54.dp else 68.dp)
+            .size(if (hasDailyMood) 54.dp else 68.dp)
             .clip(CircleShape)
             .gradientCircleBorder(),
         contentScale = ContentScale.Crop

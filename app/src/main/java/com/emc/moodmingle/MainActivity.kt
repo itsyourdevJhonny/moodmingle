@@ -77,8 +77,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.emc.moodmingle.cloudinary.CloudinaryManager
-import com.emc.moodmingle.data.model.UserEntity
+import com.emc.moodmingle.api.cloudinary.CloudinaryManager
+import com.emc.moodmingle.domain.local.model.user.UserEntity
 import com.emc.moodmingle.di.AppDatabase
 import com.emc.moodmingle.navigation.BottomNavItem
 import com.emc.moodmingle.navigation.Routes
@@ -87,6 +87,7 @@ import com.emc.moodmingle.ui.screens.ChatScreen
 import com.emc.moodmingle.ui.screens.ConversationScreen
 import com.emc.moodmingle.ui.screens.CreatePostScreen
 import com.emc.moodmingle.ui.screens.CreateScreen
+import com.emc.moodmingle.ui.screens.CreateDailyMoodScreen
 import com.emc.moodmingle.ui.screens.DailyMoodScreen
 import com.emc.moodmingle.ui.screens.DecryptionScreen
 import com.emc.moodmingle.ui.screens.EncryptionScreen
@@ -118,9 +119,9 @@ import com.emc.moodmingle.ui.theme.PrimaryGradient
 import com.emc.moodmingle.ui.theme.PurpleDark
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
-import com.emc.moodmingle.viewmodel.firebase.SearchViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.SearchViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.notification.NotificationViewModel
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
@@ -370,6 +371,10 @@ fun AppNavigation(mainNavController: NavHostController) {
         }
 
         composable(Routes.CreateDailyMood.route) {
+            CreateDailyMoodScreen(onBack = { mainNavController.popBackStack() })
+        }
+
+        composable(Routes.DailyMood.route) {
             DailyMoodScreen(onBack = { mainNavController.popBackStack() })
         }
 

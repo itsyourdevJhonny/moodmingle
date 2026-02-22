@@ -49,9 +49,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.normal.NormalPostEntity
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.data.firebase.viewmodel.post.normal.NormalPostViewModel
+import com.emc.moodmingle.domain.remote.model.post.normal.NormalPostEntity
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.viewmodel.post.normal.NormalPostViewModel
 import com.emc.moodmingle.ui.post.action.BottomSheetDragHandle
 import com.emc.moodmingle.ui.post.action.CreateMoreAction
 import com.emc.moodmingle.ui.post.action.more.InterestAndShareWithOther
@@ -63,7 +63,7 @@ import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.chat.checkConversationAndSendMessage
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
+import com.emc.moodmingle.viewmodel.remote.chat.ConversationViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

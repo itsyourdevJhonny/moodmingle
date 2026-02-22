@@ -35,7 +35,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.videoFrameMillis
 import com.emc.moodmingle.R
-import com.emc.moodmingle.ui.create.getMimeType
+import com.emc.moodmingle.ui.create.util.getMimeType
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.exoplayer.ExoPlayerUtils
 import com.emc.moodmingle.utils.media.image.ImageUtils

@@ -11,8 +11,8 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.normal.NormalPostEntity
-import com.emc.moodmingle.data.firebase.repository.post.UploadRepository
+import com.emc.moodmingle.domain.remote.model.post.normal.NormalPostEntity
+import com.emc.moodmingle.domain.remote.repository.post.UploadRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -61,7 +61,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.emc.moodmingle.R
 import com.emc.moodmingle.api.soundcloud.TrackResponse
 import com.emc.moodmingle.api.soundcloud.viewmodel.SearchViewModel
-import com.emc.moodmingle.ui.create.formatDuration
+import com.emc.moodmingle.ui.create.util.formatDuration
 import com.emc.moodmingle.ui.create.post.CreatePostDialogHeader
 import com.emc.moodmingle.ui.settings.saved.utils.EmptyComponent
 import com.emc.moodmingle.ui.theme.GrayTextColor

@@ -1,6 +1,8 @@
 package com.emc.moodmingle.api.nominatim
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -21,8 +23,9 @@ interface NominatimApi {
     ): NominatimPlace
 }
 
+@Parcelize
 data class NominatimPlace(
-    @SerializedName("display_name") val displayName: String,
-    val lat: String,
-    val lon: String
-)
+    @SerializedName("display_name") val displayName: String = "",
+    val lat: String = "",
+    val lon: String = ""
+) : Parcelable

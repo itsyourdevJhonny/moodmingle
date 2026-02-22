@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.emc.moodmingle.data.firebase.viewmodel.post.normal.NormalPostViewModel
+import com.emc.moodmingle.domain.remote.viewmodel.post.normal.NormalPostViewModel
 import com.emc.moodmingle.ui.create.post.EventSection
 import com.emc.moodmingle.ui.create.post.HashtagSection
 import com.emc.moodmingle.ui.create.post.MentionSection
@@ -26,8 +26,8 @@ import com.emc.moodmingle.ui.post.action.PostActions
 import com.emc.moodmingle.ui.post.more.MoreSheet
 import com.emc.moodmingle.ui.post.share.ShareSheet
 import com.emc.moodmingle.ui.theme.PrimaryDark
-import com.emc.moodmingle.viewmodel.firebase.CombinedPost
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.CombinedPost
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
 fun NormalPostItem(

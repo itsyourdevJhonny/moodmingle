@@ -53,6 +53,8 @@ class DailyMoodViewModel @Inject constructor(
         }
     }
 
+    fun getDailyMoodsByUserId(userId: String) = repository.getDailyMoodsByUserId(userId)
+
     /**
      * Observe daily moods of a specific user.
      */

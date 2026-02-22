@@ -1,8 +1,8 @@
 package com.emc.moodmingle.ui.settings.favorites.collection
 
-import com.emc.moodmingle.data.firebase.model.favorites.FavoritesCollectionEntity
-import com.emc.moodmingle.data.firebase.model.favorites.FavoritesEntityFirebase
-import com.emc.moodmingle.viewmodel.firebase.favorites.FavoritesCollectionViewModel
+import com.emc.moodmingle.domain.remote.model.favorites.FavoritesCollectionEntity
+import com.emc.moodmingle.domain.remote.model.favorites.FavoritesEntityFirebase
+import com.emc.moodmingle.viewmodel.remote.favorites.FavoritesCollectionViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

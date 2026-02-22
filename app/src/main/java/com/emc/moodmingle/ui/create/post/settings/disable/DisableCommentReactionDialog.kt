@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.settings.PostCommentReactionVisibility
+import com.emc.moodmingle.domain.remote.model.post.settings.PostCommentReactionVisibility
 import com.emc.moodmingle.ui.create.post.CreatePostDialogHeader
 import com.emc.moodmingle.ui.post.action.toastMessage
 import com.emc.moodmingle.ui.theme.GrayTextColor
@@ -39,7 +39,7 @@ import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.SwitchButton
 import com.emc.moodmingle.utils.components.UserSelector
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
 fun DisableCommentReactionDialog(

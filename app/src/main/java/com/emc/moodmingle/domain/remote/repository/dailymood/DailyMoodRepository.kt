@@ -47,7 +47,7 @@ class DailyMoodRepository @Inject constructor(firestore: FirebaseFirestore) {
             val now = System.currentTimeMillis()
 
             val listener = collection
-                .whereEqualTo("isActive", true)
+                .whereEqualTo("active", true)
                 .whereGreaterThan("expiresAt", now)
                 .orderBy("expiresAt", Query.Direction.DESCENDING)
                 .addSnapshotListener { snapshot, error ->
@@ -81,24 +81,77 @@ class DailyMoodRepository @Inject constructor(firestore: FirebaseFirestore) {
     }
 
     /**
-     * Listen to all daily moods of a specific user.
-     * Emits real-time updates ordered by creation date descending.
+     * Observe only unexpired and active daily moods by user id.
+     *
+     * Server-side filtered using:
+     * - userId
+     * - isActive = true
+     * - expiresAt > currentTime
      */
-    fun getDailyMoodsByUserId(userId: String): Flow<List<DailyMoodEntity>> = callbackFlow {
+    fun getDailyMoodsByUserId(
+        userId: String
+    ): Flow<List<DailyMoodEntity>> = callbackFlow {
+
+        val now = System.currentTimeMillis()
+
         val listener = collection
             .whereEqualTo("userId", userId)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .whereEqualTo("active", true)
+            .whereGreaterThan("expiresAt", now)
+            .orderBy("expiresAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
+
                 if (error != null) {
                     close(error)
                     return@addSnapshotListener
                 }
 
                 val moods = snapshot?.documents
-                    ?.mapNotNull { it.toObject(DailyMoodEntity::class.java) }
+                    ?.mapNotNull {
+                        it.toObject(DailyMoodEntity::class.java)
+                    }
                     ?: emptyList()
 
                 trySend(moods)
+            }
+
+        awaitClose { listener.remove() }
+    }
+
+    /**
+     * Observe a specific DailyMood by document id and user id.
+     *
+     * Real-time updates.
+     * Ensures:
+     * - The mood belongs to the user
+     * - The mood is active
+     * - The mood is not expired
+     */
+    fun getDailyMoodByIdAsFlow(
+        moodId: String,
+        userId: String
+    ): Flow<DailyMoodEntity?> = callbackFlow {
+
+        val now = System.currentTimeMillis()
+
+        val listener = collection
+            .whereEqualTo("id", moodId)
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("active", true)
+            .whereGreaterThan("expiresAt", now)
+            .limit(1)
+            .addSnapshotListener { snapshot, error ->
+
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val mood = snapshot?.documents
+                    ?.firstOrNull()
+                    ?.toObject(DailyMoodEntity::class.java)
+
+                trySend(mood)
             }
 
         awaitClose { listener.remove() }

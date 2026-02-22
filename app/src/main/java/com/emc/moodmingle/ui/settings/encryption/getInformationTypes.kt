@@ -1,7 +1,7 @@
 package com.emc.moodmingle.ui.settings.encryption
 
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 
 fun getInformationTypes(userEntity: UserEntityFirebase?):  List<Triple<List<Triple<String, String, Map<String, Boolean>>>, String, Int>>? {
     return userEntity?.let { user ->

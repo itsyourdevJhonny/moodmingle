@@ -2,8 +2,8 @@ package com.emc.moodmingle.viewmodel.local
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.model.save.SaveEntity
-import com.emc.moodmingle.data.service.SaveService
+import com.emc.moodmingle.domain.local.model.save.SaveEntity
+import com.emc.moodmingle.domain.local.service.SaveService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow

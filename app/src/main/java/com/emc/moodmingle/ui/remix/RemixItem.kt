@@ -29,10 +29,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.remix.RemixEntity
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.data.firebase.viewmodel.post.remix.RemixViewModel
-import com.emc.moodmingle.data.model.post.formatTimeAgo
+import com.emc.moodmingle.domain.remote.model.post.remix.RemixEntity
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.viewmodel.post.remix.RemixViewModel
+import com.emc.moodmingle.domain.local.model.post.formatTimeAgo
 import com.emc.moodmingle.ui.theme.PurpleDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.modifier.gradientCircleBorder
@@ -40,8 +40,8 @@ import com.emc.moodmingle.utils.text.NumberFormatter
 import com.emc.moodmingle.utils.text.toColor
 import com.emc.moodmingle.utils.text.toFontFamily
 import com.emc.moodmingle.utils.text.toTextAlign
-import com.emc.moodmingle.viewmodel.firebase.CombinedPost
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.CombinedPost
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
 fun RemixItem(

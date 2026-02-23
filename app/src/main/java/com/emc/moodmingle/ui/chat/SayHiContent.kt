@@ -20,10 +20,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.chat.ChatMessage
-import com.emc.moodmingle.data.firebase.model.chat.Conversation
+import com.emc.moodmingle.domain.remote.model.chat.ChatMessage
+import com.emc.moodmingle.domain.remote.model.chat.Conversation
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
+import com.emc.moodmingle.viewmodel.remote.chat.ConversationViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -68,10 +68,7 @@ fun SayHiContent(
                             lastMessage = "Hi!",
                             lastMessageTime = System.currentTimeMillis(),
                             messages = conversation.messages + chatMessage
-                        ),
-                        senderId = senderId,
-                        receiverId = receiverId,
-                        message = "Hi!"
+                        )
                     )
                 }
             },

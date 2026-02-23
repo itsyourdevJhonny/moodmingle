@@ -19,14 +19,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.saved.SaveEntityFirebase
-import com.emc.moodmingle.data.model.post.formatTimeAgo
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.model.saved.SaveEntityFirebase
+import com.emc.moodmingle.domain.local.model.post.formatTimeAgo
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.viewmodel.firebase.CommentViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.ReactionViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.ShareViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.CommentViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.ReactionViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.ShareViewModelFirebase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 

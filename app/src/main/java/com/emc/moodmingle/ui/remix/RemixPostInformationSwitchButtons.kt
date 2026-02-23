@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.remix.RemixEntity
+import com.emc.moodmingle.domain.remote.model.post.remix.RemixEntity
 import com.emc.moodmingle.utils.components.SwitchButton
 import com.emc.moodmingle.utils.modifier.drawGradient
 

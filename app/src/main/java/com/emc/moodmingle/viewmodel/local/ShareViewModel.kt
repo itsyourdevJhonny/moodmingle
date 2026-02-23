@@ -2,8 +2,8 @@ package com.emc.moodmingle.viewmodel.local
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.model.share.ShareEntity
-import com.emc.moodmingle.data.service.ShareService
+import com.emc.moodmingle.domain.local.model.share.ShareEntity
+import com.emc.moodmingle.domain.local.service.ShareService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch

@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.remix.Mood
+import com.emc.moodmingle.domain.remote.model.post.remix.Mood
 import com.emc.moodmingle.ui.screens.getMoods
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.PurpleDark

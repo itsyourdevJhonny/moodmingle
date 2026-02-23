@@ -1,5 +1,6 @@
 package com.emc.moodmingle.ui.profile
 
+import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,8 +46,8 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.notification.NotificationEntity
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.notification.NotificationEntity
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.profile.storymood.StoryMood
 import com.emc.moodmingle.ui.profile.storymood.add.AddStoryMood
 import com.emc.moodmingle.ui.profile.utils.ShowProfilePicture
@@ -57,8 +58,9 @@ import com.emc.moodmingle.ui.theme.TertiaryDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.ui.theme.VerifiedColor
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
-import com.emc.moodmingle.viewmodel.firebase.notification.NotificationViewModel
+import com.emc.moodmingle.utils.modifier.gradientCircleBorder
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.notification.NotificationViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -68,7 +70,7 @@ fun ProfileSection(
     postCount: Long,
     shareCount: Long,
     saveCount: Long,
-    favoritesCount: Long
+    favoritesCount: Long,
 ) {
     val joinedDate = user?.joinedDate ?: ""
 
@@ -82,15 +84,7 @@ fun ProfileSection(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             user?.let {
-                Avatar(
-                    isFromOtherUser,
-                    user,
-                    postCount,
-                    shareCount,
-                    saveCount,
-                    favoritesCount
-                )
-
+                Avatar(isFromOtherUser, user, postCount, shareCount, saveCount, favoritesCount)
                 Username(currentUser = user)
 
                 if (isFromOtherUser) {
@@ -113,71 +107,61 @@ private fun Avatar(
     postCount: Long,
     shareCount: Long,
     saveCount: Long,
-    favoritesCount: Long
+    favoritesCount: Long,
 ) {
     val context = LocalContext.current
     var showProfilePicture by remember { mutableStateOf(false) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            contentAlignment = Alignment.TopCenter
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(user.avatarUrl)
-                    .diskCachePolicy(CachePolicy.ENABLED)
-                    .memoryCachePolicy(CachePolicy.ENABLED)
-                    .build(),
-                contentDescription = "Avatar",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(110.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.3f))
-                    .border(
-                        width = 1.dp,
-                        brush = BrushPrimaryGradient,
-                        shape = CircleShape
-                    )
-                    .clickable { showProfilePicture = true }
-            )
-
-            if (isFromOtherUser) {
-                StoryMood()
-            } else {
-                AddStoryMood(modifier = Modifier.align(Alignment.BottomEnd))
-            }
-        }
+        AvatarImage(context, user, isFromOtherUser) { showProfilePicture = true }
 
         Column {
-            Interactions(
-                postCount,
-                shareCount,
-                saveCount,
-                favoritesCount
-            )
-
+            Interactions(postCount, shareCount, saveCount, favoritesCount)
             Bio(user.bio)
         }
     }
 
     if (showProfilePicture) {
-        ShowProfilePicture(user.avatarUrl) {
-            showProfilePicture = false
-        }
+        ShowProfilePicture(user.avatarUrl) { showProfilePicture = false }
+    }
+}
+
+@Composable
+private fun AvatarImage(
+    context: Context,
+    user: UserEntityFirebase,
+    isFromOtherUser: Boolean,
+    onAvatarClick: () -> Unit,
+) {
+    Box(contentAlignment = Alignment.TopCenter) {
+        AsyncImage(
+            model = ImageRequest.Builder(context)
+                .data(user.avatarUrl)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .build(),
+            contentDescription = "Avatar",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(110.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.3f))
+                .gradientCircleBorder()
+                .clickable { onAvatarClick() }
+        )
+
+        if (isFromOtherUser) StoryMood() else AddStoryMood(modifier = Modifier.align(Alignment.BottomEnd))
     }
 }
 
 @Composable
 private fun Bio(bio: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         if (bio.isNotBlank()) {
             Text(text = "(", color = Color.White)
             Text(
                 text = bio,
-                style = MaterialTheme.typography.bodyMedium.copy(
+                style = Typography.bodyMedium.copy(
                     color = GrayTextColor,
                     fontStyle = FontStyle.Italic
                 ),
@@ -190,7 +174,7 @@ private fun Bio(bio: String) {
 }
 
 @Composable
-fun Username(currentUser: UserEntityFirebase) {
+private fun Username(currentUser: UserEntityFirebase) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -241,7 +225,7 @@ private fun SocializationButtons(user: UserEntityFirebase) {
 private fun FollowButton(
     currentUser: UserEntityFirebase,
     user: UserEntityFirebase,
-    userViewModel: FirebaseUserViewModel
+    userViewModel: FirebaseUserViewModel,
 ) {
     val scope = rememberCoroutineScope()
     val notificationViewModel = hiltViewModel<NotificationViewModel>()
@@ -256,13 +240,8 @@ private fun FollowButton(
             .background(BrushPrimaryGradient, RoundedCornerShape(8.dp))
             .clickable {
                 scope.launch {
-                    userViewModel.updateUser(
-                        user.copy(followerIds = if (isFollowed) user.followerIds - currentUser.uid else user.followerIds + currentUser.uid)
-                    )
-
-                    userViewModel.updateUser(
-                        currentUser.copy(followingIds = if (isFollowing) currentUser.followingIds - user.uid else currentUser.followingIds + user.uid)
-                    )
+                    userViewModel.updateUser(user.copy(followerIds = if (isFollowed) user.followerIds - currentUser.uid else user.followerIds + currentUser.uid))
+                    userViewModel.updateUser(currentUser.copy(followingIds = if (isFollowing) currentUser.followingIds - user.uid else currentUser.followingIds + user.uid))
 
                     val userNotification =
                         notificationViewModel.getNotificationByEntityId(entityId = currentUser.uid)
@@ -312,7 +291,7 @@ private fun FollowButton(
 private fun SupportButton(
     currentUser: UserEntityFirebase,
     user: UserEntityFirebase,
-    userViewModel: FirebaseUserViewModel
+    userViewModel: FirebaseUserViewModel,
 ) {
     val scope = rememberCoroutineScope()
     val notificationViewModel = hiltViewModel<NotificationViewModel>()
@@ -386,7 +365,7 @@ private fun Interactions(
     postCount: Long,
     shareCount: Long,
     saveCount: Long,
-    favoritesCount: Long
+    favoritesCount: Long,
 ) {
     Row(
         modifier = Modifier

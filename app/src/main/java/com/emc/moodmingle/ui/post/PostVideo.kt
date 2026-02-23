@@ -64,7 +64,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
 import com.emc.moodmingle.R
-import com.emc.moodmingle.ui.create.formatDuration
+import com.emc.moodmingle.ui.create.util.formatDuration
 import com.emc.moodmingle.ui.post.audio.AudioCache
 import com.emc.moodmingle.ui.post.skeleton.PostSkeletonItem
 import com.emc.moodmingle.utils.modifier.drawGradient

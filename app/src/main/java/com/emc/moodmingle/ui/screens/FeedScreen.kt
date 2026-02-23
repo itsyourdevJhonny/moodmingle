@@ -74,6 +74,7 @@ import com.emc.moodmingle.domain.remote.model.post.normal.ShareEntityFirebase
 import com.emc.moodmingle.domain.remote.model.post.remix.RemixEntity
 import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.domain.remote.viewmodel.post.remix.RemixViewModel
+import com.emc.moodmingle.ui.feed.DailyMoodSection
 import com.emc.moodmingle.ui.post.MultimediaCard
 import com.emc.moodmingle.ui.post.PostMedia
 import com.emc.moodmingle.ui.post.comment.CommentBottomSheet
@@ -159,6 +160,8 @@ fun FeedScreen(
             item { ActiveUserList(onCreate) }
 
             item { CreatePostSection(onCreateClick) }
+
+            item { DailyMoodSection() }
 
             items(
                 items = pagedPosts,

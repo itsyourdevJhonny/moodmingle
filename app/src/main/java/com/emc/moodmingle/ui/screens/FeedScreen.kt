@@ -199,7 +199,7 @@ fun FeedScreen(
                             .fillMaxWidth()
                             .padding(16.dp),
                         contentAlignment = Alignment.Center,
-                        content =  { CircularProgressIndicator() }
+                        content = { CircularProgressIndicator() }
                     )
                 }
             }
@@ -211,7 +211,7 @@ fun FeedScreen(
             }
         }
 
-        FloatingRefreshButton(listState, onRefresh = { postViewModel.loadPosts() })
+        FloatingRefreshButton(listState) { postViewModel.loadPosts() }
     }
 }
 

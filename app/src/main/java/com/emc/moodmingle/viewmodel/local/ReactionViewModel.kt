@@ -2,8 +2,8 @@ package com.emc.moodmingle.viewmodel.local
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.model.post.ReactionEntity
-import com.emc.moodmingle.data.service.ReactionService
+import com.emc.moodmingle.domain.local.model.post.ReactionEntity
+import com.emc.moodmingle.domain.local.service.ReactionService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

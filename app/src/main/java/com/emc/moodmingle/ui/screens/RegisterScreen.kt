@@ -67,7 +67,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.cloudinary.CloudinaryService
+import com.emc.moodmingle.api.cloudinary.CloudinaryService
 import com.emc.moodmingle.ui.profile.DrawUserNoPaddingLine
 import com.emc.moodmingle.ui.settings.personal.ImageGallery
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
@@ -78,7 +78,7 @@ import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.utils.components.LoadingDialog
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.firebase.UserViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.UserViewModelFirebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch

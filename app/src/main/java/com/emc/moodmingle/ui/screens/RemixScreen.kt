@@ -49,14 +49,14 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.remix.Mood
-import com.emc.moodmingle.data.firebase.model.remix.RemixEntity
-import com.emc.moodmingle.data.firebase.model.remix.RemixEntityRemix
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
-import com.emc.moodmingle.data.firebase.viewmodel.post.remix.RemixViewModel
-import com.emc.moodmingle.data.firebase.viewmodel.video.VideoCommentViewModel
-import com.emc.moodmingle.data.model.post.formatTimeAgo
+import com.emc.moodmingle.domain.remote.model.post.remix.Mood
+import com.emc.moodmingle.domain.remote.model.post.remix.RemixEntity
+import com.emc.moodmingle.domain.remote.model.post.remix.RemixEntityRemix
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.viewmodel.post.remix.RemixViewModel
+import com.emc.moodmingle.domain.remote.viewmodel.video.VideoCommentViewModel
+import com.emc.moodmingle.domain.local.model.post.formatTimeAgo
 import com.emc.moodmingle.ui.remix.RemixSecondaryActions
 import com.emc.moodmingle.ui.remix.RemixColorPickerDialog
 import com.emc.moodmingle.ui.remix.RemixFontPickerDialog
@@ -76,7 +76,7 @@ import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.utils.modifier.gradientCircleBorder
 import com.emc.moodmingle.utils.modifier.grayCircleBorder
 import com.emc.moodmingle.utils.modifier.roundedGrayBorder
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 import kotlinx.coroutines.flow.first
 
 @Composable

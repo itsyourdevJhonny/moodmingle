@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.viewmodel.post.normal.NormalPostViewModel
+import com.emc.moodmingle.domain.remote.viewmodel.post.normal.NormalPostViewModel
 import com.emc.moodmingle.ui.create.post.HashtagSection
 import com.emc.moodmingle.ui.create.post.MentionSection
 import com.emc.moodmingle.ui.create.post.TextSection
@@ -49,7 +49,7 @@ import com.emc.moodmingle.utils.media.MediaThumbnails
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.utils.modifier.gradientCircleBorder
 import com.emc.moodmingle.utils.text.NumberFormatter
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)

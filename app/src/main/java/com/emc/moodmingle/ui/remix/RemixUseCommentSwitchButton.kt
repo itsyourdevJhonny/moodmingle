@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
 import com.emc.moodmingle.utils.components.SwitchButton
 
 @Composable

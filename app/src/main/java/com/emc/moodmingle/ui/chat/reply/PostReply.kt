@@ -28,7 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
 import com.emc.moodmingle.ui.theme.BrushSecondaryTertiaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography

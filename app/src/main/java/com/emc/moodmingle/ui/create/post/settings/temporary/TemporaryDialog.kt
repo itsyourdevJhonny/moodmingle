@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import com.emc.moodmingle.data.firebase.model.post.settings.PostTemporary
+import com.emc.moodmingle.domain.remote.model.post.settings.PostTemporary
 import com.emc.moodmingle.ui.create.post.CreatePostDialogHeader
 import com.emc.moodmingle.ui.post.action.toastMessage
 

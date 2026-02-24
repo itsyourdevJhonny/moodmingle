@@ -28,9 +28,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.video.Support
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
-import com.emc.moodmingle.data.firebase.viewmodel.video.VideoCommentViewModel
+import com.emc.moodmingle.domain.remote.model.video.Support
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.viewmodel.video.VideoCommentViewModel
 import com.emc.moodmingle.utils.components.LoadingDialog
 import com.emc.moodmingle.utils.components.BackIcon
 import com.emc.moodmingle.utils.modifier.drawGradient

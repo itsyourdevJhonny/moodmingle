@@ -87,8 +87,8 @@ import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.firebase.favorites.FavoritesViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.saved.SaveViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.favorites.FavoritesViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.saved.SaveViewModelFirebase
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

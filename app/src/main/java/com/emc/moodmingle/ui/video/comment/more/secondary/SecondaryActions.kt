@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography

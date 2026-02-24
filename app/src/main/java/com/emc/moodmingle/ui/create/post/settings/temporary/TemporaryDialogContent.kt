@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.emc.moodmingle.data.firebase.model.post.settings.PostTemporary
+import com.emc.moodmingle.domain.remote.model.post.settings.PostTemporary
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.SwitchButton

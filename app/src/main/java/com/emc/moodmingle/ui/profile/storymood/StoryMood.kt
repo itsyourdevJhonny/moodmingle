@@ -68,7 +68,7 @@ fun StoryMood() {
 
             Text(
                 modifier = Modifier.padding(top = 4.dp),
-                text = "Needs support qghahajha",
+                text = "Needs support",
                 style = Typography.labelSmall.copy(color = Color.White),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

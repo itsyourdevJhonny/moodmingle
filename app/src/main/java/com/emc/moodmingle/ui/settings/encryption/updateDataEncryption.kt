@@ -2,8 +2,8 @@ package com.emc.moodmingle.ui.settings.encryption
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.snapshotFlow
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch

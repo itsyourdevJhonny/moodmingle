@@ -1,7 +1,6 @@
 package com.emc.moodmingle.ui.post
 
 import android.content.Context
-import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +27,6 @@ import coil.request.ImageRequest
 import com.emc.moodmingle.R
 import com.emc.moodmingle.ui.post.skeleton.ShimmerAnimation
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
-import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
 import com.emc.moodmingle.viewmodel.local.PostViewModel
 
 @Composable

@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.emc.moodmingle.data.firebase.model.chat.ChatMessage
+import com.emc.moodmingle.domain.remote.model.chat.ChatMessage
 import com.emc.moodmingle.ui.theme.BrushSecondaryTertiaryGradient
 import com.emc.moodmingle.ui.theme.GrayTextColor
 

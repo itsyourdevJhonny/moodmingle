@@ -24,10 +24,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.chat.ChatMessage
-import com.emc.moodmingle.data.firebase.model.chat.Conversation
+import com.emc.moodmingle.domain.remote.model.chat.ChatMessage
+import com.emc.moodmingle.domain.remote.model.chat.Conversation
 import com.emc.moodmingle.ui.theme.SecondaryDark
-import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
+import com.emc.moodmingle.viewmodel.remote.chat.ConversationViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,10 +100,7 @@ private fun CreateAction(
                             )
 
                             conversationViewModel.updateConversation(
-                                updatedConversation,
-                                chatMessage.senderId,
-                                chatMessage.receiverId,
-                                chatMessage.message
+                                updatedConversation
                             )
                         }
                     }

@@ -15,11 +15,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
-import com.emc.moodmingle.data.firebase.model.video.VideoCommentReply
-import com.emc.moodmingle.data.firebase.viewmodel.video.VideoCommentReplyViewModel
-import com.emc.moodmingle.data.firebase.viewmodel.video.VideoCommentViewModel
-import com.emc.moodmingle.service.UploadVideoCommentService
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.model.video.VideoCommentReply
+import com.emc.moodmingle.domain.remote.viewmodel.video.VideoCommentReplyViewModel
+import com.emc.moodmingle.domain.remote.viewmodel.video.VideoCommentViewModel
+import com.emc.moodmingle.service.upload.UploadVideoCommentService
 import com.emc.moodmingle.utils.modifier.drawGradient
 import kotlinx.coroutines.launch
 

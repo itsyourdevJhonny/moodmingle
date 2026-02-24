@@ -43,7 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.settings.PostSchedule
+import com.emc.moodmingle.domain.remote.model.post.settings.PostSchedule
 import com.emc.moodmingle.ui.create.post.CreatePostDialogHeader
 import com.emc.moodmingle.ui.theme.MentionTextColor
 import com.emc.moodmingle.ui.theme.Typography

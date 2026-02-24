@@ -2,9 +2,9 @@ package com.emc.moodmingle.viewmodel.local
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.model.UserEntity
-import com.emc.moodmingle.data.model.search.SearchEntity
-import com.emc.moodmingle.data.service.SearchService
+import com.emc.moodmingle.domain.local.model.user.UserEntity
+import com.emc.moodmingle.domain.local.model.search.SearchEntity
+import com.emc.moodmingle.domain.local.service.SearchService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

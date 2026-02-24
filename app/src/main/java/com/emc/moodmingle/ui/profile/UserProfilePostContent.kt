@@ -34,12 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.post.ShareEntityFirebase
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.data.model.post.formatTimeAgo
-import com.emc.moodmingle.data.model.post.user.CombinedPost
-import com.emc.moodmingle.data.model.post.user.PostType
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.model.post.normal.ShareEntityFirebase
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.local.model.post.formatTimeAgo
+import com.emc.moodmingle.domain.local.model.post.user.CombinedPost
+import com.emc.moodmingle.domain.local.model.post.user.PostType
 import com.emc.moodmingle.ui.post.AvatarImage
 import com.emc.moodmingle.ui.post.MultimediaCard
 import com.emc.moodmingle.ui.post.PostMedia
@@ -50,9 +50,9 @@ import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.TertiaryDark
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
-import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
-import com.emc.moodmingle.viewmodel.firebase.ShareViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.PostViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.ShareViewModelFirebase
 
 @Composable
 fun UserPostContent(post: CombinedPost, postViewModel: PostViewModelFirebase, onChatClick: (String, String) -> Unit) {

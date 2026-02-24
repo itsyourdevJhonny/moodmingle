@@ -20,7 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.video.comment.more.secondary.buttons.VideoCommentSecondaryCancelButton
 import com.emc.moodmingle.ui.video.comment.more.secondary.buttons.VideoCommentSecondaryNextButton

@@ -4,8 +4,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emc.moodmingle.data.model.UserEntity
-import com.emc.moodmingle.data.repository.UserRepository
+import com.emc.moodmingle.domain.local.model.user.UserEntity
+import com.emc.moodmingle.domain.local.repository.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -63,11 +63,4 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun logout(onComplete: () -> Unit, uid: String) {
-        viewModelScope.launch {
-            userRepository.logout(uid)
-            _user.value = null
-            onComplete()
-        }
-    }
 }

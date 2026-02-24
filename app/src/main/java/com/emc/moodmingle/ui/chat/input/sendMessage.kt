@@ -1,8 +1,8 @@
 package com.emc.moodmingle.ui.chat.input
 
-import com.emc.moodmingle.data.firebase.model.chat.ChatMessage
-import com.emc.moodmingle.data.firebase.model.chat.Conversation
-import com.emc.moodmingle.viewmodel.chat.ConversationViewModel
+import com.emc.moodmingle.domain.remote.model.chat.ChatMessage
+import com.emc.moodmingle.domain.remote.model.chat.Conversation
+import com.emc.moodmingle.viewmodel.remote.chat.ConversationViewModel
 
 suspend fun sendMessage(
     message: String,
@@ -31,10 +31,7 @@ suspend fun sendMessage(
                 lastMessageTime = System.currentTimeMillis(),
                 lastMessageUserId = senderId,
                 messages = conversation.messages + chatMessage
-            ),
-            senderId = senderId,
-            receiverId = receiverId,
-            message = message
+            )
         )
     }
 }

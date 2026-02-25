@@ -50,8 +50,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.ui.create.formatDuration
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.ui.create.util.formatDuration
 import com.emc.moodmingle.ui.theme.PurplePrimary
 import com.emc.moodmingle.utils.network.NetworkStatus
 import com.emc.moodmingle.utils.network.NetworkUtils

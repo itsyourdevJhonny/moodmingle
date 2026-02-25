@@ -43,8 +43,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.emc.moodmingle.data.firebase.model.post.PostEntityFirebase
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.model.post.normal.PostEntityFirebase
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
 import com.emc.moodmingle.ui.settings.saved.media.isVideo
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
@@ -52,8 +52,8 @@ import com.emc.moodmingle.ui.video.VideoFeedItem
 import com.emc.moodmingle.ui.video.comment.bottomsheet.VideoCommentBottomSheet
 import com.emc.moodmingle.ui.video.comment.reply.dialog.DisplayVideoCommentReplies
 import com.emc.moodmingle.utils.exoplayer.ExoPlayerPool
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
-import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.PostViewModelFirebase
 
 data class VideoPageItem(
     val post: PostEntityFirebase,

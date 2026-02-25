@@ -37,7 +37,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.ui.PlayerView
 import coil.compose.rememberAsyncImagePainter
-import com.emc.moodmingle.ui.create.detectLongPress
+import com.emc.moodmingle.ui.create.util.detectLongPress
 import com.emc.moodmingle.ui.post.PostAudio
 import com.emc.moodmingle.ui.settings.saved.media.getMime
 import com.emc.moodmingle.ui.video.MuteIcon

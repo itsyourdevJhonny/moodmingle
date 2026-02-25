@@ -52,8 +52,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
-import com.emc.moodmingle.data.firebase.viewmodel.video.VideoCommentViewModel
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.viewmodel.video.VideoCommentViewModel
 import com.emc.moodmingle.ui.post.action.DrawNoPaddingLine
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
@@ -79,7 +79,7 @@ import com.emc.moodmingle.ui.video.comment.reply.VideoCommentReply
 import com.emc.moodmingle.utils.SwitchButton
 import com.emc.moodmingle.utils.modifier.drawGradient
 import com.emc.moodmingle.utils.modifier.grayCircleBorder
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)

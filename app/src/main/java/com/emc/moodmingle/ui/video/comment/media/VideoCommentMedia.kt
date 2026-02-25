@@ -46,7 +46,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.request.videoFrameMillis
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
 import com.emc.moodmingle.ui.settings.saved.media.getMime
 import com.emc.moodmingle.ui.theme.SecondaryDark
 import com.emc.moodmingle.ui.theme.Typography
@@ -54,7 +54,7 @@ import com.emc.moodmingle.ui.video.comment.media.dialog.VideoCommentMediaDialog
 import com.emc.moodmingle.utils.exoplayer.ExoPlayerUtils
 import com.emc.moodmingle.utils.media.image.ImageUtils
 import com.emc.moodmingle.utils.modifier.drawGradient
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
 fun VideoCommentMedia(comment: VideoComment) {

@@ -4,9 +4,9 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.emc.moodmingle.data.firebase.model.video.Trigger
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
-import com.emc.moodmingle.data.firebase.viewmodel.video.VideoCommentViewModel
+import com.emc.moodmingle.domain.remote.model.video.Trigger
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.viewmodel.video.VideoCommentViewModel
 
 @Composable
 fun VideoCommentSecondaryNextButton(

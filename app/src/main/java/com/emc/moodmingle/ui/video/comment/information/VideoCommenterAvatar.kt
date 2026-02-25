@@ -10,7 +10,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient
 
 @Composable

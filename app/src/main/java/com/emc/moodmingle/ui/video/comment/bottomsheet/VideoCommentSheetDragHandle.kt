@@ -24,7 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.emc.moodmingle.ui.post.action.DrawNoPaddingLine
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.viewmodel.firebase.PostViewModelFirebase
+import com.emc.moodmingle.viewmodel.remote.PostViewModelFirebase
 
 @Composable
 fun VideoCommentSheetDragHandle(commentsCount: Long, videoUrl: String, onDismiss: () -> Unit) {

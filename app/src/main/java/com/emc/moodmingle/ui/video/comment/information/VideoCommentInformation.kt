@@ -31,9 +31,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
-import com.emc.moodmingle.data.model.post.formatTimeAgo
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
+import com.emc.moodmingle.domain.local.model.post.formatTimeAgo
 import com.emc.moodmingle.ui.post.text.ExpandableAutoDetectClickableText
 import com.emc.moodmingle.ui.screens.getEmojiByEmotion
 import com.emc.moodmingle.ui.theme.BrushPrimaryGradient

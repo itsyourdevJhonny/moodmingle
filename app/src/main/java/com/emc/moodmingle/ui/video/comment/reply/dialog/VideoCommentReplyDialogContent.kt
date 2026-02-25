@@ -34,11 +34,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.user.UserEntityFirebase
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
-import com.emc.moodmingle.data.firebase.model.video.VideoCommentReply
-import com.emc.moodmingle.data.firebase.viewmodel.video.VideoCommentReplyViewModel
-import com.emc.moodmingle.data.model.post.formatTimeAgo
+import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.model.video.VideoCommentReply
+import com.emc.moodmingle.domain.remote.viewmodel.video.VideoCommentReplyViewModel
+import com.emc.moodmingle.domain.local.model.post.formatTimeAgo
 import com.emc.moodmingle.ui.post.text.ExpandableAutoDetectClickableText
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.SecondaryDark
@@ -46,7 +46,7 @@ import com.emc.moodmingle.ui.theme.TertiaryDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.modifier.gradientCircleBorder
 import com.emc.moodmingle.utils.text.NumberFormatter
-import com.emc.moodmingle.viewmodel.firebase.FirebaseUserViewModel
+import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 import kotlinx.coroutines.launch
 
 @Composable

@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.emc.moodmingle.R
-import com.emc.moodmingle.data.firebase.model.video.VideoComment
+import com.emc.moodmingle.domain.remote.model.video.VideoComment
 import com.emc.moodmingle.ui.post.action.DrawNoPaddingLine
 import com.emc.moodmingle.ui.theme.GrayTextColor
 import com.emc.moodmingle.ui.theme.PrimaryDark

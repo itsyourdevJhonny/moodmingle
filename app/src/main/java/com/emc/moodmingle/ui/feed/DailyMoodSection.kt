@@ -73,12 +73,7 @@ fun DailyMoodSection() {
             .padding(bottom = 16.dp)
             .fillMaxWidth()
     ) {
-        Text(
-            text = "Daily Moods",
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-            color = Color.White,
-            fontWeight = FontWeight.Black
-        )
+        Title()
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             itemsIndexed(dailyMoods) { index, dailyMood ->
@@ -91,6 +86,16 @@ fun DailyMoodSection() {
             }
         }
     }
+}
+
+@Composable
+private fun Title() {
+    Text(
+        text = "Daily Moods",
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+        color = Color.White,
+        fontWeight = FontWeight.Black
+    )
 }
 
 @Composable

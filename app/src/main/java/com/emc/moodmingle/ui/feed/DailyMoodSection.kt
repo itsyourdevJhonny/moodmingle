@@ -92,12 +92,17 @@ fun DailyMoodSection() {
                 items = dailyMoods.distinctBy { it.userId }.sortedBy { it.createdAt },
                 key = { _, dailyMood -> dailyMood.id + dailyMood.createdAt }
             ) { index, dailyMood ->
-                val user by userViewModel.getUserByUid(dailyMood.userId)
+                val userResult by userViewModel.getUserByUid(dailyMood.userId)
                     .collectAsState(initial = null)
+
+                val user = userResult?.getOrNull()
+
                 val media = dailyMood.media
                 val text = dailyMood.text
 
-                DailyMoodItem(index, user, media, text, dailyMood, dailyMoodViewModel)
+                if (user != null) {
+                    DailyMoodItem(index, user, media, text, dailyMood, dailyMoodViewModel)
+                }
             }
         }
     }
@@ -116,13 +121,13 @@ private fun HeaderTitle() {
 @Composable
 private fun DailyMoodItem(
     index: Int,
-    user: Result<UserEntityFirebase>?,
+    user: UserEntityFirebase,
     media: DailyMoodMedia,
     text: DailyMoodText,
     dailyMood: DailyMoodEntity,
     dailyMoodViewModel: DailyMoodViewModel,
 ) {
-    val userDailyMoods by dailyMoodViewModel.getDailyMoodsByUserId(user?.getOrNull()?.uid.orEmpty())
+    val userDailyMoods by dailyMoodViewModel.getDailyMoodsByUserId(user.uid)
         .collectAsState(initial = null)
 
     Box(
@@ -153,7 +158,7 @@ private fun MoodDescription(text: DailyMoodText) {
 }
 
 @Composable
-private fun MainSection(user: Result<UserEntityFirebase>?, media: DailyMoodMedia) {
+private fun MainSection(user: UserEntityFirebase, media: DailyMoodMedia) {
     BackgroundImageOverlay(user)
 
     if (media.urls.isNotEmpty()) {
@@ -226,14 +231,14 @@ private fun DailyMoodVideo(videoUrl: String) {
 }
 
 @Composable
-private fun BackgroundImageOverlay(user: Result<UserEntityFirebase>?) {
+private fun BackgroundImageOverlay(user: UserEntityFirebase) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
             .roundedGrayBorder(16.dp)
     ) {
         AsyncImage(
-            model = user?.getOrNull()?.avatarUrl.orEmpty(),
+            model = user.avatarUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -250,7 +255,7 @@ private fun BackgroundImageOverlay(user: Result<UserEntityFirebase>?) {
 }
 
 @Composable
-private fun BoxScope.TopSection(user: Result<UserEntityFirebase>?, dailyMood: DailyMoodEntity) {
+private fun BoxScope.TopSection(user: UserEntityFirebase, dailyMood: DailyMoodEntity) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -259,10 +264,10 @@ private fun BoxScope.TopSection(user: Result<UserEntityFirebase>?, dailyMood: Da
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        Avatar(model = user?.getOrNull()?.avatarUrl.orEmpty(), 38.dp)
+        Avatar(model = user.avatarUrl, 38.dp)
 
         Text(
-            text = user?.getOrNull()?.username.orEmpty(),
+            text = user.username,
             style = TextStyle(
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -279,7 +284,7 @@ private fun BoxScope.TopSection(user: Result<UserEntityFirebase>?, dailyMood: Da
 }
 
 @Composable
-private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>?) {
+private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>?, ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -289,7 +294,7 @@ private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>?) {
             .padding(8.dp)
     ) {
         ReactionButton()
-        ReactionCount()
+        ReactionCount(userDailyMoods)
         DailyMoodsCount(userDailyMoods)
     }
 }
@@ -312,9 +317,11 @@ private fun ReactionButton() {
 }
 
 @Composable
-private fun RowScope.ReactionCount() {
+private fun RowScope.ReactionCount(userDailyMoods: List<DailyMoodEntity>?) {
+    val totalReactors = userDailyMoods?.sumOf { it.reactorId.size } ?: 0
+
     Text(
-        text = "87",
+        text = NumberFormatter.formatValue(totalReactors.toLong(), true),
         style = TextStyle(
             color = Color.White,
             shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),

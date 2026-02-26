@@ -23,9 +23,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -34,13 +36,20 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackParameters
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
 import com.emc.moodmingle.domain.remote.model.post.dailymood.DailyMoodEntity
@@ -123,11 +132,8 @@ private fun DailyMoodItem(
         contentAlignment = Alignment.Center
     ) {
         MainSection(user, media)
-
         MoodDescription(text)
-
         TopSection(user, dailyMood)
-
         BottomSection(userDailyMoods)
     }
 }
@@ -162,8 +168,51 @@ private fun MainSection(user: Result<UserEntityFirebase>?, media: DailyMoodMedia
                         .clip(RoundedCornerShape(16.dp))
                 )
             }
+
+            mimeType.startsWith("video") -> {
+                DailyMoodVideo(url)
+            }
         }
     }
+}
+
+@Composable
+private fun DailyMoodVideo(videoUrl: String) {
+    val context = LocalContext.current
+
+    // Create exoplayer
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            val mediaItem = MediaItem.fromUri(videoUrl)
+            setMediaItem(mediaItem)
+
+            repeatMode = Player.REPEAT_MODE_ONE  // Infinite loop
+            volume = 0f                          // Mute audio
+            playbackParameters = PlaybackParameters(3f) // 3x speed
+
+            prepare()
+            playWhenReady = true
+        }
+    }
+
+    // Release player when composable leaves
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    AndroidView(
+        factory = {
+            PlayerView(it).apply {
+                player = exoPlayer
+                useController = false  // Hide controls
+            }
+        },
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(16.dp))
+    )
 }
 
 @Composable

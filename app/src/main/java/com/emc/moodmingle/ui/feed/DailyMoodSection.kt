@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -217,17 +218,22 @@ private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>) {
             )
         }
 
-        Text(
-            text = "87",
-            style = TextStyle(
-                color = Color.White,
-                shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),
-            ),
-            modifier = Modifier.weight(1f)
-        )
+        ReactionCount()
 
         DailyMoodsCount(userDailyMoods)
     }
+}
+
+@Composable
+private fun RowScope.ReactionCount() {
+    Text(
+        text = "87",
+        style = TextStyle(
+            color = Color.White,
+            shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),
+        ),
+        modifier = Modifier.weight(1f)
+    )
 }
 
 @Composable

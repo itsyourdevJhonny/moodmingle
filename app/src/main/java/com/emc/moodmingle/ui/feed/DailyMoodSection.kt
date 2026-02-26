@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -188,46 +189,51 @@ private fun DailyMoodItem(
             Text(text = dailyMood.mood.emoji, color = Color.White, fontSize = 20.sp)
         }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        BottomSection(userDailyMoods)
+    }
+}
+
+@Composable
+private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .align(Alignment.BottomStart)
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        IconButton(
+            onClick = {},
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .fillMaxWidth()
-                .padding(8.dp)
+                .border(width = 0.5.dp, color = Color.Red, shape = CircleShape)
+                .size(38.dp)
         ) {
-            IconButton(
-                onClick = {},
-                modifier = Modifier
-                    .border(width = 0.5.dp, color = Color.Red, shape = CircleShape)
-                    .size(38.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.love),
-                    contentDescription = null,
-                    tint = Color.Red,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Text(
-                text = "87",
-                style = TextStyle(
-                    color = Color.White,
-                    shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),
-                ),
-                modifier = Modifier.weight(1f)
-            )
-
-            Text(
-                text = NumberFormatter.formatValue(userDailyMoods.size.toLong(), true),
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White,
-                    shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),
-                )
+            Icon(
+                painter = painterResource(R.drawable.love),
+                contentDescription = null,
+                tint = Color.Red,
+                modifier = Modifier.size(24.dp)
             )
         }
+
+        Text(
+            text = "87",
+            style = TextStyle(
+                color = Color.White,
+                shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),
+            ),
+            modifier = Modifier.weight(1f)
+        )
+
+        Text(
+            text = NumberFormatter.formatValue(userDailyMoods.size.toLong(), true),
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White,
+                shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),
+            )
+        )
     }
 }

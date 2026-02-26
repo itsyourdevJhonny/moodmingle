@@ -11,19 +11,14 @@ import java.time.ZoneId
  * Returns null if FOREVER.
  */
 fun DailyMoodSettings.computeExpiresAt(createdAt: Long): Long? {
-
     val durationMillis = duration.toMillisOrNull()
-
-    return durationMillis?.let {
-        createdAt + it
-    }
+    return durationMillis?.let { createdAt + it }
 }
 
 /**
  * Returns true if the mood is currently active and not expired.
  */
 fun DailyMoodEntity.isActiveAndNotExpired(): Boolean {
-
     val now = System.currentTimeMillis()
 
     // -----------------------------
@@ -32,7 +27,6 @@ fun DailyMoodEntity.isActiveAndNotExpired(): Boolean {
     val timing = settings.timing
 
     val isPosted = when (timing.type) {
-
         TimingType.AUTO_POST_NOW -> true
 
         TimingType.SCHEDULE -> {
@@ -70,23 +64,11 @@ fun DailyMoodEntity.isActiveAndNotExpired(): Boolean {
  */
 fun MoodDuration.toMillisOrNull(): Long? {
     return when (type) {
-
-        MoodDurationType.HOURS_24 ->
-            24 * 60 * 60 * 1000L
-
-        MoodDurationType.HOURS_6 ->
-            6 * 60 * 60 * 1000L
-
-        MoodDurationType.DAYS_3 ->
-            3 * 24 * 60 * 60 * 1000L
-
-        MoodDurationType.DAYS_7 ->
-            7 * 24 * 60 * 60 * 1000L
-
-        MoodDurationType.FOREVER ->
-            null
-
-        MoodDurationType.CUSTOM ->
-            (customHours ?: 0) * 60 * 60 * 1000L
+        MoodDurationType.HOURS_24 -> 24 * 60 * 60 * 1000L
+        MoodDurationType.HOURS_6 -> 6 * 60 * 60 * 1000L
+        MoodDurationType.DAYS_3 -> 3 * 24 * 60 * 60 * 1000L
+        MoodDurationType.DAYS_7 -> 7 * 24 * 60 * 60 * 1000L
+        MoodDurationType.FOREVER -> null
+        MoodDurationType.CUSTOM -> (customHours ?: 0) * 60 * 60 * 1000L
     }
 }

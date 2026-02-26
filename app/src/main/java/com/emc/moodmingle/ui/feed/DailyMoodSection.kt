@@ -117,44 +117,7 @@ private fun DailyMoodItem(
             .clickable {},
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .roundedGrayBorder(16.dp)
-        ) {
-            AsyncImage(
-                model = user?.getOrNull()?.avatarUrl.orEmpty(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .blur(30.dp)
-            )
-
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color.Black.copy(alpha = 0.8f))
-            )
-        }
-
-        if (media.urls.isNotEmpty()) {
-            val url = media.urls[0]
-            val mimeType = getMime(url)
-
-            when {
-                mimeType.startsWith("image") -> {
-                    AsyncImage(
-                        model = url,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp))
-                    )
-                }
-            }
-        }
+        MainSection(user, media)
 
         if (text.description.isNotEmpty()) {
             Text(
@@ -171,10 +134,49 @@ private fun DailyMoodItem(
 }
 
 @Composable
-private fun BoxScope.TopSection(
-    user: Result<UserEntityFirebase>?,
-    dailyMood: DailyMoodEntity,
-) {
+private fun MainSection(user: Result<UserEntityFirebase>?, media: DailyMoodMedia) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .roundedGrayBorder(16.dp)
+    ) {
+        AsyncImage(
+            model = user?.getOrNull()?.avatarUrl.orEmpty(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(30.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color.Black.copy(alpha = 0.8f))
+        )
+    }
+
+    if (media.urls.isNotEmpty()) {
+        val url = media.urls[0]
+        val mimeType = getMime(url)
+
+        when {
+            mimeType.startsWith("image") -> {
+                AsyncImage(
+                    model = url,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.TopSection(user: Result<UserEntityFirebase>?, dailyMood: DailyMoodEntity) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),

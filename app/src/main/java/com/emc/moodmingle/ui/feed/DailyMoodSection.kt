@@ -88,7 +88,10 @@ fun DailyMoodSection() {
         HeaderTitle()
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            itemsIndexed(dailyMoods) { index, dailyMood ->
+            itemsIndexed(
+                items = dailyMoods.distinctBy { it.userId }.sortedBy { it.createdAt },
+                key = { _, dailyMood -> dailyMood.id + dailyMood.createdAt }
+            ) { index, dailyMood ->
                 val user by userViewModel.getUserByUid(dailyMood.userId)
                     .collectAsState(initial = null)
                 val media = dailyMood.media

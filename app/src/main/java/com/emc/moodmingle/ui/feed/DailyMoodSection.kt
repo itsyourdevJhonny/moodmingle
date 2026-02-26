@@ -119,17 +119,22 @@ private fun DailyMoodItem(
     ) {
         MainSection(user, media)
 
-        if (text.description.isNotEmpty()) {
-            Text(
-                text = text.description,
-                color = text.color.toColor(),
-                fontFamily = text.font.toFontFamily()
-            )
-        }
+        MoodDescription(text)
 
         TopSection(user, dailyMood)
 
         BottomSection(userDailyMoods)
+    }
+}
+
+@Composable
+private fun MoodDescription(text: DailyMoodText) {
+    if (text.description.isNotEmpty()) {
+        Text(
+            text = text.description,
+            color = text.color.toColor(),
+            fontFamily = text.font.toFontFamily()
+        )
     }
 }
 

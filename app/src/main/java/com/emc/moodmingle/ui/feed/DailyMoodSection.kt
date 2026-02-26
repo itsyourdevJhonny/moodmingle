@@ -1,5 +1,7 @@
 package com.emc.moodmingle.ui.feed
 
+import android.R.attr.resizeMode
+import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,7 +50,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.emc.moodmingle.R
@@ -181,6 +185,7 @@ private fun DailyMoodImage(url: String) {
     )
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 private fun DailyMoodVideo(videoUrl: String) {
     val context = LocalContext.current
@@ -194,6 +199,7 @@ private fun DailyMoodVideo(videoUrl: String) {
             repeatMode = Player.REPEAT_MODE_ONE  // Infinite loop
             volume = 0f                          // Mute audio
             playbackParameters = PlaybackParameters(3f) // 3x speed
+            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 
             prepare()
             playWhenReady = true

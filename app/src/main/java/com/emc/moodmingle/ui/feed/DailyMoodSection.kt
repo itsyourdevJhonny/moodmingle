@@ -204,23 +204,28 @@ private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>) {
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        IconButton(
-            onClick = {},
-            modifier = Modifier
-                .border(width = 0.5.dp, color = Color.Red, shape = CircleShape)
-                .size(38.dp)
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.love),
-                contentDescription = null,
-                tint = Color.Red,
-                modifier = Modifier.size(24.dp)
-            )
-        }
+        ReactionButton()
 
         ReactionCount()
 
         DailyMoodsCount(userDailyMoods)
+    }
+}
+
+@Composable
+private fun ReactionButton() {
+    IconButton(
+        onClick = {},
+        modifier = Modifier
+            .border(width = 0.5.dp, color = Color.Red, shape = CircleShape)
+            .size(38.dp)
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.love),
+            contentDescription = null,
+            tint = Color.Red,
+            modifier = Modifier.size(24.dp)
+        )
     }
 }
 

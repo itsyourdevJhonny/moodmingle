@@ -89,7 +89,7 @@ class DailyMoodRepository @Inject constructor(firestore: FirebaseFirestore) {
      * - expiresAt > currentTime
      */
     fun getDailyMoodsByUserId(
-        userId: String
+        userId: String,
     ): Flow<List<DailyMoodEntity>> = callbackFlow {
 
         val now = System.currentTimeMillis()
@@ -129,7 +129,7 @@ class DailyMoodRepository @Inject constructor(firestore: FirebaseFirestore) {
      */
     fun getDailyMoodByIdAsFlow(
         moodId: String,
-        userId: String
+        userId: String,
     ): Flow<DailyMoodEntity?> = callbackFlow {
 
         val now = System.currentTimeMillis()
@@ -161,12 +161,31 @@ class DailyMoodRepository @Inject constructor(firestore: FirebaseFirestore) {
      * Observe only active and non-expired daily moods by user id.
      */
     fun getActiveDailyMoodsByUserId(
-        userId: String
+        userId: String,
     ): Flow<List<DailyMoodEntity>> {
 
         return getDailyMoodsByUserId(userId)
             .map { moods ->
                 moods.filter { it.isActiveAndNotExpired() }
+            }
+    }
+
+    /**
+     * Observe total number of reactors from all active and non-expired
+     * daily moods of a specific user.
+     *
+     * This function:
+     * - Listens to active daily moods of the user
+     * - Counts all reactorId entries from each mood
+     * - Emits the total count in real-time
+     */
+    fun getTotalReactorsFromActiveMoods(userId: String): Flow<Int> {
+        return getActiveDailyMoodsByUserId(userId)
+            .map { moods ->
+                // Sum all reactorId list sizes
+                moods.sumOf { mood ->
+                    mood.reactorId.size
+                }
             }
     }
 

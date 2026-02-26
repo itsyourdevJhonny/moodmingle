@@ -1,6 +1,5 @@
 package com.emc.moodmingle.ui.feed
 
-import android.R.attr.resizeMode
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -199,7 +198,6 @@ private fun DailyMoodVideo(videoUrl: String) {
             repeatMode = Player.REPEAT_MODE_ONE  // Infinite loop
             volume = 0f                          // Mute audio
             playbackParameters = PlaybackParameters(3f) // 3x speed
-            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 
             prepare()
             playWhenReady = true
@@ -218,6 +216,7 @@ private fun DailyMoodVideo(videoUrl: String) {
             PlayerView(it).apply {
                 player = exoPlayer
                 useController = false  // Hide controls
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             }
         },
         modifier = Modifier

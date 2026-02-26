@@ -27,7 +27,8 @@ data class DailyMoodEntity(
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = 0,
     val expiresAt: Long? = null,
-    val active: Boolean = true
+    val active: Boolean = true,
+    val reactorId: List<String> = emptyList()
 ) : Parcelable
 
 @Parcelize

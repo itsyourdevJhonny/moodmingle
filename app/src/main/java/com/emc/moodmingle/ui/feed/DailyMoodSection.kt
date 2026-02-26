@@ -119,11 +119,8 @@ private fun DailyMoodItem(
     dailyMood: DailyMoodEntity,
     dailyMoodViewModel: DailyMoodViewModel,
 ) {
-    val userDailyMoods by dailyMoodViewModel.activeDailyMoods.collectAsState()
-
-    LaunchedEffect(Unit) {
-        dailyMoodViewModel.observeActiveDailyMoods(user?.getOrNull()?.uid.orEmpty())
-    }
+    val userDailyMoods by dailyMoodViewModel.getDailyMoodsByUserId(user?.getOrNull()?.uid.orEmpty())
+        .collectAsState(initial = null)
 
     Box(
         modifier = Modifier
@@ -279,7 +276,7 @@ private fun BoxScope.TopSection(user: Result<UserEntityFirebase>?, dailyMood: Da
 }
 
 @Composable
-private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>) {
+private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>?) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -324,9 +321,9 @@ private fun RowScope.ReactionCount() {
 }
 
 @Composable
-private fun DailyMoodsCount(userDailyMoods: List<DailyMoodEntity>) {
+private fun DailyMoodsCount(userDailyMoods: List<DailyMoodEntity>?) {
     Text(
-        text = NumberFormatter.formatValue(userDailyMoods.size.toLong(), true),
+        text = NumberFormatter.formatValue(userDailyMoods?.size?.toLong() ?: 0L, true),
         style = TextStyle(
             fontSize = 16.sp,
             fontWeight = FontWeight.Black,

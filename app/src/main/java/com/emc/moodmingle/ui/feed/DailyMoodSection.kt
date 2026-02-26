@@ -135,6 +135,29 @@ private fun DailyMoodItem(
 
 @Composable
 private fun MainSection(user: Result<UserEntityFirebase>?, media: DailyMoodMedia) {
+    BackgroundImageOverlay(user)
+
+    if (media.urls.isNotEmpty()) {
+        val url = media.urls[0]
+        val mimeType = getMime(url)
+
+        when {
+            mimeType.startsWith("image") -> {
+                AsyncImage(
+                    model = url,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BackgroundImageOverlay(user: Result<UserEntityFirebase>?) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
@@ -154,24 +177,6 @@ private fun MainSection(user: Result<UserEntityFirebase>?, media: DailyMoodMedia
                 .matchParentSize()
                 .background(Color.Black.copy(alpha = 0.8f))
         )
-    }
-
-    if (media.urls.isNotEmpty()) {
-        val url = media.urls[0]
-        val mimeType = getMime(url)
-
-        when {
-            mimeType.startsWith("image") -> {
-                AsyncImage(
-                    model = url,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(16.dp))
-                )
-            }
-        }
     }
 }
 

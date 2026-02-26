@@ -226,14 +226,19 @@ private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>) {
             modifier = Modifier.weight(1f)
         )
 
-        Text(
-            text = NumberFormatter.formatValue(userDailyMoods.size.toLong(), true),
-            style = TextStyle(
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-                color = Color.White,
-                shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),
-            )
-        )
+        DailyMoodsCount(userDailyMoods)
     }
+}
+
+@Composable
+private fun DailyMoodsCount(userDailyMoods: List<DailyMoodEntity>) {
+    Text(
+        text = NumberFormatter.formatValue(userDailyMoods.size.toLong(), true),
+        style = TextStyle(
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Black,
+            color = Color.White,
+            shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),
+        )
+    )
 }

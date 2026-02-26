@@ -74,6 +74,7 @@ fun DailyMoodSection() {
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
     val dailyMoodViewModel = hiltViewModel<DailyMoodViewModel>()
     val dailyMoods by dailyMoodViewModel.allActiveDailyMoods.collectAsState()
+    val currentUserId = userViewModel.loggedUser.value?.uid.orEmpty()
 
     LaunchedEffect(Unit) {
         dailyMoodViewModel.observeAllActiveDailyMoods()
@@ -101,7 +102,16 @@ fun DailyMoodSection() {
                 val text = dailyMood.text
 
                 if (user != null) {
-                    DailyMoodItem(index, user, media, text, dailyMood, dailyMoodViewModel)
+                    DailyMoodItem(
+                        index,
+                        currentUserId,
+                        user,
+                        media,
+                        text,
+                        dailyMood,
+                        dailyMoodViewModel,
+                        userViewModel
+                    )
                 }
             }
         }
@@ -121,11 +131,13 @@ private fun HeaderTitle() {
 @Composable
 private fun DailyMoodItem(
     index: Int,
+    currentUserId: String,
     user: UserEntityFirebase,
     media: DailyMoodMedia,
     text: DailyMoodText,
     dailyMood: DailyMoodEntity,
     dailyMoodViewModel: DailyMoodViewModel,
+    userViewModel: FirebaseUserViewModel,
 ) {
     val userDailyMoods by dailyMoodViewModel.getDailyMoodsByUserId(user.uid)
         .collectAsState(initial = null)
@@ -141,8 +153,8 @@ private fun DailyMoodItem(
     ) {
         MainSection(user, media)
         MoodDescription(text)
-        TopSection(user, dailyMood)
-        BottomSection(userDailyMoods)
+        TopSection(currentUserId, user, dailyMood)
+        BottomSection(userDailyMoods, dailyMoodViewModel, userViewModel)
     }
 }
 
@@ -255,7 +267,7 @@ private fun BackgroundImageOverlay(user: UserEntityFirebase) {
 }
 
 @Composable
-private fun BoxScope.TopSection(user: UserEntityFirebase, dailyMood: DailyMoodEntity) {
+private fun BoxScope.TopSection(currentUserId: String, user: UserEntityFirebase, dailyMood: DailyMoodEntity) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -267,7 +279,7 @@ private fun BoxScope.TopSection(user: UserEntityFirebase, dailyMood: DailyMoodEn
         Avatar(model = user.avatarUrl, 38.dp)
 
         Text(
-            text = user.username,
+            text = if (currentUserId == user.uid) "Mine" else user.username,
             style = TextStyle(
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -284,7 +296,11 @@ private fun BoxScope.TopSection(user: UserEntityFirebase, dailyMood: DailyMoodEn
 }
 
 @Composable
-private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>?, ) {
+private fun BoxScope.BottomSection(
+    userDailyMoods: List<DailyMoodEntity>?,
+    dailyMoodViewModel: DailyMoodViewModel,
+    userViewModel: FirebaseUserViewModel,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -293,24 +309,41 @@ private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>?, ) {
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        ReactionButton()
+        ReactionButton(latestDailyMood = userDailyMoods?.get(0), dailyMoodViewModel, userViewModel)
         ReactionCount(userDailyMoods)
         DailyMoodsCount(userDailyMoods)
     }
 }
 
 @Composable
-private fun ReactionButton() {
+private fun ReactionButton(
+    latestDailyMood: DailyMoodEntity?,
+    dailyMoodViewModel: DailyMoodViewModel,
+    userViewModel: FirebaseUserViewModel,
+) {
+    val currentUserId = userViewModel.loggedUser.value?.uid.orEmpty()
+    val isReacted = latestDailyMood?.reactorId?.contains(currentUserId) ?: false
+
     IconButton(
-        onClick = {},
+        onClick = {
+            latestDailyMood?.let {
+                dailyMoodViewModel.updateDailyMood(
+                    mood = it.copy(reactorId = if (isReacted) it.reactorId - currentUserId else it.reactorId + currentUserId)
+                )
+            }
+        },
         modifier = Modifier
-            .border(width = 0.5.dp, color = Color.Red, shape = CircleShape)
+            .border(
+                width = 0.5.dp,
+                color = if (isReacted) Color.Red else Color.White,
+                shape = CircleShape
+            )
             .size(38.dp)
     ) {
         Icon(
             painter = painterResource(R.drawable.love),
             contentDescription = null,
-            tint = Color.Red,
+            tint = if (isReacted) Color.Red else Color.White,
             modifier = Modifier.size(24.dp)
         )
     }
@@ -321,7 +354,7 @@ private fun RowScope.ReactionCount(userDailyMoods: List<DailyMoodEntity>?) {
     val totalReactors = userDailyMoods?.sumOf { it.reactorId.size } ?: 0
 
     Text(
-        text = NumberFormatter.formatValue(totalReactors.toLong(), true),
+        text = if (totalReactors == 0) "" else NumberFormatter.formatValue(totalReactors.toLong(), true),
         style = TextStyle(
             color = Color.White,
             shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),

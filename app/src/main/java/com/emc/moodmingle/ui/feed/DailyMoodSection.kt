@@ -159,14 +159,7 @@ private fun MainSection(user: Result<UserEntityFirebase>?, media: DailyMoodMedia
 
         when {
             mimeType.startsWith("image") -> {
-                AsyncImage(
-                    model = url,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(16.dp))
-                )
+                DailyMoodImage(url)
             }
 
             mimeType.startsWith("video") -> {
@@ -174,6 +167,18 @@ private fun MainSection(user: Result<UserEntityFirebase>?, media: DailyMoodMedia
             }
         }
     }
+}
+
+@Composable
+private fun DailyMoodImage(url: String) {
+    AsyncImage(
+        model = url,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(16.dp))
+    )
 }
 
 @Composable

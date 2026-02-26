@@ -164,33 +164,41 @@ private fun DailyMoodItem(
             )
         }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Avatar(model = user?.getOrNull()?.avatarUrl.orEmpty(), 38.dp)
-
-            Text(
-                text = user?.getOrNull()?.username.orEmpty(),
-                style = TextStyle(
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-
-            Text(text = dailyMood.mood.emoji, color = Color.White, fontSize = 20.sp)
-        }
+        TopSection(user, dailyMood)
 
         BottomSection(userDailyMoods)
+    }
+}
+
+@Composable
+private fun BoxScope.TopSection(
+    user: Result<UserEntityFirebase>?,
+    dailyMood: DailyMoodEntity,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Avatar(model = user?.getOrNull()?.avatarUrl.orEmpty(), 38.dp)
+
+        Text(
+            text = user?.getOrNull()?.username.orEmpty(),
+            style = TextStyle(
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+
+        Text(text = dailyMood.mood.emoji, color = Color.White, fontSize = 20.sp)
     }
 }
 
@@ -205,9 +213,7 @@ private fun BoxScope.BottomSection(userDailyMoods: List<DailyMoodEntity>) {
             .padding(8.dp)
     ) {
         ReactionButton()
-
         ReactionCount()
-
         DailyMoodsCount(userDailyMoods)
     }
 }

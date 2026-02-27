@@ -64,6 +64,7 @@ fun HomeScreen(
     onConversationClick: () -> Unit,
     onRemix: (String, String) -> Unit,
     onCreate: () -> Unit,
+    onDailyMoodClick: (Int, String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -71,7 +72,7 @@ fun HomeScreen(
             .background(Color.Black)
     ) {
         TopNavigationBar(onCreateClick, onSearchClick, onAvatarClick, onConversationClick)
-        FeedScreen(onCreateClick, onProfileClick, onChatClick, onRemix, onCreate)
+        FeedScreen(onCreateClick, onProfileClick, onChatClick, onRemix, onCreate, onDailyMoodClick)
     }
 }
 

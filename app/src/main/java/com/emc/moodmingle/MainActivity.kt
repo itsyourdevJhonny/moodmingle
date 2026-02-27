@@ -367,19 +367,25 @@ fun AppNavigation(mainNavController: NavHostController) {
         }
 
         composable(Routes.CreatePost.route) {
-            CreatePostScreen(onBack = { mainNavController.popBackStack() })
+            CreatePostScreen { mainNavController.popBackStack() }
         }
 
         composable(Routes.CreateDailyMood.route) {
-            CreateDailyMoodScreen(onBack = { mainNavController.popBackStack() })
+            CreateDailyMoodScreen { mainNavController.popBackStack() }
         }
 
-        composable(Routes.DailyMood.route) {
-            DailyMoodScreen(onBack = { mainNavController.popBackStack() })
+        composable(Routes.DailyMood.route) {backStackEntry ->
+            val index = backStackEntry.arguments?.getInt("index") ?: 0
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+
+            DailyMoodScreen(
+                userId = userId,
+                onBack = { mainNavController.popBackStack() }
+            )
         }
 
         composable(Routes.Insights.route) {
-            InsightsScreen(onBackClick = { mainNavController.popBackStack() })
+            InsightsScreen { mainNavController.popBackStack() }
         }
 
         composable(
@@ -397,7 +403,7 @@ fun AppNavigation(mainNavController: NavHostController) {
         }
 
         composable(Routes.Personal.route) {
-            PersonalScreen(onBackClick = { mainNavController.popBackStack() })
+            PersonalScreen { mainNavController.popBackStack() }
         }
 
         composable(Routes.Password.route) {
@@ -650,6 +656,9 @@ fun BottomNavigationContainer(mainNavController: NavHostController) {
                     },
                     onCreate = {
                         mainNavController.navigate(Routes.Create.route)
+                    },
+                    onDailyMoodClick = { index, userId ->
+                        mainNavController.navigate("daily_mood/$index/$userId")
                     }
                 )
             }

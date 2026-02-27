@@ -70,7 +70,7 @@ import com.emc.moodmingle.utils.text.toFontFamily
 import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
 
 @Composable
-fun DailyMoodSection() {
+fun DailyMoodSection(onDailyMoodClick: (Int, String) -> Unit) {
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
     val dailyMoodViewModel = hiltViewModel<DailyMoodViewModel>()
     val dailyMoods by dailyMoodViewModel.allActiveDailyMoods.collectAsState()
@@ -110,7 +110,8 @@ fun DailyMoodSection() {
                         text,
                         dailyMood,
                         dailyMoodViewModel,
-                        userViewModel
+                        userViewModel,
+                        onDailyMoodClick
                     )
                 }
             }
@@ -138,6 +139,7 @@ private fun DailyMoodItem(
     dailyMood: DailyMoodEntity,
     dailyMoodViewModel: DailyMoodViewModel,
     userViewModel: FirebaseUserViewModel,
+    onDailyMoodClick: (Int, String) -> Unit
 ) {
     val userDailyMoods by dailyMoodViewModel.getDailyMoodsByUserId(user.uid)
         .collectAsState(initial = null)
@@ -148,7 +150,7 @@ private fun DailyMoodItem(
             .height(200.dp)
             .width(150.dp)
             .background(PrimaryDark, RoundedCornerShape(16.dp))
-            .clickable {},
+            .clickable { onDailyMoodClick(index, dailyMood.userId) },
         contentAlignment = Alignment.Center
     ) {
         MainSection(user, media)
@@ -267,7 +269,11 @@ private fun BackgroundImageOverlay(user: UserEntityFirebase) {
 }
 
 @Composable
-private fun BoxScope.TopSection(currentUserId: String, user: UserEntityFirebase, dailyMood: DailyMoodEntity) {
+private fun BoxScope.TopSection(
+    currentUserId: String,
+    user: UserEntityFirebase,
+    dailyMood: DailyMoodEntity,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -301,6 +307,8 @@ private fun BoxScope.BottomSection(
     dailyMoodViewModel: DailyMoodViewModel,
     userViewModel: FirebaseUserViewModel,
 ) {
+    val latestDailyMood = userDailyMoods?.get(0)
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -309,8 +317,11 @@ private fun BoxScope.BottomSection(
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        ReactionButton(latestDailyMood = userDailyMoods?.get(0), dailyMoodViewModel, userViewModel)
-        ReactionCount(userDailyMoods)
+        if (latestDailyMood?.settings?.reactionEnabled == true) {
+            ReactionButton(latestDailyMood, dailyMoodViewModel, userViewModel)
+            ReactionCount(userDailyMoods)
+        }
+
         DailyMoodsCount(userDailyMoods)
     }
 }
@@ -354,7 +365,10 @@ private fun RowScope.ReactionCount(userDailyMoods: List<DailyMoodEntity>?) {
     val totalReactors = userDailyMoods?.sumOf { it.reactorId.size } ?: 0
 
     Text(
-        text = if (totalReactors == 0) "" else NumberFormatter.formatValue(totalReactors.toLong(), true),
+        text = if (totalReactors == 0) "" else NumberFormatter.formatValue(
+            totalReactors.toLong(),
+            true
+        ),
         style = TextStyle(
             color = Color.White,
             shadow = Shadow(color = Color.Black, offset = Offset(4f, 4f)),

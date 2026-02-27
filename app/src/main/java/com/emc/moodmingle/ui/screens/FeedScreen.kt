@@ -105,6 +105,7 @@ fun FeedScreen(
     onChat: (String, String) -> Unit,
     onRemix: (String, String) -> Unit,
     onCreate: () -> Unit,
+    onDailyMoodClick: (Int, String) -> Unit
 ) {
     val userViewModel = hiltViewModel<FirebaseUserViewModel>()
     val postViewModel = hiltViewModel<PostViewModelFirebase>()
@@ -161,7 +162,7 @@ fun FeedScreen(
 
             item { CreatePostSection(onCreateClick) }
 
-            item { DailyMoodSection() }
+            item { DailyMoodSection(onDailyMoodClick) }
 
             items(
                 items = pagedPosts,

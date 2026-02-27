@@ -27,7 +27,7 @@ sealed class Routes(val route: String) {
     object Conversation : Routes("conversation")
     object Remix : Routes("remix/{entityId}/{type}")
     object Music : Routes("music")
-    object DailyMood : Routes("daily_mood")
+    object DailyMood : Routes("daily_mood/{index}/{userId}")
 
     object BottomHome : Routes("home_tab")
     object BottomNotification : Routes("notification_tab")

@@ -695,7 +695,7 @@ private fun BoxScope.SingleVideoSection(
 }
 
 @Composable
-private fun rememberMediaPalette(uri: Uri, isVideo: Boolean): State<Pair<Color, Color>> {
+fun rememberMediaPalette(uri: Uri, isVideo: Boolean): State<Pair<Color, Color>> {
     val context = LocalContext.current
     val state = remember { mutableStateOf(Color.Black to Color.Black) }
 

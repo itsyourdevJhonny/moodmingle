@@ -7,11 +7,13 @@ import android.graphics.ImageDecoder
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.palette.graphics.Palette
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.net.URL
 
 object MediaPaletteExtractor {
 
@@ -19,15 +21,28 @@ object MediaPaletteExtractor {
         context: Context,
         uri: Uri,
         isVideo: Boolean
-    ): Pair<Color, Color> = withContext(Dispatchers.Default) {
+    ): Pair<Color, Color> = withContext(Dispatchers.IO) {
 
-        val bitmap = loadBitmap(context, uri, isVideo)
-        val (topStrip, bottomStrip) = extractStrips(bitmap)
+        if (isVideo) {
+            return@withContext Color.Black to Color.Black
+        }
 
-        val topColor = extractPaletteColor(topStrip)
-        val bottomColor = extractPaletteColor(bottomStrip)
+        val bitmap = context.getBitmapFromUri(uri)
 
-        topColor to bottomColor
+        if (bitmap != null) {
+            return@withContext extractFromBitmap(bitmap)
+        } else {
+            return@withContext Color.Black to Color.Black
+        }
+    }
+
+    private fun extractFromBitmap(bitmap: Bitmap): Pair<Color, Color> {
+        val palette = Palette.from(bitmap).generate()
+
+        val topColor = palette.getVibrantColor(android.graphics.Color.BLACK)
+        val bottomColor = palette.getDarkVibrantColor(android.graphics.Color.BLACK)
+
+        return Color(topColor) to Color(bottomColor)
     }
 
     private fun loadBitmap(
@@ -157,5 +172,31 @@ private fun Bitmap.toSoftwareBitmap(): Bitmap {
         this.copy(Bitmap.Config.ARGB_8888, false)
     } else {
         this
+    }
+}
+
+fun Context.getBitmapFromUri(uri: Uri): Bitmap? {
+    return try {
+        when (uri.scheme) {
+
+            "http", "https" -> {
+                BitmapFactory.decodeStream(URL(uri.toString()).openStream())
+            }
+
+            "content", "file" -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    ImageDecoder.decodeBitmap(
+                        ImageDecoder.createSource(contentResolver, uri)
+                    )
+                } else {
+                    MediaStore.Images.Media.getBitmap(contentResolver, uri)
+                }
+            }
+
+            else -> null
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }

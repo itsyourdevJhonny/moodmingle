@@ -105,7 +105,6 @@ private fun Content(
 
     HorizontalPager(state = pagerState) { page ->
         val mood = allMoods[page]
-        val text = mood.text
         val media = mood.media
 
         var paletteColors by remember { mutableStateOf(listOf(Color.Black, Color.Black)) }
@@ -218,30 +217,7 @@ private fun Content(
                 }
             }
 
-            val color = if (text.color.toColor().luminance() < 0.5f) Color.White else Color.Black
-
-            Text(
-                text = text.description,
-                color = when (text.style) {
-                    TextStyle.NORMAL -> text.color.toColor()
-                    TextStyle.WITH_BACKGROUND -> color
-                    TextStyle.WITHOUT_BACKGROUND -> Color.White
-                },
-                fontFamily = text.font.toFontFamily(),
-                textAlign = text.align.toTextAlign(),
-                modifier = Modifier
-                    .offset { IntOffset(text.offsetX.roundToInt(), text.offsetY.roundToInt()) }
-//                    .widthIn(max = (boxSize.width - 390).dp)
-                    .background(
-                        color = when (text.style) {
-                            TextStyle.NORMAL -> Color.Transparent
-                            TextStyle.WITH_BACKGROUND -> text.color.toColor()
-                            TextStyle.WITHOUT_BACKGROUND -> text.color.toColor().copy(alpha = 0.3f)
-                        },
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(8.dp)
-            )
+            DescriptionSection(mood)
 
             Box(
                 modifier = Modifier
@@ -261,31 +237,38 @@ private fun Content(
                 DailyMoodMentionSection(mood) {}
                 DailyMoodHashtagSection(mood)
                 DailyMoodLocationSection(mood)
-
-                /*Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .background(Color.Black.copy(alpha = 0.3f), CircleShape)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.location),
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-
-                    Text(
-                        text = mood.location?.displayName.orEmpty(),
-                        style = Typography.bodyMedium.copy(color = Color.White)
-                    )
-
-                }*/
             }
         }
     }
+}
+
+@Composable
+private fun DescriptionSection(mood: DailyMoodEntity) {
+    val text = mood.text
+
+    val color = if (text.color.toColor().luminance() < 0.5f) Color.White else Color.Black
+
+    Text(
+        text = text.description,
+        color = when (text.style) {
+            TextStyle.NORMAL -> text.color.toColor()
+            TextStyle.WITH_BACKGROUND -> color
+            TextStyle.WITHOUT_BACKGROUND -> Color.White
+        },
+        fontFamily = text.font.toFontFamily(),
+        textAlign = text.align.toTextAlign(),
+        modifier = Modifier
+            .offset { IntOffset(text.offsetX.roundToInt(), text.offsetY.roundToInt()) }
+            .background(
+                color = when (text.style) {
+                    TextStyle.NORMAL -> Color.Transparent
+                    TextStyle.WITH_BACKGROUND -> text.color.toColor()
+                    TextStyle.WITHOUT_BACKGROUND -> text.color.toColor().copy(alpha = 0.3f)
+                },
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp)
+    )
 }
 
 @OptIn(UnstableApi::class)

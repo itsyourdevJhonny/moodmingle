@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,7 +29,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -76,7 +74,6 @@ import com.emc.moodmingle.ui.create.dailymood.mood.DailyMoodMoodSection
 import com.emc.moodmingle.ui.create.dailymood.page.rememberMediaPalette
 import com.emc.moodmingle.ui.create.util.getMimeType
 import com.emc.moodmingle.ui.settings.saved.media.getMime
-import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.Avatar
 import com.emc.moodmingle.utils.text.toColor
@@ -98,12 +95,12 @@ fun DailyMoodScreen(userId: String, onBack: () -> Unit) {
     LaunchedEffect(Unit) { dailyMoodViewModel.observeAllActiveDailyMoods() }
 
     Scaffold(
-        containerColor = Color.Black,
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = {},
-                actions = { Header(onBack, selectedUser) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = PrimaryDark)
+//                colors = TopAppBarDefaults.topAppBarColors(containerColor = SecondaryDark),
+                actions = { Header(onBack, selectedUser) }
             )
         }
     ) { paddingValues ->
@@ -117,7 +114,9 @@ private fun Header(onBack: () -> Unit, selectedUser: UserEntityFirebase?) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Green, RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)),
     ) {
         IconButton(onClick = onBack) {
             Icon(
@@ -223,7 +222,12 @@ private fun Content(
                 enter = fadeIn(),
                 exit = fadeOut(),
                 modifier = Modifier
-                    .offset { IntOffset(mood.gif.offsetX.roundToInt(), mood.gif.offsetY.roundToInt()) }
+                    .offset {
+                        IntOffset(
+                            mood.gif.offsetX.roundToInt(),
+                            mood.gif.offsetY.roundToInt()
+                        )
+                    }
             ) {
                 when (mood.gif.type) {
                     GifType.IMAGE -> {

@@ -147,75 +147,13 @@ private fun Content(
                     }
 
                     mimeType.startsWith("video") -> {
-                        DailyMoodVideoPlayer(url)
+                        VideoSection(url)
                     }
                 }
 
             }
 
-            AnimatedVisibility(
-                visible = mood.gif.url.isNotEmpty(),
-                enter = fadeIn(),
-                exit = fadeOut(),
-                modifier = Modifier
-                    .offset {
-                        IntOffset(
-                            mood.gif.offsetX.roundToInt(),
-                            mood.gif.offsetY.roundToInt()
-                        )
-                    }
-            ) {
-                when (mood.gif.type) {
-                    GifType.IMAGE -> {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(mood.gif.url)
-                                .crossfade(true)
-                                .diskCachePolicy(CachePolicy.ENABLED)
-                                .memoryCachePolicy(CachePolicy.ENABLED)
-                                .build(),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(120.dp)
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(8.dp))
-                        )
-                    }
-
-                    GifType.VIDEO -> {
-                        val context = LocalContext.current
-                        val exoPlayer = remember(mood.gif.url) {
-                            ExoPlayer.Builder(context)
-                                .build()
-                                .apply {
-                                    setMediaItem(MediaItem.fromUri(mood.gif.url))
-                                    prepare()
-                                    playWhenReady = true
-                                    repeatMode = Player.REPEAT_MODE_ONE
-                                    volume = 0f
-                                }
-                        }
-
-                        DisposableEffect(mood.gif.url) { onDispose { exoPlayer.release() } }
-
-                        AndroidView(
-                            factory = {
-                                PlayerView(context).apply {
-                                    player = exoPlayer
-                                    useController = false
-                                    layoutParams = ViewGroup.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        ViewGroup.LayoutParams.MATCH_PARENT
-                                    )
-                                }
-                            },
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                        )
-                    }
-                }
-            }
+            GifSection(mood)
 
             DescriptionSection(mood)
 
@@ -237,6 +175,70 @@ private fun Content(
                 DailyMoodMentionSection(mood) {}
                 DailyMoodHashtagSection(mood)
                 DailyMoodLocationSection(mood)
+            }
+        }
+    }
+}
+
+@Composable
+private fun GifSection(mood: DailyMoodEntity) {
+    val gif = mood.gif
+    val gifUrl = gif.url
+
+    AnimatedVisibility(
+        visible = gifUrl.isNotEmpty(),
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = Modifier.offset { IntOffset(gif.offsetX.roundToInt(), gif.offsetY.roundToInt()) }
+    ) {
+        when (gif.type) {
+            GifType.IMAGE -> {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(gif.url)
+                        .crossfade(true)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .build(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(120.dp)
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            }
+
+            GifType.VIDEO -> {
+                val context = LocalContext.current
+                val exoPlayer = remember(gifUrl) {
+                    ExoPlayer.Builder(context)
+                        .build()
+                        .apply {
+                            setMediaItem(MediaItem.fromUri(gifUrl))
+                            prepare()
+                            playWhenReady = true
+                            repeatMode = Player.REPEAT_MODE_ONE
+                            volume = 0f
+                        }
+                }
+
+                DisposableEffect(Unit) { onDispose { exoPlayer.release() } }
+
+                AndroidView(
+                    factory = {
+                        PlayerView(context).apply {
+                            player = exoPlayer
+                            useController = false
+                            layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                        }
+                    },
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
             }
         }
     }
@@ -273,7 +275,7 @@ private fun DescriptionSection(mood: DailyMoodEntity) {
 
 @OptIn(UnstableApi::class)
 @Composable
-private fun DailyMoodVideoPlayer(videoUrl: String) {
+private fun VideoSection(url: String) {
     val context = LocalContext.current
 
     var isPlaying by remember { mutableStateOf(true) }
@@ -281,7 +283,7 @@ private fun DailyMoodVideoPlayer(videoUrl: String) {
     // Create exoplayer
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            val mediaItem = MediaItem.fromUri(videoUrl)
+            val mediaItem = MediaItem.fromUri(url)
             setMediaItem(mediaItem)
             repeatMode = Player.REPEAT_MODE_ONE
             prepare()

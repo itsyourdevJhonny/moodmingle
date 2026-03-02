@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -133,14 +134,7 @@ private fun Content(
 
             DescriptionSection(mood)
 
-            Box(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .align(Alignment.BottomEnd)
-                    .offset(y = (-48).dp)
-            ) {
-                DailyMoodMoodSection(mood)
-            }
+            MoodSection(mood)
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -153,6 +147,18 @@ private fun Content(
                 DailyMoodLocationSection(mood)
             }
         }
+    }
+}
+
+@Composable
+private fun BoxScope.MoodSection(mood: DailyMoodEntity) {
+    Box(
+        modifier = Modifier
+            .padding(12.dp)
+            .align(Alignment.BottomEnd)
+            .offset(y = (-48).dp)
+    ) {
+        DailyMoodMoodSection(mood)
     }
 }
 

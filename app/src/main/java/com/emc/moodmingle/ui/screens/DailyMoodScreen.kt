@@ -129,11 +129,8 @@ private fun Content(
                 .background(Brush.verticalGradient(paletteColors))
         ) {
             MediaSection(mood)
-
             GifSection(mood)
-
             DescriptionSection(mood)
-
             MoodSection(mood)
 
             Column(
@@ -156,10 +153,9 @@ private fun BoxScope.MoodSection(mood: DailyMoodEntity) {
         modifier = Modifier
             .padding(12.dp)
             .align(Alignment.BottomEnd)
-            .offset(y = (-48).dp)
-    ) {
-        DailyMoodMoodSection(mood)
-    }
+            .offset(y = (-48).dp),
+        content = { DailyMoodMoodSection(mood) }
+    )
 }
 
 @Composable

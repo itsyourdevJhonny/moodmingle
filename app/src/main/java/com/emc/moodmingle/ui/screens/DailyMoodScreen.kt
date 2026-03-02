@@ -113,10 +113,7 @@ fun DailyMoodScreen(userId: String, onBack: () -> Unit) {
 }
 
 @Composable
-private fun Header(
-    onBack: () -> Unit,
-    selectedUser: UserEntityFirebase?,
-) {
+private fun Header(onBack: () -> Unit, selectedUser: UserEntityFirebase?) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),

@@ -110,7 +110,6 @@ import com.emc.moodmingle.ui.create.dailymood.visibility.DailyMoodAudience
 import com.emc.moodmingle.ui.remix.MoodPickerDialog
 import com.emc.moodmingle.ui.theme.PrimaryDark
 import com.emc.moodmingle.ui.theme.SecondaryDark
-import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.components.GifPicker
 import com.emc.moodmingle.utils.components.ScaffoldHeader
 import com.emc.moodmingle.utils.media.MediaPaletteExtractor

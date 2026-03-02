@@ -128,21 +128,7 @@ private fun Content(
                 .fillMaxSize()
                 .background(Brush.verticalGradient(paletteColors))
         ) {
-            if (mood.media.urls.isNotEmpty()) {
-                val url = mood.media.urls[0]
-                val mimeType = getMime(url)
-
-                when {
-                    mimeType.startsWith("image") -> {
-                        ImageSection(url, media)
-                    }
-
-                    mimeType.startsWith("video") -> {
-                        VideoSection(url)
-                    }
-                }
-
-            }
+            MediaSection(mood, media)
 
             GifSection(mood)
 
@@ -168,6 +154,25 @@ private fun Content(
                 DailyMoodLocationSection(mood)
             }
         }
+    }
+}
+
+@Composable
+private fun MediaSection(mood: DailyMoodEntity, media: DailyMoodMedia) {
+    if (mood.media.urls.isNotEmpty()) {
+        val url = mood.media.urls[0]
+        val mimeType = getMime(url)
+
+        when {
+            mimeType.startsWith("image") -> {
+                ImageSection(url, media)
+            }
+
+            mimeType.startsWith("video") -> {
+                VideoSection(url)
+            }
+        }
+
     }
 }
 

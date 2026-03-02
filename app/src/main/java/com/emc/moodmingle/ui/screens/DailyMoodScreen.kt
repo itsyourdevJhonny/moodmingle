@@ -165,11 +165,11 @@ private fun MediaSection(mood: DailyMoodEntity, media: DailyMoodMedia) {
 
         when {
             mimeType.startsWith("image") -> {
-                ImageSection(url, media)
+                Image(url, media)
             }
 
             mimeType.startsWith("video") -> {
-                VideoSection(url)
+                Video(url)
             }
         }
 
@@ -177,7 +177,7 @@ private fun MediaSection(mood: DailyMoodEntity, media: DailyMoodMedia) {
 }
 
 @Composable
-private fun ImageSection(
+private fun Image(
     url: String,
     media: DailyMoodMedia,
 ) {
@@ -295,7 +295,7 @@ private fun DescriptionSection(mood: DailyMoodEntity) {
 
 @OptIn(UnstableApi::class)
 @Composable
-private fun VideoSection(url: String) {
+private fun Video(url: String) {
     val context = LocalContext.current
 
     var isPlaying by remember { mutableStateOf(true) }

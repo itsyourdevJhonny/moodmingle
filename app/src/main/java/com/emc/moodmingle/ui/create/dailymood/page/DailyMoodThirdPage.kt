@@ -98,6 +98,7 @@ import com.emc.moodmingle.ui.create.dailymood.action.DailyMoodContentBottomSheet
 import com.emc.moodmingle.ui.create.dailymood.action.DailyMoodFloatingActions
 import com.emc.moodmingle.ui.create.dailymood.hashtag.DailyMoodHashtagSection
 import com.emc.moodmingle.ui.create.dailymood.location.DailyMoodLocation
+import com.emc.moodmingle.ui.create.dailymood.location.DailyMoodLocationSection
 import com.emc.moodmingle.ui.create.dailymood.media.image.DailyMoodEditImage
 import com.emc.moodmingle.ui.create.dailymood.media.image.DailyMoodSelectMedia
 import com.emc.moodmingle.ui.create.dailymood.media.image.animatedShape
@@ -419,7 +420,7 @@ private fun Content(
         ) {
             DailyMoodMentionSection(mood, onMentionDeleted)
             DailyMoodHashtagSection(mood)
-            LocationSection(mood)
+            DailyMoodLocationSection(mood)
         }
     }
 }
@@ -846,38 +847,6 @@ private fun BoxScope.GifSection(
 
     AnimatedDivider(visible = showHorizontalGuide) {
         HorizontalDivider(color = Color.White.copy(alpha = 0.8f))
-    }
-}
-
-@Composable
-private fun LocationSection(mood: DailyMoodEntity) {
-    AnimatedVisibility(
-        visible = mood.location != null,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        mood.location?.let { location ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier
-                    .padding(8.dp)
-                    .background(Color.Black.copy(alpha = 0.3f), CircleShape)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.location),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-
-                Text(
-                    text = location.displayName,
-                    style = Typography.bodyMedium.copy(color = Color.White)
-                )
-            }
-        }
     }
 }
 

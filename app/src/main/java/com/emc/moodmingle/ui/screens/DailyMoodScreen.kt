@@ -246,13 +246,14 @@ private fun Content(
 private fun DescriptionSection(mood: DailyMoodEntity) {
     val text = mood.text
 
-    val color = if (text.color.toColor().luminance() < 0.5f) Color.White else Color.Black
+    val hexColor = text.color
+    val displayedColor = if (hexColor.toColor().luminance() < 0.5f) Color.White else Color.Black
 
     Text(
         text = text.description,
         color = when (text.style) {
-            TextStyle.NORMAL -> text.color.toColor()
-            TextStyle.WITH_BACKGROUND -> color
+            TextStyle.NORMAL -> hexColor.toColor()
+            TextStyle.WITH_BACKGROUND -> displayedColor
             TextStyle.WITHOUT_BACKGROUND -> Color.White
         },
         fontFamily = text.font.toFontFamily(),
@@ -262,8 +263,8 @@ private fun DescriptionSection(mood: DailyMoodEntity) {
             .background(
                 color = when (text.style) {
                     TextStyle.NORMAL -> Color.Transparent
-                    TextStyle.WITH_BACKGROUND -> text.color.toColor()
-                    TextStyle.WITHOUT_BACKGROUND -> text.color.toColor().copy(alpha = 0.3f)
+                    TextStyle.WITH_BACKGROUND -> hexColor.toColor()
+                    TextStyle.WITHOUT_BACKGROUND -> hexColor.toColor().copy(alpha = 0.3f)
                 },
                 shape = RoundedCornerShape(8.dp)
             )

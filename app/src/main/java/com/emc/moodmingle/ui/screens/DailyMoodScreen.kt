@@ -57,6 +57,7 @@ import coil.request.ImageRequest
 import com.emc.moodmingle.domain.remote.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.domain.remote.model.post.dailymood.gif.Gif
 import com.emc.moodmingle.domain.remote.model.post.dailymood.gif.GifType
+import com.emc.moodmingle.domain.remote.model.post.dailymood.media.DailyMoodMedia
 import com.emc.moodmingle.domain.remote.model.post.dailymood.media.DailyMoodMediaType
 import com.emc.moodmingle.domain.remote.model.post.dailymood.text.TextStyle
 import com.emc.moodmingle.domain.remote.viewmodel.dailymood.DailyMoodViewModel
@@ -133,18 +134,7 @@ private fun Content(
 
                 when {
                     mimeType.startsWith("image") -> {
-                        AsyncImage(
-                            model = url,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .offset {
-                                    IntOffset(
-                                        x = media.image.offsetX.roundToInt(),
-                                        y = media.image.offsetY.roundToInt()
-                                    )
-                                }
-                        )
+                        ImageSection(url, media)
                     }
 
                     mimeType.startsWith("video") -> {
@@ -182,6 +172,25 @@ private fun Content(
 }
 
 @Composable
+private fun ImageSection(
+    url: String,
+    media: DailyMoodMedia,
+) {
+    AsyncImage(
+        model = url,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .offset {
+                IntOffset(
+                    x = media.image.offsetX.roundToInt(),
+                    y = media.image.offsetY.roundToInt()
+                )
+            }
+    )
+}
+
+@Composable
 private fun GifSection(mood: DailyMoodEntity) {
     val gif = mood.gif
     val gifUrl = gif.url
@@ -193,13 +202,8 @@ private fun GifSection(mood: DailyMoodEntity) {
         modifier = Modifier.offset { IntOffset(gif.offsetX.roundToInt(), gif.offsetY.roundToInt()) }
     ) {
         when (gif.type) {
-            GifType.IMAGE -> {
-                ImageGif(gif)
-            }
-
-            GifType.VIDEO -> {
-                VideoGif(gifUrl)
-            }
+            GifType.IMAGE -> { ImageGif(gif) }
+            GifType.VIDEO -> { VideoGif(gifUrl) }
         }
     }
 }

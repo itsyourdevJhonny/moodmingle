@@ -209,39 +209,44 @@ private fun GifSection(mood: DailyMoodEntity) {
             }
 
             GifType.VIDEO -> {
-                val context = LocalContext.current
-                val exoPlayer = remember(gifUrl) {
-                    ExoPlayer.Builder(context)
-                        .build()
-                        .apply {
-                            setMediaItem(MediaItem.fromUri(gifUrl))
-                            prepare()
-                            playWhenReady = true
-                            repeatMode = Player.REPEAT_MODE_ONE
-                            volume = 0f
-                        }
-                }
-
-                DisposableEffect(Unit) { onDispose { exoPlayer.release() } }
-
-                AndroidView(
-                    factory = {
-                        PlayerView(context).apply {
-                            player = exoPlayer
-                            useController = false
-                            layoutParams = ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT
-                            )
-                        }
-                    },
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
+                VideoGif(gifUrl)
             }
         }
     }
+}
+
+@Composable
+private fun VideoGif(gifUrl: String) {
+    val context = LocalContext.current
+    val exoPlayer = remember(gifUrl) {
+        ExoPlayer.Builder(context)
+            .build()
+            .apply {
+                setMediaItem(MediaItem.fromUri(gifUrl))
+                prepare()
+                playWhenReady = true
+                repeatMode = Player.REPEAT_MODE_ONE
+                volume = 0f
+            }
+    }
+
+    DisposableEffect(Unit) { onDispose { exoPlayer.release() } }
+
+    AndroidView(
+        factory = {
+            PlayerView(context).apply {
+                player = exoPlayer
+                useController = false
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            }
+        },
+        modifier = Modifier
+            .size(120.dp)
+            .clip(RoundedCornerShape(8.dp))
+    )
 }
 
 @Composable

@@ -1,6 +1,7 @@
 package com.emc.moodmingle.ui.screens
 
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -21,14 +22,10 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -46,8 +43,6 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -66,7 +61,6 @@ import com.emc.moodmingle.domain.remote.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.domain.remote.model.post.dailymood.gif.GifType
 import com.emc.moodmingle.domain.remote.model.post.dailymood.media.DailyMoodMediaType
 import com.emc.moodmingle.domain.remote.model.post.dailymood.text.TextStyle
-import com.emc.moodmingle.domain.remote.model.user.UserEntityFirebase
 import com.emc.moodmingle.domain.remote.viewmodel.dailymood.DailyMoodViewModel
 import com.emc.moodmingle.ui.create.dailymood.hashtag.DailyMoodHashtagSection
 import com.emc.moodmingle.ui.create.dailymood.mention.DailyMoodMentionSection
@@ -75,68 +69,25 @@ import com.emc.moodmingle.ui.create.dailymood.page.rememberMediaPalette
 import com.emc.moodmingle.ui.create.util.getMimeType
 import com.emc.moodmingle.ui.settings.saved.media.getMime
 import com.emc.moodmingle.ui.theme.Typography
-import com.emc.moodmingle.utils.components.Avatar
 import com.emc.moodmingle.utils.text.toColor
 import com.emc.moodmingle.utils.text.toFontFamily
 import com.emc.moodmingle.utils.text.toTextAlign
-import com.emc.moodmingle.viewmodel.remote.FirebaseUserViewModel
-import kotlinx.coroutines.flow.first
 import kotlin.math.roundToInt
 
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DailyMoodScreen(userId: String, onBack: () -> Unit) {
-    val userViewModel = hiltViewModel<FirebaseUserViewModel>()
     val dailyMoodViewModel = hiltViewModel<DailyMoodViewModel>()
-
     val dailyMoods by dailyMoodViewModel.allActiveDailyMoods.collectAsState()
-    var selectedUser by remember { mutableStateOf<UserEntityFirebase?>(null) }
 
     LaunchedEffect(Unit) { dailyMoodViewModel.observeAllActiveDailyMoods() }
 
-    Scaffold(
-        containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
-                title = {},
-//                colors = TopAppBarDefaults.topAppBarColors(containerColor = SecondaryDark),
-                actions = { Header(onBack, selectedUser) }
-            )
-        }
-    ) { paddingValues ->
-        Content(paddingValues, dailyMoods, userId, userViewModel) { selectedUser = it }
+    BackHandler { onBack() }
+
+    Scaffold { paddingValues ->
+        Content(paddingValues, dailyMoods, userId)
     }
 
-}
-
-@Composable
-private fun Header(onBack: () -> Unit, selectedUser: UserEntityFirebase?) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Green, RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)),
-    ) {
-        IconButton(onClick = onBack) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = null,
-                tint = Color.White
-            )
-        }
-
-        Avatar(model = selectedUser?.avatarUrl.orEmpty(), size = 38.dp)
-
-        Text(
-            text = selectedUser?.username.orEmpty(),
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(start = 8.dp)
-        )
-    }
 }
 
 @Composable
@@ -144,8 +95,6 @@ private fun Content(
     paddingValues: PaddingValues,
     dailyMoods: List<DailyMoodEntity>,
     userId: String,
-    userViewModel: FirebaseUserViewModel,
-    onUserSelected: (UserEntityFirebase) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -156,15 +105,6 @@ private fun Content(
     val allMoods = userDailyMoods + otherDailyMoods
 
     val pagerState = rememberPagerState(pageCount = { allMoods.size })
-
-    LaunchedEffect(pagerState.currentPage, allMoods) {
-        if (allMoods.isNotEmpty() && pagerState.currentPage < allMoods.size) {
-            val userId = allMoods[pagerState.currentPage].userId
-            val user = userViewModel.getUserByUid(userId).first().getOrNull()
-
-            if (user != null) onUserSelected(user)
-        }
-    }
 
     HorizontalPager(state = pagerState) { page ->
         val mood = allMoods[page]
@@ -306,7 +246,12 @@ private fun Content(
                     .padding(8.dp)
             )
 
-            Box(modifier = Modifier.padding(12.dp)) {
+            Box(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(y = (-48).dp)
+            ) {
                 DailyMoodMoodSection(mood)
             }
 

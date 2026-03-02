@@ -55,6 +55,7 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.emc.moodmingle.domain.remote.model.post.dailymood.DailyMoodEntity
+import com.emc.moodmingle.domain.remote.model.post.dailymood.gif.Gif
 import com.emc.moodmingle.domain.remote.model.post.dailymood.gif.GifType
 import com.emc.moodmingle.domain.remote.model.post.dailymood.media.DailyMoodMediaType
 import com.emc.moodmingle.domain.remote.model.post.dailymood.text.TextStyle
@@ -193,19 +194,7 @@ private fun GifSection(mood: DailyMoodEntity) {
     ) {
         when (gif.type) {
             GifType.IMAGE -> {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(gif.url)
-                        .crossfade(true)
-                        .diskCachePolicy(CachePolicy.ENABLED)
-                        .memoryCachePolicy(CachePolicy.ENABLED)
-                        .build(),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(120.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(8.dp))
-                )
+                ImageGif(gif)
             }
 
             GifType.VIDEO -> {
@@ -213,6 +202,23 @@ private fun GifSection(mood: DailyMoodEntity) {
             }
         }
     }
+}
+
+@Composable
+private fun ImageGif(gif: Gif) {
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(gif.url)
+            .crossfade(true)
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .build(),
+        contentDescription = null,
+        modifier = Modifier
+            .size(120.dp)
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(8.dp))
+    )
 }
 
 @Composable

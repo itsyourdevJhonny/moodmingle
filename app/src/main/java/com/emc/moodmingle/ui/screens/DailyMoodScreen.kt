@@ -107,7 +107,6 @@ private fun Content(
 
     HorizontalPager(state = pagerState) { page ->
         val mood = allMoods[page]
-        val media = mood.media
 
         var paletteColors by remember { mutableStateOf(listOf(Color.Black, Color.Black)) }
 
@@ -128,7 +127,7 @@ private fun Content(
                 .fillMaxSize()
                 .background(Brush.verticalGradient(paletteColors))
         ) {
-            MediaSection(mood, media)
+            MediaSection(mood)
 
             GifSection(mood)
 
@@ -158,41 +157,94 @@ private fun Content(
 }
 
 @Composable
-private fun MediaSection(mood: DailyMoodEntity, media: DailyMoodMedia) {
-    if (mood.media.urls.isNotEmpty()) {
-        val url = mood.media.urls[0]
+private fun MediaSection(mood: DailyMoodEntity) {
+    val media = mood.media
+
+    if (media.urls.isNotEmpty()) {
+        val url = media.urls[0]
         val mimeType = getMime(url)
 
         when {
-            mimeType.startsWith("image") -> {
-                Image(url, media)
-            }
-
-            mimeType.startsWith("video") -> {
-                Video(url)
-            }
+            mimeType.startsWith("image") -> Image(url, media)
+            mimeType.startsWith("video") -> Video(url)
         }
-
     }
 }
 
 @Composable
-private fun Image(
-    url: String,
-    media: DailyMoodMedia,
-) {
+private fun Image(url: String, media: DailyMoodMedia) {
     AsyncImage(
         model = url,
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .offset {
-                IntOffset(
-                    x = media.image.offsetX.roundToInt(),
-                    y = media.image.offsetY.roundToInt()
-                )
-            }
+        modifier = Modifier.offset {
+            IntOffset(
+                x = media.image.offsetX.roundToInt(),
+                y = media.image.offsetY.roundToInt()
+            )
+        }
     )
+}
+
+@OptIn(UnstableApi::class)
+@Composable
+private fun Video(url: String) {
+    val context = LocalContext.current
+
+    var isPlaying by remember { mutableStateOf(true) }
+
+    // Create exoplayer
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            val mediaItem = MediaItem.fromUri(url)
+            setMediaItem(mediaItem)
+            repeatMode = Player.REPEAT_MODE_ONE
+            prepare()
+            playWhenReady = true
+        }
+    }
+
+    // Update state when player changes
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(playing: Boolean) {
+                isPlaying = playing
+            }
+        }
+
+        exoPlayer.addListener(listener)
+
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
+    }
+
+    // Release player when composable leaves
+    DisposableEffect(Unit) {
+        onDispose { exoPlayer.release() }
+    }
+
+    Box(contentAlignment = Alignment.Center) {
+        AndroidView(
+            factory = {
+                PlayerView(it).apply {
+                    player = exoPlayer
+                    useController = false
+                }
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable { if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play() }
+        )
+
+        if (!isPlaying) {
+            Icon(
+                painter = painterResource(androidx.media3.session.R.drawable.media3_icon_pause),
+                contentDescription = null
+            )
+        }
+    }
 }
 
 @Composable
@@ -207,8 +259,13 @@ private fun GifSection(mood: DailyMoodEntity) {
         modifier = Modifier.offset { IntOffset(gif.offsetX.roundToInt(), gif.offsetY.roundToInt()) }
     ) {
         when (gif.type) {
-            GifType.IMAGE -> { ImageGif(gif) }
-            GifType.VIDEO -> { VideoGif(gifUrl) }
+            GifType.IMAGE -> {
+                ImageGif(gif)
+            }
+
+            GifType.VIDEO -> {
+                VideoGif(gifUrl)
+            }
         }
     }
 }
@@ -291,65 +348,4 @@ private fun DescriptionSection(mood: DailyMoodEntity) {
             )
             .padding(8.dp)
     )
-}
-
-@OptIn(UnstableApi::class)
-@Composable
-private fun Video(url: String) {
-    val context = LocalContext.current
-
-    var isPlaying by remember { mutableStateOf(true) }
-
-    // Create exoplayer
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            val mediaItem = MediaItem.fromUri(url)
-            setMediaItem(mediaItem)
-            repeatMode = Player.REPEAT_MODE_ONE
-            prepare()
-            playWhenReady = true
-        }
-    }
-
-    // Update state when player changes
-    DisposableEffect(exoPlayer) {
-        val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(playing: Boolean) {
-                isPlaying = playing
-            }
-        }
-
-        exoPlayer.addListener(listener)
-
-        onDispose {
-            exoPlayer.removeListener(listener)
-            exoPlayer.release()
-        }
-    }
-
-    // Release player when composable leaves
-    DisposableEffect(Unit) {
-        onDispose { exoPlayer.release() }
-    }
-
-    Box(contentAlignment = Alignment.Center) {
-        AndroidView(
-            factory = {
-                PlayerView(it).apply {
-                    player = exoPlayer
-                    useController = false
-                }
-            },
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable { if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play() }
-        )
-
-        if (!isPlaying) {
-            Icon(
-                painter = painterResource(androidx.media3.session.R.drawable.media3_icon_pause),
-                contentDescription = null
-            )
-        }
-    }
 }

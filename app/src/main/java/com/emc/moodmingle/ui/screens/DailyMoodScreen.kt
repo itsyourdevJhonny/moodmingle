@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -56,19 +54,18 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.emc.moodmingle.R
 import com.emc.moodmingle.domain.remote.model.post.dailymood.DailyMoodEntity
 import com.emc.moodmingle.domain.remote.model.post.dailymood.gif.GifType
 import com.emc.moodmingle.domain.remote.model.post.dailymood.media.DailyMoodMediaType
 import com.emc.moodmingle.domain.remote.model.post.dailymood.text.TextStyle
 import com.emc.moodmingle.domain.remote.viewmodel.dailymood.DailyMoodViewModel
 import com.emc.moodmingle.ui.create.dailymood.hashtag.DailyMoodHashtagSection
+import com.emc.moodmingle.ui.create.dailymood.location.DailyMoodLocationSection
 import com.emc.moodmingle.ui.create.dailymood.mention.DailyMoodMentionSection
 import com.emc.moodmingle.ui.create.dailymood.mood.DailyMoodMoodSection
 import com.emc.moodmingle.ui.create.dailymood.page.rememberMediaPalette
 import com.emc.moodmingle.ui.create.util.getMimeType
 import com.emc.moodmingle.ui.settings.saved.media.getMime
-import com.emc.moodmingle.ui.theme.Typography
 import com.emc.moodmingle.utils.text.toColor
 import com.emc.moodmingle.utils.text.toFontFamily
 import com.emc.moodmingle.utils.text.toTextAlign
@@ -263,8 +260,9 @@ private fun Content(
             ) {
                 DailyMoodMentionSection(mood) {}
                 DailyMoodHashtagSection(mood)
+                DailyMoodLocationSection(mood)
 
-                Row(
+                /*Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier
@@ -284,7 +282,7 @@ private fun Content(
                         style = Typography.bodyMedium.copy(color = Color.White)
                     )
 
-                }
+                }*/
             }
         }
     }

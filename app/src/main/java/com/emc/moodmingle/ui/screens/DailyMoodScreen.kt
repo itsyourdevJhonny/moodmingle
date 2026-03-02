@@ -102,32 +102,7 @@ fun DailyMoodScreen(userId: String, onBack: () -> Unit) {
         topBar = {
             TopAppBar(
                 title = {},
-                actions = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = null,
-                                tint = Color.White
-                            )
-                        }
-
-                        Avatar(model = selectedUser?.avatarUrl.orEmpty(), size = 38.dp)
-
-                        Text(
-                            text = selectedUser?.username.orEmpty(),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
-                },
+                actions = { Header(onBack, selectedUser) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = PrimaryDark)
             )
         }
@@ -135,6 +110,37 @@ fun DailyMoodScreen(userId: String, onBack: () -> Unit) {
         Content(paddingValues, dailyMoods, userId, userViewModel) { selectedUser = it }
     }
 
+}
+
+@Composable
+private fun Header(
+    onBack: () -> Unit,
+    selectedUser: UserEntityFirebase?,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = null,
+                tint = Color.White
+            )
+        }
+
+        Avatar(model = selectedUser?.avatarUrl.orEmpty(), size = 38.dp)
+
+        Text(
+            text = selectedUser?.username.orEmpty(),
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
 }
 
 @Composable

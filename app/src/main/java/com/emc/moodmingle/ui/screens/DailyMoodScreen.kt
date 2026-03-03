@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -100,6 +101,170 @@ fun DailyMoodScreen(userId: String, onBack: () -> Unit) {
 }
 
 @Composable
+private fun Content(
+    paddingValues: PaddingValues,
+    dailyMoods: List<DailyMoodEntity>,
+    userId: String,
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    val groupedMoods = dailyMoods
+        .groupBy { it.userId }
+        .toList()
+
+    val pagerState = rememberPagerState(pageCount = { groupedMoods.size })
+
+    if (groupedMoods.isNotEmpty()) {
+        StoryEngine(
+            paddingValues = paddingValues,
+            moods = dailyMoods,
+            userId = userId,
+            onFinished = {
+                // move to next user automatically
+                if (pagerState.currentPage < groupedMoods.lastIndex) {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun StoryEngine(
+    paddingValues: PaddingValues,
+    moods: List<DailyMoodEntity>,
+    userId: String,
+    onFinished: () -> Unit,
+) {
+    val userMoods = moods.filter { it.userId == userId }
+
+    // REMEMBER PAGERSTATE FOR THIS USER
+    val pagerState = rememberPagerState(pageCount = { userMoods.size })
+    val coroutineScope = rememberCoroutineScope()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+//            .padding(paddingValues)
+    ) {
+
+        // STORY PROGRESS BAR
+        StoryProgressBar(total = userMoods.size, currentIndex = pagerState.currentPage)
+
+        // PASS PAGERSTATE TO MoodContent
+        MoodContent(
+            paddingValues = paddingValues,
+            dailyMoods = userMoods,
+            userId = userId,
+            pagerState = pagerState,
+            onFinished = onFinished
+        )
+
+        // CLICK AREAS FOR NEXT / PREV
+        /*Row(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = {
+                            if (pagerState.currentPage > 0) coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            }
+                        }
+                    )
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = {
+                            if (pagerState.currentPage < userMoods.lastIndex) coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            } else onFinished()
+                        }
+                    )
+            )
+        }*/
+    }
+
+    // AUTO-PROGRESS TIMER
+    LaunchedEffect(pagerState.currentPage) {
+        delay(5000) // 5 seconds per story
+        if (pagerState.currentPage < userMoods.lastIndex) {
+            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+        } else {
+            onFinished()
+        }
+    }
+}
+
+@Composable
+private fun MoodContent(
+    paddingValues: PaddingValues,
+    dailyMoods: List<DailyMoodEntity>,
+    userId: String,
+    pagerState: PagerState,
+    onFinished: () -> Unit,
+) {
+    val context = LocalContext.current
+
+    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+        val mood = dailyMoods[page]
+
+        var paletteColors by remember { mutableStateOf(listOf(Color.Black, Color.Black)) }
+
+        if (mood.media.type == DailyMoodMediaType.SINGLE && mood.media.urls.isNotEmpty()) {
+            val uri = mood.media.urls.first().toUri()
+            val mimeType = getMimeType(context, uri) ?: ""
+            val isVideo = mimeType.startsWith("video")
+            val (topColor, bottomColor) = rememberMediaPalette(uri, isVideo).value
+            paletteColors = listOf(topColor, bottomColor)
+        } else {
+            paletteColors = listOf(Color.Black, Color.Black)
+        }
+
+        Box(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .background(Brush.verticalGradient(paletteColors))
+        ) {
+            MediaSection(mood)
+            GifSection(mood)
+            DescriptionSection(mood)
+            MoodSection(mood)
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(bottom = 8.dp)
+            ) {
+                DailyMoodMentionSection(mood) {}
+                DailyMoodHashtagSection(mood)
+                DailyMoodLocationSection(mood)
+            }
+        }
+    }
+
+    // CALL onFinished WHEN USER REACHES LAST PAGE
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage >= dailyMoods.lastIndex) {
+            onFinished()
+        }
+    }
+}
+
+/*@Composable
 private fun Content(paddingValues: PaddingValues, dailyMoods: List<DailyMoodEntity>, userId: String) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -123,6 +288,54 @@ private fun Content(paddingValues: PaddingValues, dailyMoods: List<DailyMoodEnti
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun StoryEngine(
+    paddingValues: PaddingValues,
+    moods: List<DailyMoodEntity>,
+    userId: String,
+    onFinished: () -> Unit,
+) {
+    var currentIndex by remember { mutableIntStateOf(0) }
+
+    // auto progress timer
+    LaunchedEffect(currentIndex) {
+        delay(10000) // 5 seconds per story
+        if (currentIndex < moods.lastIndex) currentIndex++ else onFinished()
+    }
+
+    val mood = moods[currentIndex]
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        StoryProgressBar(total = moods.size, currentIndex = currentIndex)
+
+        MoodContent(paddingValues, dailyMoods = listOf(mood), userId = userId)
+
+        Row(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = { if (currentIndex > 0) currentIndex-- }
+                    )
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = { if (currentIndex < moods.lastIndex) currentIndex++ else onFinished() }
+                    )
+            )
+        }
     }
 }
 
@@ -180,55 +393,7 @@ private fun MoodContent(
             }
         }
     }
-}
-
-@Composable
-private fun StoryEngine(
-    paddingValues: PaddingValues,
-    moods: List<DailyMoodEntity>,
-    userId: String,
-    onFinished: () -> Unit,
-) {
-    var currentIndex by remember { mutableIntStateOf(0) }
-
-    // auto progress timer
-    LaunchedEffect(currentIndex) {
-        delay(10000) // 5 seconds per story
-        if (currentIndex < moods.lastIndex) currentIndex++ else onFinished()
-    }
-
-    val mood = moods[currentIndex]
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        StoryProgressBar(total = moods.size, currentIndex = currentIndex)
-
-        MoodContent(paddingValues, dailyMoods = listOf(mood), userId = userId)
-
-        Row(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                        onClick = { if (currentIndex > 0) currentIndex-- }
-                    )
-            )
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                        onClick = { if (currentIndex < moods.lastIndex) currentIndex++ else onFinished() }
-                    )
-            )
-        }
-    }
-}
+}*/
 
 @Composable
 private fun StoryProgressBar(total: Int, currentIndex: Int) {
